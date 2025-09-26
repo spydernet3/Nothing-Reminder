@@ -77,8 +77,4 @@ REMINDER APP [ https://spydernet3.github.io/Reminders-Notes/ ]
 
 ---
 
-## Installation / Usage
 
-1. Clone or download the repository:
-   ```bash
-   git clone <repo_url>

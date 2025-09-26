@@ -251,119 +251,187 @@ body {
 
 <script>
 (function () {
-const STORAGE_KEYS = { reminders: 'app_reminders_v1', notes: 'app_notes_v1', profileName: 'app_profile_name_v1', profilePhoto: 'app_profile_photo_v1', darkMode: 'app_dark_mode_v1' };
-let reminders = JSON.parse(localStorage.getItem(STORAGE_KEYS.reminders)) || [];
-let notes = JSON.parse(localStorage.getItem(STORAGE_KEYS.notes)) || [];
-let editingIndex = null;
-function byId(id){ return document.getElementById(id);}
-function saveAll(){ localStorage.setItem(STORAGE_KEYS.reminders,JSON.stringify(reminders)); localStorage.setItem(STORAGE_KEYS.notes,JSON.stringify(notes)); }
-function daysLeft(endDateStr){ if(!endDateStr)return 0; const [y,m,d]=endDateStr.split('-').map(Number); const end=new Date(y,m-1,d,23,59,59,999); const now=new Date(); return Math.max(0,Math.ceil((end-now)/(1000*60*60*24))); }
-function formatDMY(dateStr){ if(!dateStr)return ''; const [y,m,d]=dateStr.split('-'); return `${d.padStart(2,'0')}/${m.padStart(2,'0')}/${y}`; }
+  // ---------- Storage ----------
+  const STORAGE_KEY = 'smart_reminder_app_v1';
+  let appData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
+    reminders: [],
+    notes: [],
+    profileName: '',
+    profilePhoto: '',
+    darkMode: '0'
+  };
 
-function renderReminders(){ const list=byId('reminderList'); list.innerHTML=''; if(reminders.length===0){ const li=document.createElement('li'); li.textContent='No reminders yet.'; li.style.opacity='0.7'; list.appendChild(li); return; }
-  reminders.forEach((r,i)=>{ const li=document.createElement('li'); const left=document.createElement('div'); left.className='item-left'; const title=document.createElement('div'); title.textContent=r.title; title.style.fontWeight='600'; const dates=document.createElement('div'); dates.style.fontSize='13px'; dates.style.opacity='0.85'; dates.textContent=`Start: ${formatDMY(r.startDate)} | End: ${formatDMY(r.endDate)}`; left.appendChild(title); left.appendChild(dates); const right=document.createElement('div'); right.style.display='flex'; right.style.alignItems='center'; const badge=document.createElement('div'); badge.className='badge'; badge.textContent=`${daysLeft(r.endDate)} days left`; const editBtn=document.createElement('button'); editBtn.className='icon-small'; editBtn.textContent='✏️'; editBtn.title='Edit'; editBtn.addEventListener('click',()=>editReminder(i)); const delBtn=document.createElement('button'); delBtn.className='icon-small'; delBtn.textContent='🗑️'; delBtn.title='Delete'; delBtn.addEventListener('click',()=>deleteReminder(i)); right.appendChild(badge); right.appendChild(editBtn); right.appendChild(delBtn); li.appendChild(left); li.appendChild(right); list.appendChild(li); });
-  renderHomeReminders(); renderHomeNotes(); }
+  let editingIndex = null;
 
-function renderHomeReminders(){ const container=byId('homeRemindersContainer'); container.innerHTML=''; const urgent=reminders.filter(r=>daysLeft(r.endDate)<=1); if(urgent.length===0){ const li=document.createElement('li'); li.textContent='No urgent/expired reminders.'; li.style.opacity='0.7'; container.appendChild(li); return; } urgent.forEach(r=>{ const li=document.createElement('li'); li.className='list-item'; const left=document.createElement('div'); left.className='item-left'; const title=document.createElement('div'); title.textContent=r.title; title.style.fontWeight='600'; const dates=document.createElement('div'); dates.style.fontSize='13px'; dates.style.opacity='0.85'; dates.textContent=`End: ${formatDMY(r.endDate)}`; left.appendChild(title); left.appendChild(dates); li.appendChild(left); container.appendChild(li); }); }
+  // ---------- Helpers ----------
+  function byId(id){ return document.getElementById(id); }
+  function saveAll(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); }
+  function daysLeft(endDateStr){ 
+    if(!endDateStr) return 0; 
+    const [y,m,d] = endDateStr.split('-').map(Number); 
+    const end = new Date(y,m-1,d,23,59,59,999); 
+    const now = new Date(); 
+    return Math.max(0, Math.ceil((end-now)/(1000*60*60*24))); 
+  }
+  function formatDMY(dateStr){ 
+    if(!dateStr) return ''; 
+    const [y,m,d] = dateStr.split('-'); 
+    return `${d.padStart(2,'0')}/${m.padStart(2,'0')}/${y}`; 
+  }
 
-function renderHomeNotes(){ const container=byId('homeNotesContainer'); container.innerHTML=''; if(notes.length===0){ const li=document.createElement('li'); li.textContent='No notes available.'; li.style.opacity='0.7'; container.appendChild(li); return; } notes.forEach(n=>{ const li=document.createElement('li'); li.className='list-item'; const left=document.createElement('div'); left.className='item-left'; const text=document.createElement('div'); text.innerHTML=`<b>${n.text}</b><br><small style="opacity:0.7">${n.createdAt||''}</small>`; left.appendChild(text); li.appendChild(left); container.appendChild(li); }); }
-
-function renderNotes(){ const list=byId('noteList'); list.innerHTML=''; if(notes.length===0){ const li=document.createElement('li'); li.textContent='No notes yet.'; li.style.opacity='0.7'; list.appendChild(li); return; } notes.forEach((note,i)=>{ const li=document.createElement('li'); const left=document.createElement('div'); left.className='item-left'; const text=document.createElement('div'); text.innerHTML=`<b>${note.text}</b><br><small style="opacity:0.7">${note.createdAt||''}</small>`; left.appendChild(text); const right=document.createElement('div'); right.style.display='flex'; right.style.alignItems='center'; const delBtn=document.createElement('button'); delBtn.className='icon-small'; delBtn.textContent='🗑️'; delBtn.title='Delete'; delBtn.addEventListener('click',()=>{ notes.splice(i,1); saveAll(); renderNotes(); renderHomeNotes(); }); right.appendChild(delBtn); li.appendChild(left); li.appendChild(right); list.appendChild(li); }); }
-
-function editReminder(i){ const r=reminders[i]; editingIndex=i; showForm(); byId('reminderTitle').value=r.title; byId('startDate').value=r.startDate||''; byId('endDate').value=r.endDate||''; openForm(); }
-function deleteReminder(i){ if(!confirm('Are you sure?')) return; reminders.splice(i,1); saveAll(); renderReminders(); }
-function showForm(){ openForm(); }
-function clearForm(){ byId('reminderTitle').value=''; byId('startDate').value=''; byId('endDate').value=''; editingIndex=null; }
-function openForm(){ const f=byId('reminderFormContainer'); const b=byId('showAddFormBtn'); f.classList.add('visible'); b.classList.add('open'); b.setAttribute('aria-expanded','true'); f.setAttribute('aria-hidden','false'); }
-function closeForm(){ const f=byId('reminderFormContainer'); const b=byId('showAddFormBtn'); f.classList.remove('visible'); b.classList.remove('open'); b.setAttribute('aria-expanded','false'); f.setAttribute('aria-hidden','true'); }
-function toggleForm(){ const f=byId('reminderFormContainer'); if(f.classList.contains('visible')){ closeForm(); clearForm(); } else { openForm(); } }
-function saveReminder(){ const title=byId('reminderTitle').value.trim(); const startDate=byId('startDate').value; const endDate=byId('endDate').value; if(!title){ alert('Please enter a title.'); return; } if(startDate&&endDate&&startDate>endDate){ alert('Start date cannot be after End date.'); return; } const reminder={title,startDate,endDate}; if(editingIndex!==null){ reminders[editingIndex]=reminder; } else { reminders.push(reminder); } saveAll(); renderReminders(); closeForm(); clearForm(); }
-
-// ---------- Events ----------
-byId('showAddFormBtn').addEventListener('click',toggleForm);
-byId('saveReminderBtn').addEventListener('click',saveReminder);
-byId('cancelReminderBtn').addEventListener('click',()=>{ closeForm(); clearForm(); });
-byId('homeRemindersToggle').addEventListener('click',()=>{ const c=byId('homeRemindersContainer'); c.classList.toggle('visible'); byId('homeRemindersToggle').classList.toggle('open'); const expanded=c.classList.contains('visible'); byId('homeRemindersToggle').setAttribute('aria-expanded',expanded); });
-byId('homeNotesToggle').addEventListener('click',()=>{ const c=byId('homeNotesContainer'); c.classList.toggle('visible'); byId('homeNotesToggle').classList.toggle('open'); const expanded=c.classList.contains('visible'); byId('homeNotesToggle').setAttribute('aria-expanded',expanded); });
-
-byId('showAddNoteBtn').addEventListener('click',()=>{ const f=byId('noteFormContainer'); f.classList.toggle('visible'); byId('showAddNoteBtn').classList.toggle('open'); const expanded=f.classList.contains('visible'); byId('showAddNoteBtn').setAttribute('aria-expanded',expanded); });
-byId('cancelNoteBtn').addEventListener('click',()=>{ const f=byId('noteFormContainer'); f.classList.remove('visible'); byId('showAddNoteBtn').classList.remove('open'); byId('showAddNoteBtn').setAttribute('aria-expanded','false'); });
-
-// ---------- Save note with IST date & time ----------
-byId('saveNoteBtn').addEventListener('click', () => {
-  const text = byId('noteText').value.trim(); 
-  if(!text){ alert('Please enter a note.'); return; }
-
-  const now = new Date();
-  const istOffsetMs = 5.5 * 60 * 60 * 1000; 
-  const ist = new Date(now.getTime() + istOffsetMs + (now.getTimezoneOffset() * 60 * 1000));
-  const istStr = ist.toLocaleString('en-IN', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', hour12:true });
-
-  notes.push({ text, createdAt: istStr });
-  saveAll(); 
-  renderNotes(); 
-  renderHomeNotes();
-
-  byId('noteText').value='';
-  const f=byId('noteFormContainer'); 
-  f.classList.remove('visible'); 
-  byId('showAddNoteBtn').classList.remove('open'); 
-  byId('showAddNoteBtn').setAttribute('aria-expanded','false');
-});
-
-byId('viewNotesToggle').addEventListener('click',()=>{ const f=byId('noteList'); f.classList.toggle('visible'); byId('viewNotesToggle').classList.toggle('open'); const expanded=f.classList.contains('visible'); byId('viewNotesToggle').setAttribute('aria-expanded',expanded); });
-
-const sidebar = byId('sidebar'); 
-const main = byId('main');
-byId('toggleBtn').addEventListener('click',()=>{ 
-  if(sidebar.style.display==='none'){ 
-    sidebar.style.display='flex'; 
-    main.style.marginLeft='220px'; 
-    byId('toggleBtn').textContent='⮜'; 
-  } else { 
-    sidebar.style.display='none'; 
-    main.style.marginLeft='0'; 
-    byId('toggleBtn').textContent='⮞'; 
-  } 
-});
-
-// ---------- Page buttons with auto-hide sidebar ----------
-document.querySelectorAll('.menu-btn[data-page]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const page = btn.getAttribute('data-page');
-    document.querySelectorAll('.page').forEach(p => p.classList.toggle('hidden', p.id !== page));
-
-    if(page === 'home') {
-      renderReminders(); 
-      renderHomeNotes(); 
-    } else if(page === 'reminders') {
-      renderReminders(); 
-    } else if(page === 'notes') {
-      renderNotes(); 
+  // ---------- Render Functions ----------
+  function renderReminders(){
+    const list = byId('reminderList'); list.innerHTML = '';
+    if(appData.reminders.length === 0){
+      const li = document.createElement('li'); li.textContent='No reminders yet.'; li.style.opacity='0.7'; list.appendChild(li);
+      renderHomeReminders(); renderHomeNotes(); return;
     }
+    const frag = document.createDocumentFragment();
+    appData.reminders.forEach((r,i)=>{
+      const li=document.createElement('li');
+      const left=document.createElement('div'); left.className='item-left';
+      const title=document.createElement('div'); title.textContent=r.title; title.style.fontWeight='600';
+      const dates=document.createElement('div'); dates.style.fontSize='13px'; dates.style.opacity='0.85'; dates.textContent=`Start: ${formatDMY(r.startDate)} | End: ${formatDMY(r.endDate)}`;
+      left.appendChild(title); left.appendChild(dates);
 
-    closeForm();
+      const right=document.createElement('div'); right.style.display='flex'; right.style.alignItems='center';
+      const badge=document.createElement('div'); badge.className='badge'; badge.textContent=`${daysLeft(r.endDate)} days left`;
+      const editBtn=document.createElement('button'); editBtn.className='icon-small'; editBtn.textContent='✏️'; editBtn.title='Edit'; editBtn.addEventListener('click',()=>editReminder(i));
+      const delBtn=document.createElement('button'); delBtn.className='icon-small'; delBtn.textContent='🗑️'; delBtn.title='Delete'; delBtn.addEventListener('click',()=>deleteReminder(i));
+      right.appendChild(badge); right.appendChild(editBtn); right.appendChild(delBtn);
 
-    // Auto-hide sidebar only for navigation
-    if (sidebar.style.display !== 'none') {
-      sidebar.style.display = 'none';
-      main.style.marginLeft = '0';
-      byId('toggleBtn').textContent = '⮞';
-    }
+      li.appendChild(left); li.appendChild(right); frag.appendChild(li);
+    });
+    list.appendChild(frag);
+    renderHomeReminders(); renderHomeNotes();
+  }
+
+  function renderHomeReminders(){
+    const container = byId('homeRemindersContainer'); container.innerHTML='';
+    const urgent = appData.reminders.filter(r=>daysLeft(r.endDate)<=1);
+    if(urgent.length===0){ const li=document.createElement('li'); li.textContent='No urgent/expired reminders.'; li.style.opacity='0.7'; container.appendChild(li); return; }
+    const frag=document.createDocumentFragment();
+    urgent.forEach(r=>{
+      const li=document.createElement('li'); li.className='list-item';
+      const left=document.createElement('div'); left.className='item-left';
+      const title=document.createElement('div'); title.textContent=r.title; title.style.fontWeight='600';
+      const dates=document.createElement('div'); dates.style.fontSize='13px'; dates.style.opacity='0.85'; dates.textContent=`End: ${formatDMY(r.endDate)}`;
+      left.appendChild(title); left.appendChild(dates); li.appendChild(left); frag.appendChild(li);
+    });
+    container.appendChild(frag);
+  }
+
+  function renderHomeNotes(){
+    const container = byId('homeNotesContainer'); container.innerHTML='';
+    if(appData.notes.length===0){ const li=document.createElement('li'); li.textContent='No notes available.'; li.style.opacity='0.7'; container.appendChild(li); return; }
+    const frag=document.createDocumentFragment();
+    appData.notes.forEach(n=>{
+      const li=document.createElement('li'); li.className='list-item';
+      const left=document.createElement('div'); left.className='item-left';
+      const text=document.createElement('div'); text.innerHTML=`<b>${n.text}</b><br><small style="opacity:0.7">${n.createdAt||''}</small>`;
+      left.appendChild(text); li.appendChild(left); frag.appendChild(li);
+    });
+    container.appendChild(frag);
+  }
+
+  function renderNotes(){
+    const list=byId('noteList'); list.innerHTML='';
+    if(appData.notes.length===0){ const li=document.createElement('li'); li.textContent='No notes yet.'; li.style.opacity='0.7'; list.appendChild(li); return; }
+    const frag=document.createDocumentFragment();
+    appData.notes.forEach((note,i)=>{
+      const li=document.createElement('li');
+      const left=document.createElement('div'); left.className='item-left';
+      const text=document.createElement('div'); text.innerHTML=`<b>${note.text}</b><br><small style="opacity:0.7">${note.createdAt||''}</small>`; left.appendChild(text);
+      const right=document.createElement('div'); right.style.display='flex'; right.style.alignItems='center';
+      const delBtn=document.createElement('button'); delBtn.className='icon-small'; delBtn.textContent='🗑️'; delBtn.title='Delete';
+      delBtn.addEventListener('click',()=>{ appData.notes.splice(i,1); saveAll(); renderNotes(); renderHomeNotes(); });
+      right.appendChild(delBtn); li.appendChild(left); li.appendChild(right); frag.appendChild(li);
+    });
+    list.appendChild(frag);
+  }
+
+  // ---------- Actions ----------
+  function editReminder(i){ const r=appData.reminders[i]; editingIndex=i; showForm(); byId('reminderTitle').value=r.title; byId('startDate').value=r.startDate||''; byId('endDate').value=r.endDate||''; openForm(); }
+  function deleteReminder(i){ if(!confirm('Are you sure?')) return; appData.reminders.splice(i,1); saveAll(); renderReminders(); }
+  function showForm(){ openForm(); }
+  function clearForm(){ byId('reminderTitle').value=''; byId('startDate').value=''; byId('endDate').value=''; editingIndex=null; }
+  function openForm(){ const f=byId('reminderFormContainer'); const b=byId('showAddFormBtn'); f.classList.add('visible'); b.classList.add('open'); b.setAttribute('aria-expanded','true'); f.setAttribute('aria-hidden','false'); }
+  function closeForm(){ const f=byId('reminderFormContainer'); const b=byId('showAddFormBtn'); f.classList.remove('visible'); b.classList.remove('open'); b.setAttribute('aria-expanded','false'); f.setAttribute('aria-hidden','true'); }
+  function toggleForm(){ const f=byId('reminderFormContainer'); if(f.classList.contains('visible')){ closeForm(); clearForm(); } else { openForm(); } }
+  function saveReminder(){ 
+    const title=byId('reminderTitle').value.trim(); 
+    const startDate=byId('startDate').value; 
+    const endDate=byId('endDate').value; 
+    if(!title){ alert('Please enter a title.'); return; } 
+    if(startDate&&endDate&&startDate>endDate){ alert('Start date cannot be after End date.'); return; } 
+    const reminder={title,startDate,endDate}; 
+    if(editingIndex!==null){ appData.reminders[editingIndex]=reminder; } else { appData.reminders.push(reminder); } 
+    saveAll(); renderReminders(); closeForm(); clearForm(); 
+  }
+
+  // ---------- Event Listeners ----------
+  byId('showAddFormBtn').addEventListener('click',toggleForm);
+  byId('saveReminderBtn').addEventListener('click',saveReminder);
+  byId('cancelReminderBtn').addEventListener('click',()=>{ closeForm(); clearForm(); });
+  byId('homeRemindersToggle').addEventListener('click',()=>{ const c=byId('homeRemindersContainer'); c.classList.toggle('visible'); byId('homeRemindersToggle').classList.toggle('open'); const expanded=c.classList.contains('visible'); byId('homeRemindersToggle').setAttribute('aria-expanded',expanded); });
+  byId('homeNotesToggle').addEventListener('click',()=>{ const c=byId('homeNotesContainer'); c.classList.toggle('visible'); byId('homeNotesToggle').classList.toggle('open'); const expanded=c.classList.contains('visible'); byId('homeNotesToggle').setAttribute('aria-expanded',expanded); });
+  byId('showAddNoteBtn').addEventListener('click',()=>{ const f=byId('noteFormContainer'); f.classList.toggle('visible'); byId('showAddNoteBtn').classList.toggle('open'); const expanded=f.classList.contains('visible'); byId('showAddNoteBtn').setAttribute('aria-expanded',expanded); });
+  byId('cancelNoteBtn').addEventListener('click',()=>{ const f=byId('noteFormContainer'); f.classList.remove('visible'); byId('showAddNoteBtn').classList.remove('open'); byId('showAddNoteBtn').setAttribute('aria-expanded','false'); });
+  byId('saveNoteBtn').addEventListener('click',()=>{
+    const text = byId('noteText').value.trim(); 
+    if(!text){ alert('Please enter a note.'); return; }
+    const now = new Date();
+    const istOffsetMs = 5.5 * 60 * 60 * 1000; 
+    const ist = new Date(now.getTime() + istOffsetMs + (now.getTimezoneOffset() * 60 * 1000));
+    const istStr = ist.toLocaleString('en-IN', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', hour12:true });
+    appData.notes.push({ text, createdAt: istStr });
+    saveAll(); renderNotes(); renderHomeNotes();
+    byId('noteText').value=''; const f=byId('noteFormContainer'); f.classList.remove('visible'); byId('showAddNoteBtn').classList.remove('open'); byId('showAddNoteBtn').setAttribute('aria-expanded','false');
   });
-});
+  byId('viewNotesToggle').addEventListener('click',()=>{ const f=byId('noteList'); f.classList.toggle('visible'); byId('viewNotesToggle').classList.toggle('open'); const expanded=f.classList.contains('visible'); byId('viewNotesToggle').setAttribute('aria-expanded',expanded); });
 
-byId('editNameBtn').addEventListener('click',()=>{ const newName=prompt('Enter new name:',byId('profileName').textContent); if(newName!==null){ byId('profileName').textContent=newName; localStorage.setItem(STORAGE_KEYS.profileName,newName); } });
-byId('photoUpload').addEventListener('change',function(){ const file=this.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ byId('profilePhoto').src=reader.result; localStorage.setItem(STORAGE_KEYS.profilePhoto,reader.result); }; reader.readAsDataURL(file); });
-byId('darkModeBtn').addEventListener('click',()=>{ document.body.classList.toggle('dark'); localStorage.setItem(STORAGE_KEYS.darkMode,document.body.classList.contains('dark')?'1':'0'); });
+  const sidebar = byId('sidebar'); const main = byId('main');
+  byId('toggleBtn').addEventListener('click',()=>{ 
+    if(sidebar.style.display==='none'){ sidebar.style.display='flex'; main.style.marginLeft='220px'; byId('toggleBtn').textContent='⮜'; } 
+    else { sidebar.style.display='none'; main.style.marginLeft='0'; byId('toggleBtn').textContent='⮞'; } 
+  });
 
-window.addEventListener('load',()=>{
-  const savedName=localStorage.getItem(STORAGE_KEYS.profileName); if(savedName){ byId('profileName').textContent=savedName; }
-  const savedPhoto=localStorage.getItem(STORAGE_KEYS.profilePhoto); if(savedPhoto){ byId('profilePhoto').src=savedPhoto; }
-  renderReminders(); renderNotes(); renderHomeReminders(); renderHomeNotes();
-  if(localStorage.getItem(STORAGE_KEYS.darkMode)==='1'){ document.body.classList.add('dark'); }
-});
+  document.querySelectorAll('.menu-btn[data-page]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const page = btn.getAttribute('data-page');
+      document.querySelectorAll('.page').forEach(p=>p.classList.toggle('hidden', p.id !== page));
+      if(page==='home'){ renderReminders(); renderHomeNotes(); } else if(page==='reminders'){ renderReminders(); } else if(page==='notes'){ renderNotes(); }
+      closeForm();
+      if(sidebar.style.display!=='none'){ sidebar.style.display='none'; main.style.marginLeft='0'; byId('toggleBtn').textContent='⮞'; }
+    });
+  });
+
+  byId('editNameBtn').addEventListener('click',()=>{
+    const newName=prompt('Enter new name:',byId('profileName').textContent); 
+    if(newName!==null){ byId('profileName').textContent=newName; appData.profileName=newName; saveAll(); } 
+  });
+
+  byId('photoUpload').addEventListener('change',function(){
+    const file=this.files[0]; if(!file) return; 
+    const reader=new FileReader(); 
+    reader.onload=()=>{ byId('profilePhoto').src=reader.result; appData.profilePhoto=reader.result; saveAll(); }; 
+    reader.readAsDataURL(file); 
+  });
+
+  byId('darkModeBtn').addEventListener('click',()=>{
+    document.body.classList.toggle('dark'); appData.darkMode=document.body.classList.contains('dark')?'1':'0'; saveAll();
+  });
+
+  // ---------- Initial Load ----------
+  window.addEventListener('load',()=>{
+    if(appData.profileName) byId('profileName').textContent=appData.profileName;
+    if(appData.profilePhoto) byId('profilePhoto').src=appData.profilePhoto;
+    if(appData.darkMode==='1') document.body.classList.add('dark');
+    renderReminders(); renderNotes(); renderHomeReminders(); renderHomeNotes();
+  });
+
 })();
 </script>
+
 </body>
 </html>

@@ -1,7 +1,8 @@
-# Reminder & Notes App 📝⏰
+# Smart Reminder & Notes App 📝⏰
 
 A lightweight, web-based Reminder and Notes application with dark mode, collapsible sections, and IST timestamp support. Designed for **fast note-taking, reminders, and home overview**.
 
+!> Data may fetching slowly based on your browser speed..
 ---
 REMINDER APP [ https://spydernet3.github.io/Reminders-Notes/ ]
 ---

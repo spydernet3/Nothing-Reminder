@@ -256,9 +256,9 @@
 
         function renderHomeReminders(){ const container=byId('homeRemindersContainer'); container.innerHTML=''; const urgent=reminders.filter(r=>daysLeft(r.endDate)<=1); if(urgent.length===0){ const li=document.createElement('li'); li.textContent='No urgent/expired reminders.'; li.style.opacity='0.7'; container.appendChild(li); return; } urgent.forEach(r=>{ const li=document.createElement('li'); li.className='list-item'; const left=document.createElement('div'); left.className='item-left'; const title=document.createElement('div'); title.textContent=r.title; title.style.fontWeight='600'; const dates=document.createElement('div'); dates.style.fontSize='13px'; dates.style.opacity='0.85'; dates.textContent=`End: ${formatDMY(r.endDate)}`; left.appendChild(title); left.appendChild(dates); li.appendChild(left); container.appendChild(li); }); }
 
-        function renderHomeNotes(){ const container=byId('homeNotesContainer'); container.innerHTML=''; if(notes.length===0){ const li=document.createElement('li'); li.textContent='No notes available.'; li.style.opacity='0.7'; container.appendChild(li); return; } notes.forEach(n=>{ const li=document.createElement('li'); li.className='list-item'; const left=document.createElement('div'); left.className='item-left'; const text=document.createElement('div'); text.textContent=n.text; text.style.fontSize='13px'; text.style.opacity='0.85'; left.appendChild(text); li.appendChild(left); container.appendChild(li); }); }
+        function renderHomeNotes(){ const container=byId('homeNotesContainer'); container.innerHTML=''; if(notes.length===0){ const li=document.createElement('li'); li.textContent='No notes available.'; li.style.opacity='0.7'; container.appendChild(li); return; } notes.forEach(n=>{ const li=document.createElement('li'); li.className='list-item'; const left=document.createElement('div'); left.className='item-left'; const text=document.createElement('div'); text.innerHTML=`<b>${n.text}</b><br><small style="opacity:0.7">${n.createdAt||''}</small>`; left.appendChild(text); li.appendChild(left); container.appendChild(li); }); }
 
-        function renderNotes(){ const list=byId('noteList'); list.innerHTML=''; if(notes.length===0){ const li=document.createElement('li'); li.textContent='No notes yet.'; li.style.opacity='0.7'; list.appendChild(li); return; } notes.forEach((note,i)=>{ const li=document.createElement('li'); const left=document.createElement('div'); left.className='item-left'; const text=document.createElement('div'); text.textContent=note.text; text.style.fontSize='13px'; text.style.opacity='0.85'; left.appendChild(text); const right=document.createElement('div'); right.style.display='flex'; right.style.alignItems='center'; const delBtn=document.createElement('button'); delBtn.className='icon-small'; delBtn.textContent='🗑️'; delBtn.title='Delete'; delBtn.addEventListener('click',()=>{ notes.splice(i,1); saveAll(); renderNotes(); renderHomeNotes(); }); right.appendChild(delBtn); li.appendChild(left); li.appendChild(right); list.appendChild(li); }); }
+        function renderNotes(){ const list=byId('noteList'); list.innerHTML=''; if(notes.length===0){ const li=document.createElement('li'); li.textContent='No notes yet.'; li.style.opacity='0.7'; list.appendChild(li); return; } notes.forEach((note,i)=>{ const li=document.createElement('li'); const left=document.createElement('div'); left.className='item-left'; const text=document.createElement('div'); text.innerHTML=`<b>${note.text}</b><br><small style="opacity:0.7">${note.createdAt||''}</small>`; left.appendChild(text); const right=document.createElement('div'); right.style.display='flex'; right.style.alignItems='center'; const delBtn=document.createElement('button'); delBtn.className='icon-small'; delBtn.textContent='🗑️'; delBtn.title='Delete'; delBtn.addEventListener('click',()=>{ notes.splice(i,1); saveAll(); renderNotes(); renderHomeNotes(); }); right.appendChild(delBtn); li.appendChild(left); li.appendChild(right); list.appendChild(li); }); }
 
         function editReminder(i){ const r=reminders[i]; editingIndex=i; showForm(); byId('reminderTitle').value=r.title; byId('startDate').value=r.startDate||''; byId('endDate').value=r.endDate||''; openForm(); }
         function deleteReminder(i){ if(!confirm('Are you sure?')) return; reminders.splice(i,1); saveAll(); renderReminders(); }
@@ -278,11 +278,35 @@
 
         byId('showAddNoteBtn').addEventListener('click',()=>{ const f=byId('noteFormContainer'); f.classList.toggle('visible'); byId('showAddNoteBtn').classList.toggle('open'); const expanded=f.classList.contains('visible'); byId('showAddNoteBtn').setAttribute('aria-expanded',expanded); });
         byId('cancelNoteBtn').addEventListener('click',()=>{ const f=byId('noteFormContainer'); f.classList.remove('visible'); byId('showAddNoteBtn').classList.remove('open'); byId('showAddNoteBtn').setAttribute('aria-expanded','false'); });
-        byId('saveNoteBtn').addEventListener('click',()=>{
-          const text=byId('noteText').value.trim();
+        
+        // ---------- Save note with IST date & time ----------
+        byId('saveNoteBtn').addEventListener('click', () => {
+          const text = byId('noteText').value.trim(); 
           if(!text){ alert('Please enter a note.'); return; }
-          notes.push({text}); saveAll(); renderNotes(); renderHomeNotes(); byId('noteText').value=''; const f=byId('noteFormContainer'); f.classList.remove('visible'); byId('showAddNoteBtn').classList.remove('open'); byId('showAddNoteBtn').setAttribute('aria-expanded','false');
+
+          const now = new Date();
+          // Convert to IST (UTC+5:30)
+          const istOffsetMs = 5.5 * 60 * 60 * 1000; 
+          const ist = new Date(now.getTime() + istOffsetMs + (now.getTimezoneOffset() * 60 * 1000));
+
+          // Format IST date/time
+          const istStr = ist.toLocaleString('en-IN', { 
+            day:'2-digit', month:'2-digit', year:'numeric', 
+            hour:'2-digit', minute:'2-digit', hour12:true 
+          });
+
+          notes.push({ text, createdAt: istStr });
+          saveAll(); 
+          renderNotes(); 
+          renderHomeNotes();
+
+          byId('noteText').value='';
+          const f=byId('noteFormContainer'); 
+          f.classList.remove('visible'); 
+          byId('showAddNoteBtn').classList.remove('open'); 
+          byId('showAddNoteBtn').setAttribute('aria-expanded','false');
         });
+
         byId('viewNotesToggle').addEventListener('click',()=>{ const f=byId('noteList'); f.classList.toggle('visible'); byId('viewNotesToggle').classList.toggle('open'); const expanded=f.classList.contains('visible'); byId('viewNotesToggle').setAttribute('aria-expanded',expanded); });
 
         document.querySelectorAll('.menu-btn[data-page]').forEach(btn=>{

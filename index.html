@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Reminder App</title>
+<title>Smart Reminder</title>
 <style>
 :root {
   --bg: #ffffff;
@@ -48,13 +48,14 @@ body {
   cursor:pointer;
   text-align:left;
   font-size:15px;
+  transition: left 0.25s;
 }
 .menu-btn:hover, .icon-btn:hover, .add-btn:hover { background:#aaa; }
 .main {
   margin-left: 220px;
   padding: 20px;
   min-height: 100vh;
-  transition: margin-left .25s;
+  transition: left 0.25s;
 }
 .page.hidden { display:none; }
 .toggle-btn {
@@ -66,6 +67,7 @@ body {
   border:none;
   background:#ddd;
   cursor:pointer;
+  transition: left 0.25s;
 }
 .list { list-style:none; padding:0; margin:0 0 12px 0; }
 .list li {
@@ -76,6 +78,7 @@ body {
   border-radius:6px;
   margin-bottom:8px;
   background: rgba(0,0,0,0.03);
+  transition: left 0.25s;
 }
 .item-left { display:flex; flex-direction:column; gap:4px; }
 .badge { background:#eee; padding:4px 8px; border-radius:12px; font-size:12px; }
@@ -93,6 +96,7 @@ body {
   max-height: 0;
   padding-top: 0;
   padding-bottom: 0;
+  transition: left 0.25s;
 }
 .form.visible {
   max-height: 500px;
@@ -104,16 +108,19 @@ body {
   flex-direction:column;
   font-size:13px;
   gap:6px;
+  transition: left 0.25s;
 }
 .form input[type="text"], .form input[type="date"], .form textarea {
   padding:8px;
   border-radius:6px;
   border:1px solid #ccc;
+  transition: left 0.25s;
 }
 .form-actions {
   display:flex;
   gap:8px;
   margin-top:6px;
+  transition: left 0.25s;
 }
 .primary {
   background: var(--accent);
@@ -157,9 +164,11 @@ body {
   font-weight: 600;
   font-size: 16px;
   cursor: pointer;
+  transition: left 0.25s;
 }
 #showAddFormBtn.open .arrow, #homeRemindersToggle.open .arrow, #showAddNoteBtn.open .arrow, #viewNotesToggle.open .arrow, #homeNotesToggle.open .arrow {
   transform: rotate(180deg);
+  transition: left 0.25s;
 }
 </style>
 </head>

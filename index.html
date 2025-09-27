@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Smart Reminder</title>
+<title>Nothing Reminder</title>
 <style>
 :root {
   --bg: #ffffff;
@@ -183,6 +183,8 @@ body {
   <button class="menu-btn" data-page="home">🏠 Home</button>
   <button class="menu-btn" data-page="reminders">⏰ Reminders</button>
   <button class="menu-btn" data-page="notes">📝 Notes</button>
+  <button class="menu-btn" data-page="terms">📄 Terms of Use</button>
+  <button class="menu-btn" data-page="how">📄 How to Use</button>
   <button id="darkModeBtn" class="icon-btn" style="margin-top:auto;">🌙 Dark Mode</button>
 </div>
 <div id="main" class="main">
@@ -247,7 +249,56 @@ body {
       <ul id="noteList" class="list form" aria-hidden="true"></ul>
     </div>
   </div>
+  <!-- Terms of Use Page -->
+<div id="terms" class="page hidden">
+  <h1>Privacy Policy!></h1>
+  <ul>
+    <li> App data are stored using local storage. Avoid data losses before formatting the device.</li>
+    <li> Data's fetched delay may happened based on your browser performance.</li>
+    <li>If you'd like to contribute, check out here: <a href="https://github.com/Spydernet3" target="_blank">Spydernet Github ↠</a></li>
+  </ul>
+  <hr>
+  <h3>Version Info!></h3>
+  <p>Version 8.1</p>
+  <p>Last Updated: 27-Aug-2025</p>
+  <p>Project: Open source project</p>
 </div>
+<!-- Terms of Use Page -->
+<div id="how" class="page hidden">
+  <h3>Reminder!></h3>
+  <hr>
+  <ul>
+    <li>Go to the Reminders page</li>
+    <li> Click + Add New Reminder</li>
+    <li> Fill Title, Start Date, End Date</li>
+    <li> Click Save</li>
+    <li> Edit or delete using the ✏️ and 🗑️ button.</li>
+    <li>Urgent reminders appear on the Home page automatically.</li>
+  </ul>
+
+  <h3>Notes!></h3>
+  <hr>
+  <li>Go to the Notes page.</li>
+  <li>Click + Add New Note.</li>
+  <li>Write your note in the textarea.</li>
+  <li>Click Save. IST date & time is added automatically.</li>
+  <li>View notes in the collapsible View Notes section.</li>
+  <li>Delete notes with 🗑️ button.</li>
+
+  <h3>Profile!></h3>
+  <hr>
+  <li>Click the profile picture to upload a new image.</li>
+  <li>Click Edit Name to update the username.</li>
+  <h3>Dark Mode!></h3>
+  <hr>
+  <li>Click the 🌙 button in the sidebar to toggle dark mode.</li>
+  <li>Dark mode preference is saved.</li>
+  <h3>Remember!></h3>
+  <hr>
+  <li>Data's may fetching slowly based on your browser performance</li>
+</div>
+</div>
+
 
 <script>
 (function () {

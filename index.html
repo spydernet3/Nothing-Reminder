@@ -1,569 +1,622 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Nothing Reminder</title>
-<link rel="icon" type="image/png" href="assets/icon.png">
-<style>
-:root {
-  --bg: #ffffff;
-  --text: #000000;
-  --muted: #666;
-  --accent: #4CAF50;
-}
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
-  background: var(--bg);
-  color: var(--text);
-}
-.sidebar {
-  width: 220px;
-  background: #666;
-  color: #fff;
-  position: fixed;
-  height: 100%;
-  left: 0;
-  display: flex;
-  flex-direction: column;
-  padding: 12px;
-  gap: 8px;
-  transition: left 0.25s;
-}
-.profile {
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin-bottom:4px;
-}
-.menu-btn, .icon-btn, .add-btn {
-  display:block;
-  width:100%;
-  padding:10px;
-  border: none;
-  background:#888;
-  color:#fff;
-  border-radius:6px;
-  cursor:pointer;
-  text-align:left;
-  font-size:15px;
-  transition: left 0.25s;
-}
-.menu-btn:hover, .icon-btn:hover, .add-btn:hover { background:#aaa; }
-.main {
-  margin-left: 220px;
-  padding: 20px;
-  min-height: 100vh;
-  transition: left 0.25s;
-}
-.page.hidden { display:none; }
-.toggle-btn {
-  position: absolute;
-  left: 230px;
-  top: 12px;
-  padding:6px 8px;
-  border-radius:6px;
-  border:none;
-  background:#ddd;
-  cursor:pointer;
-  transition: left 0.25s;
-}
-.list { list-style:none; padding:0; margin:0 0 12px 0; }
-.list li {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:8px;
-  border-radius:6px;
-  margin-bottom:8px;
-  background: rgba(0,0,0,0.03);
-  transition: left 0.25s;
-}
-.item-left { display:flex; flex-direction:column; gap:4px; }
-.badge { background:#eee; padding:4px 8px; border-radius:12px; font-size:12px; }
-.form {
-  margin-top: 0;
-  padding: 12px;
-  border-radius: 8px;
-  background: #f5f5f5;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-width: 520px;
-  overflow: hidden;
-  transition: max-height 0.3s ease, padding 0.3s ease;
-  max-height: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-  transition: left 0.25s;
-}
-.form.visible {
-  max-height: 500px;
-  padding-top: 12px;
-  padding-bottom: 12px;
-}
-.form label {
-  display:flex;
-  flex-direction:column;
-  font-size:13px;
-  gap:6px;
-  transition: left 0.25s;
-}
-.form input[type="text"], .form input[type="date"], .form textarea {
-  padding:8px;
-  border-radius:6px;
-  border:1px solid #ccc;
-  transition: left 0.25s;
-}
-.form-actions {
-  display:flex;
-  gap:8px;
-  margin-top:6px;
-  transition: left 0.25s;
-}
-.primary {
-  background: var(--accent);
-  color: #fff;
-  border:none;
-  padding:8px 12px;
-  border-radius:6px;
-  cursor:pointer;
-}
-.secondary {
-  background:#ddd;
-  border:none;
-  padding:8px 12px;
-  border-radius:6px;
-  cursor:pointer;
-}
-.icon-small {
-  background:transparent;
-  border:none;
-  cursor:pointer;
-  margin-left:8px;
-  font-size:16px;
-}
-.add-area {
-  margin-top: 8px;
-  max-width: 520px;
-}
-.dark {
-  --bg: #121212;
-  --text: #f1f1f1;
-}
-.dark .main { background:#151515; color:var(--text); }
-.dark .form { background: #232323; }
-.dark .menu-btn, .dark .icon-btn { background:#333; color:var(--text); }
-#showAddFormBtn, #homeRemindersToggle, #showAddNoteBtn, #viewNotesToggle, #homeNotesToggle {
-  position: relative;
-  user-select: none;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: 600;
-  font-size: 16px;
-  cursor: pointer;
-  transition: left 0.25s;
-}
-#showAddFormBtn.open .arrow, #homeRemindersToggle.open .arrow, #showAddNoteBtn.open .arrow, #viewNotesToggle.open .arrow, #homeNotesToggle.open .arrow {
-  transform: rotate(180deg);
-  transition: left 0.25s;
-}
-</style>
-</head>
-<body>
-<div id="sidebar" class="sidebar">
-  <div class="profile">
-    <img id="profilePhoto" src="https://via.placeholder.com/40" alt="Profile" width="40" height="40" style="border-radius:50%;object-fit:cover;cursor:pointer;" onclick="document.getElementById('photoUpload').click()"/>
-    <h3 id="profileName">👤 User</h3>
-  </div>
-  <input id="photoUpload" type="file" accept="image/*" style="display:none;" />
-  <button class="menu-btn" id="editNameBtn">✏️ Edit Name</button>
-  <button class="menu-btn" data-page="home">🏠 Home</button>
-  <button class="menu-btn" data-page="reminders">⏰ Reminders</button>
-  <button class="menu-btn" data-page="notes">📝 Notes</button>
-  <button class="menu-btn" data-page="terms">📄 Terms of Use</button>
-  <button class="menu-btn" data-page="how">📄 How to Use</button>
-  <button id="darkModeBtn" class="icon-btn" style="margin-top:auto;">🌙 Dark Mode</button>
-</div>
-
-<div id="main" class="main">
-  <button id="toggleBtn" class="toggle-btn">⮜</button>
-
-  <!-- Home -->
-  <div id="home" class="page">
-    <h2>Home</h2>
-    <div class="add-area">
-      <button id="homeRemindersToggle" class="add-btn" aria-expanded="false">
-        ⚠️ Reminders <span class="arrow">▼</span>
-      </button>
-      <div id="homeRemindersContainer" class="form" aria-hidden="true"></div>
-    </div>
-    <div class="add-area">
-      <button id="homeNotesToggle" class="add-btn" aria-expanded="false">
-        📝 Notes <span class="arrow">▼</span>
-      </button>
-      <div id="homeNotesContainer" class="form" aria-hidden="true"></div>
-    </div>
-  </div>
-
-  <!-- Reminders -->
-  <div id="reminders" class="page hidden">
-    <h2>Reminders</h2>
-    <div class="add-area">
-      <button id="showAddFormBtn" class="add-btn" aria-expanded="false">
-        ＋ Add New Reminder <span class="arrow">▼</span>
-      </button>
-      <div id="reminderFormContainer" class="form" aria-hidden="true">
-        <label>Title<input id="reminderTitle" type="text" placeholder="Title" /></label>
-        <label>Start date<input id="startDate" type="date" /></label>
-        <label>End date<input id="endDate" type="date" /></label>
-        <div class="form-actions">
-          <button id="saveReminderBtn" class="primary">Save</button>
-          <button id="cancelReminderBtn" class="secondary">Cancel</button>
-        </div>
-      </div>
-    </div>
-    <ul id="reminderList" class="list"></ul>
-  </div>
-
-  <!-- Notes -->
-  <div id="notes" class="page hidden">
-    <h2>📝 Notes</h2>
-    <div class="add-area">
-      <button id="showAddNoteBtn" class="add-btn" aria-expanded="false">
-        ＋ Add New Note <span class="arrow">▼</span>
-      </button>
-      <div id="noteFormContainer" class="form" aria-hidden="true">
-        <label>Note<textarea id="noteText" rows="4" placeholder="Write your note here..."></textarea></label>
-        <div class="form-actions">
-          <button id="saveNoteBtn" class="primary">Save</button>
-          <button id="cancelNoteBtn" class="secondary">Cancel</button>
-        </div>
-      </div>
-    </div>
-    <div class="add-area">
-      <button id="viewNotesToggle" class="add-btn" aria-expanded="false">
-        👀 View Notes <span class="arrow">▼</span>
-      </button>
-      <ul id="noteList" class="list form" aria-hidden="true"></ul>
-    </div>
-  </div>
-
-  <!-- Terms of Use Page -->
-  <div id="terms" class="page hidden">
-    <h1>Privacy Policy!</h1>
-    <ul>
-      <li> App data are stored using local storage. Avoid data losses before formatting the device.</li>
-      <li> Data's fetched delay may happen based on your browser performance.</li>
-      <li>If you'd like to contribute, check out here: <a href="https://github.com/Spydernet3" target="_blank">Spydernet Github ↠</a></li>
-    </ul>
-    <hr>
-    <h3>Version Info!</h3>
-    <p>Version 8.</p>
-    <p>Last Updated: 30-Aug-2025</p>
-    <p>Project: Open source project</p>
-  </div>
-
-  <!-- How to Use Page -->
-  <div id="how" class="page hidden">
-    <h3>Reminder!</h3>
-    <hr>
-    <ul>
-      <li>Go to the Reminders page</li>
-      <li> Click + Add New Reminder</li>
-      <li> Fill Title, Start Date, End Date</li>
-      <li> Click Save</li>
-      <li> Edit or delete using the ✏️ and 🗑️ button.</li>
-      <li>Urgent reminders appear on the Home page automatically.</li>
-    </ul>
-
-    <h3>Notes!</h3>
-    <hr>
-    <ul>
-      <li>Go to the Notes page.</li>
-      <li>Click + Add New Note.</li>
-      <li>Write your note in the textarea.</li>
-      <li>Click Save. IST date & time is added automatically.</li>
-      <li>View notes in the collapsible View Notes section.</li>
-      <li>Delete notes with 🗑️ button.</li>
-    </ul>
-
-    <h3>Profile!</h3>
-    <hr>
-    <ul>
-      <li>Click the profile picture to upload a new image.</li>
-      <li>Click Edit Name to update the username.</li>
-    </ul>
-    <h3>Dark Mode!</h3>
-    <hr>
-    <ul>
-      <li>Click the 🌙 button in the sidebar to toggle dark mode.</li>
-      <li>Dark mode preference is saved.</li>
-    </ul>
-    <h3>Remember!</h3>
-    <hr>
-    <ul>
-      <li>Data may fetch slowly based on your browser performance</li>
-    </ul>
-  </div>
-</div>
-
-<script>
-(function () {
-  // ---------- Storage ----------
-  const STORAGE_KEY = 'smart_reminder_app_v1';
-  let appData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
-    reminders: [],
-    notes: [],
-    profileName: '',
-    profilePhoto: '',
-    darkMode: '0'
-  };
-
-  let editingIndex = null;
-
-  // ---------- Helpers ----------
-  function byId(id){ return document.getElementById(id); }
-  function saveAll(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); }
-
-  function daysLeft(endDateStr){
-    if(!endDateStr) return null;
-    const [y,m,d] = endDateStr.split('-').map(Number);
-    const end = new Date(y,m-1,d);
-    const now = new Date();
-    const diffTime = end.setHours(0,0,0,0) - now.setHours(0,0,0,0);
-    return Math.floor(diffTime / (1000*60*60*24));
-  }
-
-  function formatDMY(dateStr){ 
-    if(!dateStr) return ''; 
-    const [y,m,d] = dateStr.split('-'); 
-    return `${d.toString().padStart(2,'0')}/${m.toString().padStart(2,'0')}/${y}`; 
-  }
-
-  // ---------- Render Functions ----------
-  function renderReminders(){
-    const list = byId('reminderList'); list.innerHTML = '';
-    if(appData.reminders.length === 0){
-      const li = document.createElement('li'); li.textContent='No reminders yet.'; li.style.opacity='0.7'; list.appendChild(li);
-      renderHomeReminders(); renderHomeNotes(); return;
-    }
-    const frag = document.createDocumentFragment();
-    appData.reminders.forEach((r,i)=>{
-      const li=document.createElement('li');
-      const left=document.createElement('div'); left.className='item-left';
-      const title=document.createElement('div'); title.textContent=r.title; title.style.fontWeight='600';
-      const dates=document.createElement('div'); dates.style.fontSize='13px'; dates.style.opacity='0.85'; dates.textContent=`Start: ${formatDMY(r.startDate)} | End: ${formatDMY(r.endDate)}`;
-      left.appendChild(title); left.appendChild(dates);
-
-      const right=document.createElement('div'); right.style.display='flex'; right.style.alignItems='center';
-      const badge=document.createElement('div'); badge.className='badge';
-      const diff = daysLeft(r.endDate);
-      if(diff === null){ badge.textContent='No date'; }
-      else if(diff < 0){ badge.textContent='Expired'; }
-      else if(diff === 0){ badge.textContent='Today'; }
-      else{ badge.textContent=`${diff} days left`; }
-
-      const editBtn=document.createElement('button'); editBtn.className='icon-small'; editBtn.textContent='✏️'; editBtn.title='Edit'; editBtn.addEventListener('click',()=>editReminder(i));
-      const delBtn=document.createElement('button'); delBtn.className='icon-small'; delBtn.textContent='🗑️'; delBtn.title='Delete'; delBtn.addEventListener('click',()=>deleteReminder(i));
-      right.appendChild(badge); right.appendChild(editBtn); right.appendChild(delBtn);
-
-      li.appendChild(left); li.appendChild(right); frag.appendChild(li);
-    });
-    list.appendChild(frag);
-    renderHomeReminders(); renderHomeNotes();
-  }
-
-  function renderHomeReminders(){
-    const container = byId('homeRemindersContainer'); 
-    container.innerHTML='';
-    if(appData.reminders.length === 0){
-      const li=document.createElement('li'); 
-      li.textContent='No reminders yet.'; 
-      li.style.opacity='0.7'; 
-      container.appendChild(li); 
-      return; 
-    }
-    const frag=document.createDocumentFragment();
-    appData.reminders.forEach(r=>{
-      const li=document.createElement('li'); 
-      const diff = daysLeft(r.endDate);
-      let badgeText='';
-      if(diff === null){ badgeText='No date'; }
-      else if(diff < 0){ badgeText='Expired'; }
-      else if(diff === 0){ badgeText='Today'; }
-      else{ badgeText=`${diff} days left`; }
-      li.textContent = `"${r.title}" || ${badgeText}`;
-      frag.appendChild(li);
-    });
-    container.appendChild(frag);
-  }
-
-  function renderHomeNotes(){ 
-    const container = byId('homeNotesContainer'); 
-    container.innerHTML=''; 
-    if(appData.notes.length===0){ 
-      const li=document.createElement('li'); li.textContent='No notes available.'; li.style.opacity='0.7'; container.appendChild(li); return; 
-    } 
-    const frag=document.createDocumentFragment(); 
-    appData.notes.forEach(n=>{ 
-      const li=document.createElement('li'); li.className='list-item'; 
-      const left=document.createElement('div'); left.className='item-left'; 
-      const text=document.createElement('div'); 
-      text.innerHTML=`<b>${n.text}</b><br><small style="opacity:0.7">${n.createdAt||''}</small>`; 
-      left.appendChild(text); li.appendChild(left); frag.appendChild(li); 
-    }); 
-    container.appendChild(frag); 
-  }
-
-  function renderNotes(){ 
-    const list=byId('noteList'); list.innerHTML=''; 
-    if(appData.notes.length===0){ 
-      const li=document.createElement('li'); li.textContent='No notes yet.'; li.style.opacity='0.7'; list.appendChild(li); 
-      return; 
-    } 
-    const frag=document.createDocumentFragment(); 
-    appData.notes.forEach((note,i)=>{ 
-      const li=document.createElement('li'); 
-      const left=document.createElement('div'); left.className='item-left'; 
-      const text=document.createElement('div'); 
-      text.innerHTML=`<b>${note.text}</b><br><small style="opacity:0.7">${note.createdAt||''}</small>`; 
-      left.appendChild(text); 
-      const delBtn=document.createElement('button'); delBtn.className='icon-small'; delBtn.textContent='🗑️'; delBtn.title='Delete'; delBtn.addEventListener('click',()=>{ deleteNote(i); }); 
-      li.appendChild(left); li.appendChild(delBtn); frag.appendChild(li); 
-    }); 
-    list.appendChild(frag); 
-  }
-
-  // ---------- Reminder Functions ----------
-  function editReminder(i){
-    const r=appData.reminders[i];
-    editingIndex=i;
-    byId('reminderTitle').value=r.title;
-    byId('startDate').value=r.startDate||'';
-    byId('endDate').value=r.endDate||'';
-    showForm(byId('reminderFormContainer'));
-  }
-
-  function deleteReminder(i){
-    if(confirm('Delete this reminder?')){ appData.reminders.splice(i,1); saveAll(); renderReminders(); }
-  }
-
-  function saveReminder(){
-    const title=byId('reminderTitle').value.trim();
-    const start=byId('startDate').value;
-    const end=byId('endDate').value;
-    if(!title){ alert('Title required'); return; }
-    const reminderObj={ title, startDate:start, endDate:end };
-    if(editingIndex!==null){ appData.reminders[editingIndex]=reminderObj; editingIndex=null; }
-    else{ appData.reminders.push(reminderObj); }
-    saveAll(); renderReminders(); hideForm(byId('reminderFormContainer')); clearReminderForm();
-  }
-
-  function clearReminderForm(){ byId('reminderTitle').value=''; byId('startDate').value=''; byId('endDate').value=''; }
-
-  // ---------- Notes Functions ----------
-  function saveNote(){
-    const text=byId('noteText').value.trim();
-    if(!text){ alert('Note cannot be empty'); return; }
-    const noteObj={ text, createdAt:new Date().toLocaleString() };
-    appData.notes.push(noteObj);
-    saveAll(); renderNotes(); hideForm(byId('noteFormContainer')); byId('noteText').value='';
-    renderHomeNotes();
-  }
-
-  function deleteNote(i){ if(confirm('Delete this note?')){ appData.notes.splice(i,1); saveAll(); renderNotes(); renderHomeNotes(); } }
-
-  // ---------- Form Show/Hide ----------
-  function showForm(el){ el.classList.add('visible'); }
-  function hideForm(el){ el.classList.remove('visible'); }
-
-  // ---------- Page Navigation ----------
-  function showPage(pageId){
-    document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
-    byId(pageId).classList.remove('hidden');
-  }
-
-  // ---------- Sidebar Toggle ----------
-  const sidebar=byId('sidebar'); const main=byId('main'); const toggleBtn=byId('toggleBtn');
-  toggleBtn.addEventListener('click',()=>{ if(sidebar.style.left==='-220px'){ sidebar.style.left='0'; main.style.marginLeft='220px'; toggleBtn.textContent='⮜'; } else{ sidebar.style.left='-220px'; main.style.marginLeft='0'; toggleBtn.textContent='⮞'; } });
-
-  // ---------- Dark Mode ----------
-  const darkBtn=byId('darkModeBtn');
-  if(appData.darkMode==='1') document.body.classList.add('dark');
-  darkBtn.addEventListener('click',()=>{
-    document.body.classList.toggle('dark');
-    appData.darkMode=document.body.classList.contains('dark')?'1':'0';
-    saveAll();
-  });
-
-  // ---------- Profile ----------
-  const profileNameEl=byId('profileName');
-  if(appData.profileName) profileNameEl.textContent=appData.profileName;
-  byId('editNameBtn').addEventListener('click',()=>{ const n=prompt('Enter new name:',appData.profileName||''); if(n){ appData.profileName=n; profileNameEl.textContent=n; saveAll(); } });
-
-  const profilePhotoInput=byId('photoUpload');
-  profilePhotoInput.addEventListener('change',(e)=>{
-    const file=e.target.files[0]; if(file){ const reader=new FileReader(); reader.onload=function(ev){ appData.profilePhoto=ev.target.result; byId('profilePhoto').src=ev.target.result; saveAll(); }; reader.readAsDataURL(file); }
-  });
-  if(appData.profilePhoto) byId('profilePhoto').src=appData.profilePhoto;
-
-  // ---------- Event Listeners ----------
-  byId('showAddFormBtn').addEventListener('click',()=>{ toggleCollapse(byId('reminderFormContainer'), byId('showAddFormBtn')); });
-  byId('cancelReminderBtn').addEventListener('click',()=>{ hideForm(byId('reminderFormContainer')); editingIndex=null; clearReminderForm(); });
-  byId('saveReminderBtn').addEventListener('click',saveReminder);
-
-  byId('showAddNoteBtn').addEventListener('click',()=>{ toggleCollapse(byId('noteFormContainer'), byId('showAddNoteBtn')); });
-  byId('cancelNoteBtn').addEventListener('click',()=>{ hideForm(byId('noteFormContainer')); });
-  byId('saveNoteBtn').addEventListener('click',saveNote);
-
-  byId('viewNotesToggle').addEventListener('click',()=>{ toggleCollapse(byId('noteList'), byId('viewNotesToggle')); });
-  byId('homeRemindersToggle').addEventListener('click',()=>{ toggleCollapse(byId('homeRemindersContainer'), byId('homeRemindersToggle')); });
-  byId('homeNotesToggle').addEventListener('click',()=>{ toggleCollapse(byId('homeNotesContainer'), byId('homeNotesToggle')); });
-
-  document.querySelectorAll('.menu-btn[data-page]').forEach(btn=>{ btn.addEventListener('click',()=>{ showPage(btn.dataset.page); }); });
-
-  function toggleCollapse(el, btn){
-    el.classList.toggle('visible');
-    btn.classList.toggle('open');
-  }
-
-  // ---------- Notifications ----------
-  function checkNotifications(){
-    if(!("Notification" in window)) return;
-    if(Notification.permission!=='granted') Notification.requestPermission();
-
-    const now=new Date();
-    appData.reminders.forEach(r=>{
-      const diff=daysLeft(r.endDate);
-      if(diff===0||diff===1||diff<0){
-        const notifTimes=[8,13,18];
-        notifTimes.forEach(hour=>{
-          const notifTime=new Date(now.getFullYear(),now.getMonth(),now.getDate(),hour,0,0,0);
-          const delay=notifTime-now;
-          if(delay>0){
-            setTimeout(()=>{
-              if(Notification.permission==='granted'){
-                new Notification("Reminder Alert!", {
-                  body: `${r.title} - ${diff<0?'Expired':diff===0?'Today':'1 day left'}`,
-                  icon:'assets/icon.png'
-                });
-              }
-            }, delay);
-          }
-        });
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Nothing Reminder</title>
+    <link rel="icon" type="image/png" href="assets/icon.png" />
+    <style>
+      :root {
+        --bg: #ffffff;
+        --text: #000000;
+        --muted: #666;
+        --accent: #4CAF50;
       }
-    });
-  }
-  checkNotifications();
-  setInterval(checkNotifications, 24*60*60*1000);
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+        background: var(--bg);
+        color: var(--text);
+      }
+      .sidebar {
+        width: 220px;
+        background: #666;
+        color: #fff;
+        position: fixed;
+        height: 100%;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 12px;
+        gap: 8px;
+        transition: left 0.25s;
+      }
+      .profile {
+        display:flex;
+        align-items:center;
+        gap:10px;
+        margin-bottom:4px;
+      }
+      .menu-btn, .icon-btn, .add-btn {
+        display:block;
+        width:100%;
+        padding:10px;
+        border: none;
+        background:#888;
+        color:#fff;
+        border-radius:6px;
+        cursor:pointer;
+        text-align:left;
+        font-size:15px;
+        transition: left 0.25s;
+      }
+      .menu-btn:hover, .icon-btn:hover, .add-btn:hover { background:#aaa; }
+      .main {
+        margin-left: 220px;
+        padding: 20px;
+        min-height: 100vh;
+        transition: left 0.25s;
+      }
+      .page.hidden { display:none; }
+      .toggle-btn {
+        position: absolute;
+        left: 230px;
+        top: 12px;
+        padding:6px 8px;
+        border-radius:6px;
+        border:none;
+        background:#ddd;
+        cursor:pointer;
+        transition: left 0.25s;
+      }
+      .list { list-style:none; padding:0; margin:0 0 12px 0; }
+      .list li {
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        padding:8px;
+        border-radius:6px;
+        margin-bottom:8px;
+        background: rgba(0,0,0,0.03);
+        transition: left 0.25s;
+      }
+      .item-left { display:flex; flex-direction:column; gap:4px; }
+      .badge { background:#eee; padding:4px 8px; border-radius:12px; font-size:12px; }
+      .form {
+        margin-top: 0;
+        padding: 12px;
+        border-radius: 8px;
+        background: #f5f5f5;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-width: 520px;
+        overflow: hidden;
+        transition: max-height 0.3s ease, padding 0.3s ease;
+        max-height: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        transition: left 0.25s;
+      }
+      .form.visible {
+        max-height: 500px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+      }
+      .form label {
+        display:flex;
+        flex-direction:column;
+        font-size:13px;
+        gap:6px;
+        transition: left 0.25s;
+      }
+      .form input[type="text"], .form input[type="date"], .form textarea {
+        padding:8px;
+        border-radius:6px;
+        border:1px solid #ccc;
+        transition: left 0.25s;
+      }
+      .form-actions {
+        display:flex;
+        gap:8px;
+        margin-top:6px;
+        transition: left 0.25s;
+      }
+      .primary {
+        background: var(--accent);
+        color: #fff;
+        border:none;
+        padding:8px 12px;
+        border-radius:6px;
+        cursor:pointer;
+      }
+      .secondary {
+        background:#ddd;
+        border:none;
+        padding:8px 12px;
+        border-radius:6px;
+        cursor:pointer;
+      }
+      .icon-small {
+        background:transparent;
+        border:none;
+        cursor:pointer;
+        margin-left:8px;
+        font-size:16px;
+      }
+      .add-area {
+        margin-top: 8px;
+        max-width: 520px;
+      }
+      .dark {
+        --bg: #121212;
+        --text: #f1f1f1;
+      }
+      .dark .main { background:#151515; color:var(--text); }
+      .dark .form { background: #232323; }
+      .dark .menu-btn, .dark .icon-btn { background:#333; color:var(--text); }
+      #showAddFormBtn, #homeRemindersToggle, #showAddNoteBtn, #viewNotesToggle, #homeNotesToggle {
+        position: relative;
+        user-select: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 600;
+        font-size: 16px;
+        cursor: pointer;
+        transition: left 0.25s;
+      }
+      #showAddFormBtn.open .arrow, #homeRemindersToggle.open .arrow, #showAddNoteBtn.open .arrow, #viewNotesToggle.open .arrow, #homeNotesToggle.open .arrow {
+        transform: rotate(180deg);
+        transition: left 0.25s;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="sidebar" class="sidebar">
+      <div class="profile">
+        <img
+          id="profilePhoto"
+          src="https://via.placeholder.com/40"
+          alt="Profile"
+          width="40"
+          height="40"
+          style="border-radius:50%;object-fit:cover;cursor:pointer;"
+          onclick="document.getElementById('photoUpload').click()"
+        />
+        <h3 id="profileName">👤 User</h3>
+      </div>
+      <input
+        id="photoUpload"
+        type="file"
+        accept="image/*"
+        style="display:none;"
+      />
+      <button class="menu-btn" id="editNameBtn">✏️ Edit Name</button>
+      <button class="menu-btn" data-page="home">🏠 Home</button>
+      <button class="menu-btn" data-page="reminders">⏰ Reminders</button>
+      <button class="menu-btn" data-page="notes">📝 Notes</button>
+      <button class="menu-btn" data-page="terms">📄 Terms of Use</button>
+      <button class="menu-btn" data-page="how">📄 How to Use</button>
+      <button id="darkModeBtn" class="icon-btn" style="margin-top:auto;">
+        🌙 Dark Mode
+      </button>
+    </div>
 
-  // ---------- Init ----------
-  renderReminders(); renderNotes();
-})();
-</script>
-</body>
+    <div id="main" class="main">
+      <button id="toggleBtn" class="toggle-btn">⮜</button>
+
+      <!-- Home -->
+      <div id="home" class="page">
+        <h2>Home</h2>
+        <div class="add-area">
+          <button
+            id="homeRemindersToggle"
+            class="add-btn"
+            aria-expanded="false"
+          >
+            ⚠️ Reminders <span class="arrow">▼</span>
+          </button>
+          <div
+            id="homeRemindersContainer"
+            class="form"
+            aria-hidden="true"
+          ></div>
+        </div>
+        <div class="add-area">
+          <button id="homeNotesToggle" class="add-btn" aria-expanded="false">
+            📝 Notes <span class="arrow">▼</span>
+          </button>
+          <div id="homeNotesContainer" class="form" aria-hidden="true"></div>
+        </div>
+      </div>
+
+      <!-- Reminders -->
+      <div id="reminders" class="page hidden">
+        <h2>Reminders</h2>
+        <div class="add-area">
+          <button id="showAddFormBtn" class="add-btn" aria-expanded="false">
+            ＋ Add New Reminder <span class="arrow">▼</span>
+          </button>
+          <div id="reminderFormContainer" class="form" aria-hidden="true">
+            <label
+              >Title<input id="reminderTitle" type="text" placeholder="Title"
+            /></label>
+            <label>Start date<input id="startDate" type="date" /></label>
+            <label>End date<input id="endDate" type="date" /></label>
+            <div class="form-actions">
+              <button id="saveReminderBtn" class="primary">Save</button>
+              <button id="cancelReminderBtn" class="secondary">Cancel</button>
+            </div>
+          </div>
+        </div>
+        <ul id="reminderList" class="list"></ul>
+      </div>
+
+      <!-- Notes -->
+      <div id="notes" class="page hidden">
+        <h2>📝 Notes</h2>
+        <div class="add-area">
+          <button id="showAddNoteBtn" class="add-btn" aria-expanded="false">
+            ＋ Add New Note <span class="arrow">▼</span>
+          </button>
+          <div id="noteFormContainer" class="form" aria-hidden="true">
+            <label
+              >Note<textarea
+                id="noteText"
+                rows="4"
+                placeholder="Write your note here..."
+              ></textarea>
+            </label>
+            <div class="form-actions">
+              <button id="saveNoteBtn" class="primary">Save</button>
+              <button id="cancelNoteBtn" class="secondary">Cancel</button>
+            </div>
+          </div>
+        </div>
+        <div class="add-area">
+          <button id="viewNotesToggle" class="add-btn" aria-expanded="false">
+            👀 View Notes <span class="arrow">▼</span>
+          </button>
+          <ul id="noteList" class="list form" aria-hidden="true"></ul>
+        </div>
+      </div>
+
+      <!-- Terms of Use Page -->
+      <div id="terms" class="page hidden">
+        <h1>Privacy Policy!</h1>
+        <ul>
+          <li>
+            App data are stored using local storage. Avoid data losses before
+            formatting the device.
+          </li>
+          <li>
+            Data's fetched delay may happen based on your browser performance.
+          </li>
+          <li>
+            If you'd like to contribute, check out here:
+            <a href="https://github.com/Spydernet3" target="_blank"
+              >Spydernet Github ↠</a
+            >
+          </li>
+        </ul>
+        <hr />
+        <h3>Version Info!</h3>
+        <p>Version 8.3</p>
+        <p>Last Updated: 30-Aug-2025</p>
+        <p>Project: Open source project</p>
+      </div>
+
+      <!-- How to Use Page -->
+      <div id="how" class="page hidden">
+        <h3>Reminder!</h3>
+        <hr />
+        <ul>
+          <li>Go to the Reminders page</li>
+          <li>Click + Add New Reminder</li>
+          <li>Fill Title, Start Date, End Date</li>
+          <li>Click Save</li>
+          <li>Edit or delete using the ✏️ and 🗑️ button.</li>
+          <li>Urgent reminders appear on the Home page automatically.</li>
+        </ul>
+
+        <h3>Notes!</h3>
+        <hr />
+        <ul>
+          <li>Go to the Notes page.</li>
+          <li>Click + Add New Note.</li>
+          <li>Write your note in the textarea.</li>
+          <li>Click Save. IST date & time is added automatically.</li>
+          <li>View notes in the collapsible View Notes section.</li>
+          <li>Delete notes with 🗑️ button.</li>
+        </ul>
+
+        <h3>Profile!</h3>
+        <hr />
+        <ul>
+          <li>Click the profile picture to upload a new image.</li>
+          <li>Click Edit Name to update the username.</li>
+        </ul>
+        <h3>Dark Mode!</h3>
+        <hr />
+        <ul>
+          <li>Click the 🌙 button in the sidebar to toggle dark mode.</li>
+          <li>Dark mode preference is saved.</li>
+        </ul>
+        <h3>Remember!</h3>
+        <hr />
+        <ul>
+          <li>Data may fetch slowly based on your browser performance</li>
+        </ul>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        // ---------- Storage ----------
+        const STORAGE_KEY = 'smart_reminder_app_v1';
+        let appData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
+          reminders: [],
+          notes: [],
+          profileName: '',
+          profilePhoto: '',
+          darkMode: '0'
+        };
+
+        let editingIndex = null;
+
+        // ---------- Helpers ----------
+        function byId(id){ return document.getElementById(id); }
+        function saveAll(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); }
+
+        function daysLeft(endDateStr){
+          if(!endDateStr) return null;
+          const [y,m,d] = endDateStr.split('-').map(Number);
+          const end = new Date(y,m-1,d);
+          const now = new Date();
+          const diffTime = end.setHours(0,0,0,0) - now.setHours(0,0,0,0);
+          return Math.floor(diffTime / (1000*60*60*24));
+        }
+
+        function formatDMY(dateStr){
+          if(!dateStr) return '';
+          const [y,m,d] = dateStr.split('-');
+          return `${d.toString().padStart(2,'0')}/${m.toString().padStart(2,'0')}/${y}`;
+        }
+
+        // ---------- Render Functions ----------
+        function renderReminders(){
+          const list = byId('reminderList'); list.innerHTML = '';
+          if(appData.reminders.length === 0){
+            const li = document.createElement('li'); li.textContent='No reminders yet.'; li.style.opacity='0.7'; list.appendChild(li);
+            renderHomeReminders(); renderHomeNotes(); return;
+          }
+          const frag = document.createDocumentFragment();
+          appData.reminders.forEach((r,i)=>{
+            const li=document.createElement('li');
+            const left=document.createElement('div'); left.className='item-left';
+            const title=document.createElement('div'); title.textContent=r.title; title.style.fontWeight='600';
+            const dates=document.createElement('div'); dates.style.fontSize='13px'; dates.style.opacity='0.85'; dates.textContent=`Start: ${formatDMY(r.startDate)} | End: ${formatDMY(r.endDate)}`;
+            left.appendChild(title); left.appendChild(dates);
+
+            const right=document.createElement('div'); right.style.display='flex'; right.style.alignItems='center';
+            const badge=document.createElement('div'); badge.className='badge';
+            const diff = daysLeft(r.endDate);
+            if(diff === null){ badge.textContent='No date'; }
+            else if(diff < 0){ badge.textContent='Expired'; }
+            else if(diff === 0){ badge.textContent='Today'; }
+            else{ badge.textContent=`${diff} days left`; }
+
+            const editBtn=document.createElement('button'); editBtn.className='icon-small'; editBtn.textContent='✏️'; editBtn.title='Edit'; editBtn.addEventListener('click',()=>editReminder(i));
+            const delBtn=document.createElement('button'); delBtn.className='icon-small'; delBtn.textContent='🗑️'; delBtn.title='Delete'; delBtn.addEventListener('click',()=>deleteReminder(i));
+            right.appendChild(badge); right.appendChild(editBtn); right.appendChild(delBtn);
+
+            li.appendChild(left); li.appendChild(right); frag.appendChild(li);
+          });
+          list.appendChild(frag);
+          renderHomeReminders(); renderHomeNotes();
+        }
+
+        function renderHomeReminders(){
+          const container = byId('homeRemindersContainer');
+          container.innerHTML='';
+          if(appData.reminders.length === 0){
+            const li=document.createElement('li');
+            li.textContent='No reminders yet.';
+            li.style.opacity='0.7';
+            container.appendChild(li);
+            return;
+          }
+          const frag=document.createDocumentFragment();
+          appData.reminders.forEach(r=>{
+            const li=document.createElement('li');
+            const diff = daysLeft(r.endDate);
+            let badgeText='';
+            if(diff === null){ badgeText='No date'; }
+            else if(diff < 0){ badgeText='Expired'; }
+            else if(diff === 0){ badgeText='Today'; }
+            else{ badgeText=`${diff} days left`; }
+            li.textContent = `"${r.title}" || ${badgeText}`;
+            frag.appendChild(li);
+          });
+          container.appendChild(frag);
+        }
+
+        function renderHomeNotes(){
+          const container = byId('homeNotesContainer');
+          container.innerHTML='';
+          if(appData.notes.length===0){
+            const li=document.createElement('li'); li.textContent='No notes available.'; li.style.opacity='0.7'; container.appendChild(li); return;
+          }
+          const frag=document.createDocumentFragment();
+          appData.notes.forEach(n=>{
+            const li=document.createElement('li'); li.className='list-item';
+            const left=document.createElement('div'); left.className='item-left';
+            const text=document.createElement('div');
+            text.innerHTML=`<b>${n.text}</b><br><small style="opacity:0.7">${n.createdAt||''}</small>`;
+            left.appendChild(text); li.appendChild(left); frag.appendChild(li);
+          });
+          container.appendChild(frag);
+        }
+
+        function renderNotes(){
+          const list=byId('noteList'); list.innerHTML='';
+          if(appData.notes.length===0){
+            const li=document.createElement('li'); li.textContent='No notes yet.'; li.style.opacity='0.7'; list.appendChild(li);
+            return;
+          }
+          const frag=document.createDocumentFragment();
+          appData.notes.forEach((note,i)=>{
+            const li=document.createElement('li');
+            const left=document.createElement('div'); left.className='item-left';
+            const text=document.createElement('div');
+            text.innerHTML=`<b>${note.text}</b><br><small style="opacity:0.7">${note.createdAt||''}</small>`;
+            left.appendChild(text);
+            const delBtn=document.createElement('button'); delBtn.className='icon-small'; delBtn.textContent='🗑️'; delBtn.title='Delete'; delBtn.addEventListener('click',()=>{ deleteNote(i); });
+            li.appendChild(left); li.appendChild(delBtn); frag.appendChild(li);
+          });
+          list.appendChild(frag);
+        }
+
+        // ---------- Reminder Functions ----------
+        function editReminder(i){
+          const r=appData.reminders[i];
+          editingIndex=i;
+          byId('reminderTitle').value=r.title;
+          byId('startDate').value=r.startDate||'';
+          byId('endDate').value=r.endDate||'';
+          showForm(byId('reminderFormContainer'));
+        }
+
+        function deleteReminder(i){
+          if(('Delete this reminder?')){ appData.reminders.splice(i,1); saveAll(); renderReminders(); }
+        }
+
+        function saveReminder(){
+          const title=byId('reminderTitle').value.trim();
+          const start=byId('startDate').value;
+          const end=byId('endDate').value;
+          if(!title){ alert('Title required'); return; }
+          const reminderObj={ title, startDate:start, endDate:end };
+          if(editingIndex!==null){ appData.reminders[editingIndex]=reminderObj; editingIndex=null; }
+          else{ appData.reminders.push(reminderObj); }
+          saveAll(); renderReminders(); hideForm(byId('reminderFormContainer')); clearReminderForm();
+        }
+
+        function clearReminderForm(){ byId('reminderTitle').value=''; byId('startDate').value=''; byId('endDate').value=''; }
+
+        // ---------- Notes Functions ----------
+        function saveNote(){
+          const text=byId('noteText').value.trim();
+          if(!text){ alert('Note cannot be empty'); return; }
+         const noteObj = {
+          text,
+          createdAt: new Date().toLocaleString('en-US', {
+              hour12: true,
+              hour: 'numeric',
+              minute: 'numeric',
+              second: 'numeric',
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric'
+          })
+      };
+
+          appData.notes.push(noteObj);
+          saveAll(); renderNotes(); hideForm(byId('noteFormContainer')); byId('noteText').value='';
+          renderHomeNotes();
+        }
+
+        function deleteNote(i){ if(('Delete this note?')){ appData.notes.splice(i,1); saveAll(); renderNotes(); renderHomeNotes(); } }
+
+        // ---------- Form Show/Hide ----------
+        function showForm(el){ el.classList.add('visible'); }
+        function hideForm(el){ el.classList.remove('visible'); }
+
+        // ---------- Page Navigation ----------
+        function showPage(pageId){
+          document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
+          byId(pageId).classList.remove('hidden');
+        }
+
+        // ---------- Sidebar Toggle ----------
+        const sidebar=byId('sidebar'); const main=byId('main'); const toggleBtn=byId('toggleBtn');
+        toggleBtn.addEventListener('click',()=>{ if(sidebar.style.left==='-220px'){ sidebar.style.left='0'; main.style.marginLeft='220px'; toggleBtn.textContent='⮜'; } else{ sidebar.style.left='-220px'; main.style.marginLeft='0'; toggleBtn.textContent='⮞'; } });
+
+        // ---------- Dark Mode ----------
+        const darkBtn=byId('darkModeBtn');
+        if(appData.darkMode==='1') document.body.classList.add('dark');
+        darkBtn.addEventListener('click',()=>{
+          document.body.classList.toggle('dark');
+          appData.darkMode=document.body.classList.contains('dark')?'1':'0';
+          saveAll();
+        });
+
+        // ---------- Profile ----------
+        const profileNameEl=byId('profileName');
+        if(appData.profileName) profileNameEl.textContent=appData.profileName;
+        byId('editNameBtn').addEventListener('click',()=>{ const n=prompt('Enter new name:',appData.profileName||''); if(n){ appData.profileName=n; profileNameEl.textContent=n; saveAll(); } });
+
+        const profilePhotoInput=byId('photoUpload');
+        profilePhotoInput.addEventListener('change',(e)=>{
+          const file=e.target.files[0]; if(file){ const reader=new FileReader(); reader.onload=function(ev){ appData.profilePhoto=ev.target.result; byId('profilePhoto').src=ev.target.result; saveAll(); }; reader.readAsDataURL(file); }
+        });
+        if(appData.profilePhoto) byId('profilePhoto').src=appData.profilePhoto;
+
+        // ---------- Event Listeners ----------
+        byId('showAddFormBtn').addEventListener('click',()=>{ toggleCollapse(byId('reminderFormContainer'), byId('showAddFormBtn')); });
+        byId('cancelReminderBtn').addEventListener('click',()=>{ hideForm(byId('reminderFormContainer')); editingIndex=null; clearReminderForm(); });
+        byId('saveReminderBtn').addEventListener('click',saveReminder);
+
+        byId('showAddNoteBtn').addEventListener('click',()=>{ toggleCollapse(byId('noteFormContainer'), byId('showAddNoteBtn')); });
+        byId('cancelNoteBtn').addEventListener('click',()=>{ hideForm(byId('noteFormContainer')); });
+        byId('saveNoteBtn').addEventListener('click',saveNote);
+
+        byId('viewNotesToggle').addEventListener('click',()=>{ toggleCollapse(byId('noteList'), byId('viewNotesToggle')); });
+        byId('homeRemindersToggle').addEventListener('click',()=>{ toggleCollapse(byId('homeRemindersContainer'), byId('homeRemindersToggle')); });
+        byId('homeNotesToggle').addEventListener('click',()=>{ toggleCollapse(byId('homeNotesContainer'), byId('homeNotesToggle')); });
+
+        document.querySelectorAll('.menu-btn[data-page]').forEach(btn=>{ btn.addEventListener('click',()=>{ showPage(btn.dataset.page); }); });
+
+        function toggleCollapse(el, btn){
+          el.classList.toggle('visible');
+          btn.classList.toggle('open');
+        }
+
+        // ---------- Notifications ----------
+        function checkNotifications(){
+          if(!("Notification" in window)) return;
+          if(Notification.permission!=='granted') Notification.requestPermission();
+
+          const now=new Date();
+          appData.reminders.forEach(r=>{
+            const diff=daysLeft(r.endDate);
+            if(diff===0||diff===1||diff<0){
+              const notifTimes=[8,13,18];
+              notifTimes.forEach(hour=>{
+                const notifTime=new Date(now.getFullYear(),now.getMonth(),now.getDate(),hour,0,0,0);
+                const delay=notifTime-now;
+                if(delay>0){
+                  setTimeout(()=>{
+                    if(Notification.permission==='granted'){
+                      new Notification("Reminder Alert!", {
+                        body: `${r.title} - ${diff<0?'Expired':diff===0?'Today':'1 day left'}`,
+                        icon:'assets/icon.png'
+                      });
+                    }
+                  }, delay);
+                }
+              });
+            }
+          });
+        }
+        checkNotifications();
+        setInterval(checkNotifications, 24*60*60*1000);
+
+        // ---------- Init ----------
+        renderReminders(); renderNotes();
+      })();
+    </script>
+  </body>
 </html>

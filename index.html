@@ -203,12 +203,10 @@
         accept="image/*"
         style="display:none;"
       />
-      <!-- NOTE: Edit Name button moved into Settings panel (per request). -->
+      <!-- NOTE: Terms & How buttons moved into Settings panel (per request). -->
       <button class="menu-btn" data-page="home">🏠 Home</button>
       <button class="menu-btn" data-page="reminders">⏰ Reminders</button>
       <button class="menu-btn" data-page="notes">📝 Notes</button>
-      <button class="menu-btn" data-page="terms">📄 Terms of Use</button>
-      <button class="menu-btn" data-page="how">📄 How to Use</button>
 
       <!-- Settings container placed where the Dark Mode button was (bottom) -->
       <div id="settingsContainer" style="margin-top:auto;">
@@ -218,6 +216,9 @@
           <button class="menu-btn" id="editNameBtn">✏️ Edit Name</button>
           <!-- moved Dark Mode inside Settings (same id preserved) -->
           <button class="icon-btn" id="darkModeBtn">🌙 Dark Mode</button>
+          <!-- moved Terms of Use & How to Use inside Settings (preserved data-page attributes) -->
+          <button class="menu-btn" data-page="terms">💢 Terms & Conditions </button>
+          <button class="menu-btn" data-page="how">🧑‍🏫 How to Use</button>
         </div>
       </div>
     </div>
@@ -305,25 +306,26 @@
       <div id="terms" class="page hidden">
         <h1>Privacy Policy!</h1>
         <ul>
-          <li>
+          <p>
             App data are stored using local storage. Avoid data losses before
             formatting the device.
-          </li>
-          <li>
-            Data's fetched delay may happen based on your browser performance.
-          </li>
-          <li>
+          </p>
+          <p>
             If you'd like to contribute, check out here:
-            <a href="https://github.com/Spydernet3" target="_blank"
+            <a href="https://github.com/spydernet3" target="_blank"
               >Spydernet Github ↠</a
             >
-          </li>
+          </p>
         </ul>
         <hr />
         <h3>Version Info!</h3>
-        <p>Version 8.5</p>
-        <p>Last Updated: 30-Aug-2025</p>
-        <p>Project: Open source project</p>
+        <ul>
+        <p>
+          Version 8.8
+        </p>
+        <p> Last Updated: 01-Sep-2025</p>
+        <p> Project: Open source project</p>
+        </ul>
       </div>
 
       <!-- How to Use Page -->
@@ -362,11 +364,7 @@
           <li>Open Settings (⚙️) in the sidebar, then click the 🌙 button to toggle dark mode.</li>
           <li>Dark mode preference is saved.</li>
         </ul>
-        <h3>Remember!</h3>
-        <hr />
-        <ul>
-          <li>Data may fetch slowly based on your browser performance</li>
-        </ul>
+        
       </div>
     </div>
 

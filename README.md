@@ -4,7 +4,7 @@ A lightweight, web-based Reminder and Notes application with dark mode, collapsi
 
 !> Data may fetching slowly based on your browser speed..
 ---
-REMINDER APP [ https://spydernet3.github.io/Reminders-Notes/ ]
+REMINDER APP [ https://spydernet3.github.io/Nothing-Reminder/]
 ---
 ## Features
 

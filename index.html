@@ -4,7 +4,6 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Nothing Reminder</title>
-    <link rel="icon" type="image/png" href="assets/icon.png" />
     <style>
       :root {
         --bg: #ffffff;
@@ -111,7 +110,7 @@
         gap:6px;
         transition: left 0s;
       }
-      .form input[type="text"], .form input[type="date"], .form textarea {
+      .form input[type="text"], .form input[type="date"], .form textarea, .form select {
         padding:8px;
         border-radius:6px;
         border:1px solid #ccc;
@@ -239,6 +238,7 @@
       <button class="menu-btn" data-page="reminders">⏰ Reminders</button>
       <button class="menu-btn" data-page="notes">📝 Notes</button>
       <button class="menu-btn" data-page="budget">💰 Budget Tracker</button>
+      <button class="menu-btn" data-page="Check">✒ Check List</button>
 
       <!-- Settings container placed where the Dark Mode button was (bottom) -->
       <div id="settingsContainer" style="margin-top:auto;">
@@ -250,6 +250,10 @@
           <button class="menu-btn" id="editNameBtn">✏️ Edit Name</button>
           <!-- moved Dark Mode inside Settings (same id preserved) -->
           <button class="icon-btn" id="darkModeBtn">🌙 Dark Mode</button>
+          <!-- moved Notification inside Settings -->
+          <button class="icon-btn" id="notificationBtn">
+            🔔 Notifications
+          </button>
           <!-- moved Terms of Use & How to Use inside Settings (preserved data-page attributes) -->
           <button class="menu-btn" data-page="terms">
             💢 Terms & Conditions
@@ -289,7 +293,14 @@
           <button id="homeBudgetsToggle" class="add-btn" aria-expanded="false">
             💰 Budget Overview <span class="arrow">▼</span>
           </button>
-          <ul id="homeBudgetsContainer" class="form" aria-hidden="true"></ul>
+          <div id="homeBudgetsContainer" class="form" aria-hidden="true"></div>
+        </div>
+
+        <div class="add-area">
+          <button id="homeCheckToggle" class="add-btn" aria-expanded="false">
+            ✒ Check List <span class="arrow">▼</span>
+          </button>
+          <div id="homeCheckContainer" class="form" aria-hidden="true"></div>
         </div>
       </div>
 
@@ -345,13 +356,19 @@
               />
             </label>
 
-            <label
-              >Note<textarea
+            <label>
+              Note<textarea
                 id="noteText"
                 rows="4"
-                placeholder="Write your note here..."
+                placeholder="Write your note here... (use | to separate columns and --- to separate rows)"
               ></textarea>
             </label>
+
+            <label>
+              Table Format<input type="checkbox" id="tableFormatCheckbox" />
+              <span>Enable table format</span>
+            </label>
+
             <div class="form-actions">
               <button id="saveNoteBtn" class="primary">Save</button>
               <button id="cancelNoteBtn" class="secondary">Cancel</button>
@@ -410,6 +427,52 @@
         </div>
       </div>
 
+      <!-- Check List Page -->
+      <div id="Check" class="page hidden">
+        <h2>✒ Check List</h2>
+        <div class="add-area">
+          <button id="showAddCheckBtn" class="add-btn" aria-expanded="false">
+            ＋ Create New Checklist <span class="arrow">▼</span>
+          </button>
+          <div id="checkFormContainer" class="form" aria-hidden="true">
+            <label>
+              Title<input
+                id="checkTitle"
+                type="text"
+                placeholder="Checklist title"
+              />
+            </label>
+            <label>
+              Status<select id="checkStatus">
+                <option value="open">Open</option>
+                <option value="closed">Closed</option>
+              </select>
+            </label>
+            <label>
+              Items (one per line)<textarea
+                id="checkItems"
+                rows="4"
+                placeholder="Item 1&#10;Item 2&#10;Item 3"
+              ></textarea>
+            </label>
+            <div class="form-actions">
+              <button id="saveCheckBtn" class="primary">Save</button>
+              <button id="cancelCheckBtn" class="secondary">Cancel</button>
+            </div>
+          </div>
+        </div>
+        <div class="add-area">
+          <button id="viewCheckToggle" class="add-btn" aria-expanded="false">
+            👀 View Checklists <span class="arrow">▼</span>
+          </button>
+          <ul
+            id="checkList"
+            class="list scrollable-list form"
+            aria-hidden="true"
+          ></ul>
+        </div>
+      </div>
+
       <!-- Terms of Use Page -->
       <div id="terms" class="page hidden">
         <h1>Privacy Policy!</h1>
@@ -428,8 +491,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 9.8</p>
-          <p>Last Updated: 04-Sep-2025</p>
+          <p>Version 12.7</p>
+          <p>Last Updated: 08-Sep-2025</p>
           <p>Project: Open source project</p>
         </ul>
       </div>
@@ -471,7 +534,13 @@
         <hr />
         <ul>
           <li>Click the profile picture to upload a new image.</li>
-          <li>Click Edit Name to update the username (now under Settings).</li>
+          <li>Click Edit Name to update the username now under Settings.</li>
+        </ul>
+        <h3>Checklist!</h3>
+        <hr />
+        <ul>
+          <li>Create checklist and set status either Open/Closed</li>
+          <li>Opened checklist listed in Home screen</li>
         </ul>
         <h3>Dark Mode!</h3>
         <hr />
@@ -486,603 +555,908 @@
         <hr />
         <ul>
           <li>Notification will showed 3 times in a day</li>
+          <li>You will Turn Notification On/Off</li>
           <li>Morning 08:00 AM & Afternoon 01:00 PM & Evening 06:00 PM</li>
         </ul>
       </div>
     </div>
 
     <script>
-           (function () {
-             // ---------- Storage ----------
-             const STORAGE_KEY = 'smart_reminder_app_v1';
-             let appData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
-               reminders: [],
-               notes: [],
-               profileName: '',
-               profilePhoto: '',
-               darkMode: '0',
-               budget: []
-             };
-
-             let editingIndex = null;
-             let editingBudgetIndex = null;
-
-             // ---------- Helpers ----------
-             function byId(id){ return document.getElementById(id); }
-             function saveAll(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); }
-
-             function daysLeft(endDateStr){
-               if(!endDateStr) return null;
-               const [y,m,d] = endDateStr.split('-').map(Number);
-               const end = new Date(y,m-1,d);
-               const now = new Date();
-               const diffTime = end.setHours(0,0,0,0) - now.setHours(0,0,0,0);
-               return Math.floor(diffTime / (1000*60*60*24));
-             }
-
-             function formatDMY(dateStr){
-               if(!dateStr) return '';
-               const [y,m,d] = dateStr.split('-');
-               return `${d.toString().padStart(2,'0')}/${m.toString().padStart(2,'0')}/${y}`;
-             }
-
-             // Calculate days between two dates
-             function daysBetween(startDateStr, endDateStr) {
-               if (!startDateStr || !endDateStr) return 0;
-               const [startY, startM, startD] = startDateStr.split('-').map(Number);
-               const [endY, endM, endD] = endDateStr.split('-').map(Number);
-               const start = new Date(startY, startM-1, startD);
-               const end = new Date(endY, endM-1, endD);
-               const diffTime = end.setHours(0,0,0,0) - start.setHours(0,0,0,0);
-               return Math.floor(diffTime / (1000*60*60*24)) + 1; // +1 to include both start and end dates
-             }
-
-             // Calculate cost per day
-             function calculateCostPerDay(amount, startDate, endDate) {
-               const days = daysBetween(startDate, endDate);
-               if (days <= 0 || amount <= 0) return 0;
-               return (amount / days).toFixed(2);
-             }
-
-             // ---------- Render Functions ----------
-             function renderReminders(){
-               const list = byId('reminderList'); list.innerHTML = '';
-               if(appData.reminders.length === 0){
-                 const li = document.createElement('li'); li.textContent='No reminders yet.'; li.style.opacity='0.7'; list.appendChild(li);
-                 renderHomeReminders(); renderHomeNotes(); return;
-               }
-               const frag = document.createDocumentFragment();
-               appData.reminders.forEach((r,i)=>{
-                 const li=document.createElement('li');
-                 const left=document.createElement('div'); left.className='item-left';
-                 const title=document.createElement('div'); title.textContent=r.title; title.style.fontWeight='600';
-                 const dates=document.createElement('div'); dates.style.fontSize='13px'; dates.style.opacity='0.85'; dates.textContent=`Start: ${formatDMY(r.startDate)} | End: ${formatDMY(r.endDate)}`;
-                 left.appendChild(title); left.appendChild(dates);
-
-                 const right=document.createElement('div'); right.style.display='flex'; right.style.alignItems='center';
-                 const badge=document.createElement('div'); badge.className='badge';
-                 const diff = daysLeft(r.endDate);
-                 if(diff === null){ badge.textContent='No date'; }
-                 else if(diff < 0){ badge.textContent='Expired'; }
-                 else if(diff === 0){ badge.textContent='Today'; }
-                 else{ badge.textContent=`${diff} days left`; }
-
-                 const editBtn=document.createElement('button'); editBtn.className='icon-small'; editBtn.textContent='✏️'; editBtn.title='Edit'; editBtn.addEventListener('click',()=>editReminder(i));
-                 const delBtn=document.createElement('button'); delBtn.className='icon-small'; delBtn.textContent='🗑️'; delBtn.title='Delete'; delBtn.addEventListener('click',()=>deleteReminder(i));
-
-                 right.appendChild(badge); right.appendChild(editBtn); right.appendChild(delBtn);
-
-                 li.appendChild(left); li.appendChild(right); frag.appendChild(li);
-               });
-               list.appendChild(frag);
-               renderHomeReminders(); renderHomeNotes();
-             }
-
-             function renderHomeReminders(){
-               const container = byId('homeRemindersContainer');
-               container.innerHTML='';
-               if(appData.reminders.length === 0){
-                 const li=document.createElement('li');
-                 li.textContent='No reminders yet.';
-                 li.style.opacity='0.7';
-                 container.appendChild(li);
-                 return;
-               }
-               const frag=document.createDocumentFragment();
-               appData.reminders.forEach(r=>{
-                 const li=document.createElement('li');
-                 const diff = daysLeft(r.endDate);
-                 let badgeText='';
-                 if(diff === null){ badgeText='No date'; }
-                 else if(diff < 0){ badgeText='Expired'; }
-                 else if(diff === 0){ badgeText='Today'; }
-                 else{ badgeText=`${diff} days left`; }
-                 li.textContent = `"${r.title}" || ${badgeText}`;
-                 frag.appendChild(li);
-               });
-               container.appendChild(frag);
-             }
-
-             function renderHomeNotes(){
-               const container = byId('homeNotesContainer');
-               container.innerHTML = '';
-
-               if(appData.notes.length === 0){
-                 const li = document.createElement('li');
-                 li.textContent = 'No notes available.';
-                 li.style.opacity = '0.7';
-                 container.appendChild(li);
-                 return;
-               }
-
-               const frag = document.createDocumentFragment();
-
-               appData.notes.forEach(n => {
-                 const li = document.createElement('li');
-                 li.className = 'list-item';
-
-                 const left = document.createElement('div');
-                 left.className = 'item-left';
-
-                 const text = document.createElement('div');
-                 text.innerHTML = `<b>${n.text || ''}</b><br><small style="opacity:0.7">${n.createdAt || ''}</small>`;
-                 left.appendChild(text);
-
-                 // ✅ Add image thumbnail if note has image (use loop variable `n`)
-                 if (n.file && n.file.type && n.file.type.includes('image')) {
-                   const thumb = document.createElement('img');
-                   thumb.src = n.file.data;
-                   thumb.style.maxWidth = '40px';
-                   thumb.style.marginLeft = '5px';
-                   thumb.style.borderRadius = '4px';
-                   thumb.style.verticalAlign = 'middle';
-                   thumb.alt = n.file.name || 'image';
-                   left.appendChild(thumb);
-                 }
-
-                 li.appendChild(left);
-                 frag.appendChild(li);
-               });
-
-               container.appendChild(frag);
-             }
-
-             function renderNotes(){
-               const list = byId('noteList'); list.innerHTML='';
-               if(appData.notes.length===0){
-                 const li=document.createElement('li');
-                 li.textContent='No notes yet.'; li.style.opacity='0.7';
-                 list.appendChild(li);
-                 return;
-               }
-               const frag=document.createDocumentFragment();
-               appData.notes.forEach((note,i)=>{
-                 const li=document.createElement('li');
-                 const left=document.createElement('div'); left.className='item-left';
-
-                 const text=document.createElement('div');
-                 text.innerHTML=`<b>${note.text||''}</b><br>
-                   <small style="opacity:0.7">${note.createdAt||''}</small>`;
-                 left.appendChild(text);
-
-                 // --- file rendering ---
-                 if(note.file){
-                   let fileEl;
-
-                   // 📷 --- Image Support ---
-                   if(note.file.type.includes('image')){
-                     fileEl=document.createElement('img');
-                     fileEl.src=note.file.data;
-                     fileEl.style.maxWidth='200px';
-                     fileEl.style.display='block';
-                     fileEl.style.marginTop='5px';
-                   }
-                   // 🎵 --- Audio Support ---
-                   else if(note.file.type.includes('audio')){
-                     fileEl=document.createElement('audio');
-                     fileEl.controls=true;
-                     fileEl.src=note.file.data;
-                   }
-                   // 🎬 --- Video Support ---
-                   else if(note.file.type.includes('video')){
-                     fileEl=document.createElement('video');
-                     fileEl.controls=true;
-                     fileEl.width=200;
-                     fileEl.src=note.file.data;
-                   }
-                   // 📄 --- Docs (PDF/DOC) ---
-                   else {
-                     fileEl=document.createElement('a');
-                     fileEl.href=note.file.data;
-                     fileEl.download=note.file.name;
-                     fileEl.textContent='📎 '+note.file.name;
-                   }
-
-                   left.appendChild(fileEl);
-                 }
-
-                 const delBtn=document.createElement('button');
-                 delBtn.className='icon-small'; delBtn.textContent='🗑️';
-                 delBtn.title='Delete';
-                 delBtn.addEventListener('click',()=>{ deleteNote(i); });
-
-                 li.appendChild(left); li.appendChild(delBtn); frag.appendChild(li);
-               });
-               list.appendChild(frag);
-             }
-
-             // ---------- Budget Functions ----------
-             function renderBudgets(){
-               const list = byId('budgetList'); list.innerHTML = '';
-               // Ensure appData.budget exists and is an array
-               if (!appData.budget || !Array.isArray(appData.budget)) {
-                 appData.budget = [];
-               }
-               if(appData.budget.length === 0){
-                 const li = document.createElement('li'); li.textContent='No budgets yet.'; li.style.opacity='0.7'; list.appendChild(li);
-                 renderHomeBudgets(); return;
-               }
-               const frag = document.createDocumentFragment();
-               appData.budget.forEach((b,i)=>{
-                 const li=document.createElement('li');
-                 const left=document.createElement('div'); left.className='item-left';
-
-                 // Calculate cost per day
-                 const costPerDay = calculateCostPerDay(b.amount, b.startDate, b.endDate);
-                 const days = daysBetween(b.startDate, b.endDate);
-
-                 const title=document.createElement('div');
-                 title.textContent=`Title: ${b.title}`;
-                 title.style.fontWeight='600';
-
-                 const amounts=document.createElement('div');
-                 amounts.style.fontSize='13px';
-                 amounts.style.opacity='0.85';
-                 amounts.textContent=`Total Budget: ₹${b.amount} | Remaining Days: ${days} | Cost per Day: ₹${costPerDay}`;
-
-                 left.appendChild(title); left.appendChild(amounts);
-
-                 const right=document.createElement('div'); right.style.display='flex'; right.style.alignItems='center';
-                 const editBtn=document.createElement('button'); editBtn.className='icon-small'; editBtn.textContent='✏️'; editBtn.title='Edit'; editBtn.addEventListener('click',()=>editBudget(i));
-                 const delBtn=document.createElement('button'); delBtn.className='icon-small'; delBtn.textContent='🗑️'; delBtn.title='Delete'; delBtn.addEventListener('click',()=>deleteBudget(i));
-
-                 right.appendChild(editBtn); right.appendChild(delBtn);
-                 li.appendChild(left); li.appendChild(right); frag.appendChild(li);
-               });
-               list.appendChild(frag);
-               renderHomeBudgets();
-             }
-
-             function renderHomeBudgets(){
-               const container = byId('homeBudgetsContainer');
-               container.innerHTML='';
-               // Ensure appData.budget exists and is an array
-               if (!appData.budget || !Array.isArray(appData.budget)) {
-                 appData.budget = [];
-               }
-               if(appData.budget.length === 0){
-                 const li=document.createElement('li');
-                 li.textContent='No budgets yet.';
-                 li.style.opacity='0.7';
-                 container.appendChild(li);
-                 return;
-               }
-               const frag=document.createDocumentFragment();
-               appData.budget.forEach(b=>{
-                 // Calculate cost per day
-                 const costPerDay = calculateCostPerDay(b.amount, b.startDate, b.endDate);
-                 const days = daysBetween(b.startDate, b.endDate);
-
-                 const li=document.createElement('li');
-                 li.textContent = `"${b.title}" || Total: ₹${b.amount} || Remaining: ${days} days || Cost: ₹${costPerDay}/day`;
-                 frag.appendChild(li);
-               });
-               container.appendChild(frag);
-             }
-
-             function editBudget(i){
-               const b=appData.budget[i];
-               editingBudgetIndex=i;
-               byId('budgetTitle').value=b.title;
-               byId('budgetAmount').value=b.amount;
-               byId('budgetStartDate').value=b.startDate||'';
-               byId('budgetEndDate').value=b.endDate||'';
-               showForm(byId('budgetFormContainer'));
-             }
-
-             function deleteBudget(index){
-               if(!('Delete this budget?')) return;
-               appData.budget.splice(index, 1);
-               saveAll();
-               renderBudgets();
-               renderHomeBudgets();
-             }
-
-             function saveBudget(){
-               const title=byId('budgetTitle').value.trim();
-               const amount=byId('budgetAmount').value;
-               const start=byId('budgetStartDate').value;
-               const end=byId('budgetEndDate').value;
-               if(!title || !amount){ alert('Title and amount required'); return; }
-               const budgetObj={ title, amount, startDate:start, endDate:end };
-               if(editingBudgetIndex!==null){ appData.budget[editingBudgetIndex]=budgetObj; editingBudgetIndex=null; }
-               else{ appData.budget.push(budgetObj); }
-               saveAll(); renderBudgets(); hideForm(byId('budgetFormContainer')); clearBudgetForm();
-             }
-
-             function clearBudgetForm(){
-               byId('budgetTitle').value='';
-               byId('budgetAmount').value='';
-               byId('budgetStartDate').value='';
-               byId('budgetEndDate').value='';
-             }
-
-             // ---------- Reminder Functions ----------
-             function editReminder(i){
-               const r=appData.reminders[i];
-               editingIndex=i;
-               byId('reminderTitle').value=r.title;
-               byId('startDate').value=r.startDate||'';
-               byId('endDate').value=r.endDate||'';
-               showForm(byId('reminderFormContainer'));
-             }
-
-             function deleteReminder(index){
-               if(!('Delete this reminder?')) return;
-               appData.reminders.splice(index, 1);
-               saveAll();
-               renderReminders();
-               renderHomeReminders();
-             }
-
-             function saveReminder(){
-               const title=byId('reminderTitle').value.trim();
-               const start=byId('startDate').value;
-               const end=byId('endDate').value;
-               if(!title){ alert('Title required'); return; }
-               const reminderObj={ title, startDate:start, endDate:end };
-               if(editingIndex!==null){ appData.reminders[editingIndex]=reminderObj; editingIndex=null; }
-               else{ appData.reminders.push(reminderObj); }
-               saveAll(); renderReminders(); hideForm(byId('reminderFormContainer')); clearReminderForm();
-             }
-
-             function clearReminderForm(){ byId('reminderTitle').value=''; byId('startDate').value=''; byId('endDate').value=''; }
-
-             // ---------- Notes Functions ----------
-             function deleteNote(index){
-               if(!('Delete this note?')) return;
-               appData.notes.splice(index,1);
-               saveAll();
-               renderNotes();
-               renderHomeNotes();
-             }
-
-             function saveNote(){
-               const text = byId('noteText').value.trim();
-               const fileInput = byId('noteFile');
-               const file = fileInput.files[0];
-
-               if(!text && !file){
-                 alert('Note cannot be empty (text or file required)');
-                 return;
-               }
-
-               const noteObj = {
-                 text,
-                 createdAt: new Date().toLocaleString('en-US',{
-                   hour12:true, hour:'numeric', minute:'numeric', second:'numeric',
-                   day:'2-digit', month:'2-digit', year:'numeric'
-                 }),
-                 file: null
-               };
-
-               if(file){
-                 const reader = new FileReader();
-                 reader.onload = function(e){
-                   noteObj.file = {
-                     name: file.name,
-                     type: file.type,
-                     data: e.target.result
-                   };
-                   appData.notes.push(noteObj);
-                   saveAll(); renderNotes(); renderHomeNotes();
-                 };
-                 reader.readAsDataURL(file);
-               } else {
-                 appData.notes.push(noteObj);
-                 saveAll(); renderNotes(); renderHomeNotes();
-               }
-
-               hideForm(byId('noteFormContainer'));
-               byId('noteText').value='';
-               fileInput.value='';
-             }
-
-             // ---------- Form Show/Hide ----------
-             function showForm(el){ el.classList.add('visible'); }
-             function hideForm(el){ el.classList.remove('visible'); }
-
-             // ---------- Page Navigation ----------
-             const sidebar = byId('sidebar');
-             const main = byId('main');
-             const toggleBtn = byId('toggleBtn');
-
-             function showPage(pageId){
-               document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
-               byId(pageId).classList.remove('hidden');
-
-               // Auto-hide sidebar instantly when an option is chosen
-               sidebar.style.left = '-220px';
-               main.style.marginLeft = '0';
-               toggleBtn.textContent = '⮞';
-               sidebar.style.transition = 'left 0s';   // instant hide
-               main.style.transition = 'margin-left 0s'; // instant hide
-             }
-
-             // ---------- Sidebar Toggle ----------
-             toggleBtn.addEventListener('click', function() {
-               if (sidebar.style.left === '-220px' || sidebar.style.left === '') {
-                 sidebar.style.left = '0px';
-                 main.style.marginLeft = '220px';
-                 toggleBtn.textContent = '⮜';
-               } else {
-                 sidebar.style.left = '-220px';
-                 main.style.marginLeft = '0';
-                 toggleBtn.textContent = '⮞';
-               }
-             });
-
-             // ---------- Settings Panel (new) ----------
-             const settingsBtn = byId('settingsBtn');
-             const settingsPanel = byId('settingsPanel');
-             if(settingsBtn && settingsPanel){
-               settingsBtn.addEventListener('click', ()=>{
-                 const opened = settingsPanel.classList.toggle('visible');
-                 settingsBtn.setAttribute('aria-expanded', opened);
-                 settingsPanel.setAttribute('aria-hidden', !opened);
-               });
-             }
-
-             // ---------- Dark Mode ----------
-             const darkBtn=byId('darkModeBtn');
-             if(appData.darkMode==='1') document.body.classList.add('dark');
-             darkBtn.addEventListener('click',()=>{
-               document.body.classList.toggle('dark');
-               appData.darkMode=document.body.classList.contains('dark')?'1':'0';
-               saveAll();
-             });
-
-             // ---------- Profile ----------
-             const profileNameEl=byId('profileName');
-             if(appData.profileName) profileNameEl.textContent=appData.profileName;
-             byId('editNameBtn').addEventListener('click',()=>{
-               const n=prompt('Enter new name:',appData.profileName||'');
-               if(n){
-                 appData.profileName=n;
-                 profileNameEl.textContent=n;
-                 saveAll();
-               }
-             });
-
-             const profilePhotoInput=byId('photoUpload');
-             profilePhotoInput.addEventListener('change',(e)=>{
-               const file=e.target.files[0];
-               if(file){
-                 const reader=new FileReader();
-                 reader.onload=function(ev){
-                   appData.profilePhoto=ev.target.result;
-                   byId('profilePhoto').src=ev.target.result;
-                   saveAll();
-                 };
-                 reader.readAsDataURL(file);
-               }
-             });
-             if(appData.profilePhoto) byId('profilePhoto').src=appData.profilePhoto;
-
-             // ---------- Event Listeners ----------
-             // Fix: Ensure all event listeners are properly attached
-             byId('showAddFormBtn').addEventListener('click', function() {
-               toggleCollapse(byId('reminderFormContainer'), byId('showAddFormBtn'));
-             });
-
-             byId('cancelReminderBtn').addEventListener('click', function() {
-               hideForm(byId('reminderFormContainer'));
-               editingIndex=null;
-               clearReminderForm();
-             });
-
-             byId('saveReminderBtn').addEventListener('click', saveReminder);
-      byId('viewRemindersToggle').addEventListener('click', function() {
-               toggleCollapse(byId('reminderList'), byId('viewRemindersToggle'));
-             });
-             byId('showAddNoteBtn').addEventListener('click', function() {
-               toggleCollapse(byId('noteFormContainer'), byId('showAddNoteBtn'));
-             });
-
-             byId('cancelNoteBtn').addEventListener('click', function() {
-               hideForm(byId('noteFormContainer'));
-             });
-
-             byId('saveNoteBtn').addEventListener('click', saveNote);
-
-             byId('viewNotesToggle').addEventListener('click', function() {
-               toggleCollapse(byId('noteList'), byId('viewNotesToggle'));
-             });
-
-
-             byId('homeRemindersToggle').addEventListener('click', function() {
-               toggleCollapse(byId('homeRemindersContainer'), byId('homeRemindersToggle'));
-             });
-
-             byId('homeNotesToggle').addEventListener('click', function() {
-               toggleCollapse(byId('homeNotesContainer'), byId('homeNotesToggle'));
-             });
-
-             byId('showAddBudgetBtn').addEventListener('click', function() {
-               toggleCollapse(byId('budgetFormContainer'), byId('showAddBudgetBtn'));
-             });
-
-             byId('cancelBudgetBtn').addEventListener('click', function() {
-               hideForm(byId('budgetFormContainer'));
-               editingBudgetIndex=null;
-               clearBudgetForm();
-             });
-
-             // FIXED: Properly attach saveBudgetBtn event listener
-             byId('saveBudgetBtn').addEventListener('click', saveBudget);
-             byId('viewbudgetToggle').addEventListener('click', function() {
-               toggleCollapse(byId('budgetList'), byId('viewbudgetToggle'));
-             });
-             byId('homeBudgetsToggle').addEventListener('click', function() {
-               toggleCollapse(byId('homeBudgetsContainer'), byId('homeBudgetsToggle'));
-             });
-
-             document.querySelectorAll('.menu-btn[data-page]').forEach(btn=>{
-               btn.addEventListener('click',function() {
-                 showPage(this.dataset.page);
-               });
-             });
-
-             function toggleCollapse(el, btn){
-               el.classList.toggle('visible');
-               btn.classList.toggle('open');
-             }
-
-             // ---------- Notifications ----------
-             function checkNotifications(){
-               if(!("Notification" in window)) return;
-               if(Notification.permission!=='granted') Notification.requestPermission();
-
-               const now=new Date();
-               appData.reminders.forEach(r=>{
-                 const diff=daysLeft(r.endDate);
-                 if(diff===0||diff===1||diff<0){
-                   const notifTimes=[8,13,18];
-                   notifTimes.forEach(hour=>{
-                     const notifTime=new Date(now.getFullYear(),now.getMonth(),now.getDate(),hour,0,0,0);
-                     const delay=notifTime-now;
-                     if(delay>0){
-                       setTimeout(()=>{
-                         if(Notification.permission==='granted'){
-                           new Notification("Reminder Alert!", {
-                             body: `${r.title} - ${diff<0?'Expired':diff===0?'Today':'1 day left'}`,
-                             icon:'assets/icon.png'
-                           });
-                         }
-                       }, delay);
-                     }
-                   });
-                 }
-               });
-             }
-             checkNotifications();
-             setInterval(checkNotifications, 24*60*60*1000);
-
-             // ---------- Init ----------
-             renderReminders();
-             renderNotes();
-             renderBudgets();
-           })();
+            (function () {
+              // ---------- Storage ----------
+              const STORAGE_KEY = 'smart_reminder_app_v1';
+              let appData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
+                reminders: [],
+                notes: [],
+                profileName: '',
+                profilePhoto: '',
+                darkMode: '0',
+                budget: [],
+                checklists: []
+              };
+
+              let editingIndex = null;
+              let editingBudgetIndex = null;
+              let editingCheckIndex = null;
+              let editingNoteIndex = null;
+
+              // ---------- Helpers ----------
+              function byId(id){ return document.getElementById(id); }
+              function saveAll(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); }
+
+              function daysLeft(endDateStr){
+                if(!endDateStr) return null;
+                const [y,m,d] = endDateStr.split('-').map(Number);
+                const end = new Date(y,m-1,d);
+                const now = new Date();
+                const diffTime = end.setHours(0,0,0,0) - now.setHours(0,0,0,0);
+                return Math.floor(diffTime / (1000*60*60*24));
+              }
+
+              function formatDMY(dateStr){
+                if(!dateStr) return '';
+                const [y,m,d] = dateStr.split('-');
+                return `${d.toString().padStart(2,'0')}/${m.toString().padStart(2,'0')}/${y}`;
+              }
+
+              // Calculate days between two dates
+              function daysBetween(startDateStr, endDateStr) {
+                if (!startDateStr || !endDateStr) return 0;
+                const [startY, startM, startD] = startDateStr.split('-').map(Number);
+                const [endY, endM, endD] = endDateStr.split('-').map(Number);
+                const start = new Date(startY, startM-1, startD);
+                const end = new Date(endY, endM-1, endD);
+                const diffTime = end.setHours(0,0,0,0) - start.setHours(0,0,0,0);
+                return Math.floor(diffTime / (1000*60*60*24)) + 1; // +1 to include both start and end dates
+              }
+
+              // Calculate cost per day
+              function calculateCostPerDay(amount, startDate, endDate) {
+                const days = daysBetween(startDate, endDate);
+                if (days <= 0 || amount <= 0) return 0;
+                return (amount / days).toFixed(2);
+              }
+
+              // ---------- Render Functions ----------
+              function renderReminders(){
+                const list = byId('reminderList'); list.innerHTML = '';
+                  if(appData.reminders.length === 0){
+                  const li = document.createElement('li'); li.textContent='No reminders yet.'; li.style.opacity='0.7'; list.appendChild(li);
+                  renderHomeReminders(); renderHomeNotes(); renderHomeCheck(); return;
+                }
+                const frag = document.createDocumentFragment();
+                appData.reminders.forEach((r,i)=>{
+                  const li=document.createElement('li');
+                  const left=document.createElement('div'); left.className='item-left';
+                  const title=document.createElement('div'); title.textContent=r.title; title.style.fontWeight='600';
+                  const dates=document.createElement('div'); dates.style.fontSize='13px'; dates.style.opacity='0.85'; dates.textContent=`Start: ${formatDMY(r.startDate)} | End: ${formatDMY(r.endDate)}`;
+                  left.appendChild(title); left.appendChild(dates);
+
+                  const right=document.createElement('div'); right.style.display='flex'; right.style.alignItems='center';
+                  const badge=document.createElement('div'); badge.className='badge';
+                  const diff = daysLeft(r.endDate);
+                  if(diff === null){ badge.textContent='No date'; }
+                  else if(diff < 0){ badge.textContent='Expired'; }
+                  else if(diff === 0){ badge.textContent='Today'; }
+                  else{ badge.textContent=`${diff} days left`; }
+
+                  const editBtn=document.createElement('button'); editBtn.className='icon-small'; editBtn.textContent='✏️'; editBtn.title='Edit'; editBtn.addEventListener('click',()=>editReminder(i));
+                  const delBtn=document.createElement('button'); delBtn.className='icon-small'; delBtn.textContent='🗑️'; delBtn.title='Delete'; delBtn.addEventListener('click',()=>deleteReminder(i));
+
+                  right.appendChild(badge);
+                  right.appendChild(editBtn);
+                  right.appendChild(delBtn);
+                  li.appendChild(left); li.appendChild(right); frag.appendChild(li);
+                });
+                list.appendChild(frag);
+                renderHomeReminders(); renderHomeNotes(); renderHomeCheck();
+              }
+
+              function renderHomeReminders(){
+                const container = byId('homeRemindersContainer');
+                container.innerHTML='';
+                if(appData.reminders.length === 0){
+                  const li=document.createElement('li');
+                  li.textContent='No reminders yet.';
+                  li.style.opacity='0.7';
+                  container.appendChild(li);
+                  return;
+                }
+                const frag=document.createDocumentFragment();
+                appData.reminders.forEach(r=>{
+                  const li=document.createElement('li');
+                  const diff = daysLeft(r.endDate);
+                  let badgeText='';
+                  if(diff === null){ badgeText='No date'; }
+                  else if(diff < 0){ badgeText='Expired'; }
+                  else if(diff === 0){ badgeText='Today'; }
+                  else{ badgeText=`${diff} days left`; }
+                  li.textContent = `\"${r.title}\" || ${badgeText}`;
+                  frag.appendChild(li);
+                });
+                container.appendChild(frag);
+              }
+
+      // Update renderHomeNotes function to handle table formatting
+      function renderHomeNotes(){
+        const container = byId('homeNotesContainer');
+        container.innerHTML = '';
+
+        if(appData.notes.length === 0){
+          const li = document.createElement('li');
+          li.textContent = 'No notes available.';
+          li.style.opacity = '0.7';
+          container.appendChild(li);
+          return;
+        }
+
+        const frag = document.createDocumentFragment();
+
+        appData.notes.forEach(n => {
+          const li = document.createElement('li');
+          li.className = 'list-item';
+
+          const left = document.createElement('div');
+          left.className = 'item-left';
+
+          if(n.isTable && n.text) {
+            // Show first few rows of table in home view
+            const lines = n.text.split('\n');
+            let tableHTML = '<table border="1" style="border-collapse: collapse; width: 100%;">';
+
+            lines.forEach((line, index) => {
+              if(line.includes('---')) {
+                if(index > 0) tableHTML += '</tr>';
+                tableHTML += '<tr>';
+              } else if(line.includes('|')) {
+                const cells = line.split('|').filter(cell => cell.trim() !== '');
+                cells.forEach(cell => {
+                  const cellContent = cell.trim();
+                  if(index === 0) {
+                    tableHTML += `<th style="border: 1px solid #ddd; padding: 4px;">${cellContent}</th>`;
+                  } else {
+                    tableHTML += `<td style="border: 1px solid #ddd; padding: 4px;">${cellContent}</td>`;
+                  }
+                });
+              }
+            });
+
+            tableHTML += '</tr></table>';
+            const text = document.createElement('div');
+            text.innerHTML = tableHTML;
+            left.appendChild(text);
+          } else {
+            const text = document.createElement('div');
+            text.innerHTML = `<b>${n.text || ''}</b><br><small style="opacity:0.7">${n.createdAt || ''}</small>`;
+            left.appendChild(text);
+          }
+
+          // ✅ Add image thumbnail if note has image (use loop variable `n`)
+          if (n.file && n.file.type && n.file.type.includes('image')) {
+            const thumb = document.createElement('img');
+            thumb.src = n.file.data;
+            thumb.style.maxWidth = '40px';
+            thumb.style.marginLeft = '5px';
+            thumb.style.borderRadius = '4px';
+            thumb.style.verticalAlign = 'middle';
+            thumb.alt = n.file.name || 'image';
+            left.appendChild(thumb);
+          }
+
+          li.appendChild(left);
+          frag.appendChild(li);
+        });
+
+        container.appendChild(frag);
+      }
+
+              // Update renderNotes function to handle table formatting
+      function renderNotes(){
+        const list = byId('noteList'); list.innerHTML='';
+        if(appData.notes.length===0){
+          const li=document.createElement('li');
+          li.textContent='No notes yet.'; li.style.opacity='0.7';
+          list.appendChild(li);
+          return;
+        }
+        const frag=document.createDocumentFragment();
+        appData.notes.forEach((note,i)=>{
+          const li=document.createElement('li');
+          const left=document.createElement('div'); left.className='item-left';
+
+          const text=document.createElement('div');
+          if(note.isTable && note.text) {
+            // Convert table format to HTML table
+            const lines = note.text.split('\n');
+            let tableHTML = '<table border="1" style="border-collapse: collapse; width: 100%;">';
+
+            lines.forEach((line, index) => {
+              if(line.includes('---')) {
+                // Row separator - add closing tags for previous row
+                if(index > 0) tableHTML += '</tr>';
+                tableHTML += '<tr>';
+              } else if(line.includes('|')) {
+                // Table row
+                const cells = line.split('|').filter(cell => cell.trim() !== '');
+                cells.forEach(cell => {
+                  const cellContent = cell.trim();
+                  if(index === 0) {
+                    tableHTML += `<th style="border: 1px solid #ddd; padding: 8px;">${cellContent}</th>`;
+                  } else {
+                    tableHTML += `<td style="border: 1px solid #ddd; padding: 8px;">${cellContent}</td>`;
+                  }
+                });
+              }
+            });
+
+            tableHTML += '</tr></table>';
+            text.innerHTML = tableHTML;
+          } else {
+            text.innerHTML=`<b>${note.text||''}</b><br>
+              <small style="opacity:0.7">${note.createdAt||''}</small>`;
+          }
+          left.appendChild(text);
+
+          // --- file rendering ---
+          if(note.file){
+            let fileEl;
+
+            // 📷 --- Image Support ---
+            if(note.file.type.includes('image')){
+              fileEl=document.createElement('img');
+              fileEl.src=note.file.data;
+              fileEl.style.maxWidth='200px';
+              fileEl.style.display='block';
+              fileEl.style.marginTop='5px';
+            }
+            // 🎵 --- Audio Support ---
+            else if(note.file.type.includes('audio')){
+              fileEl=document.createElement('audio');
+              fileEl.controls=true;
+              fileEl.src=note.file.data;
+            }
+            // 🎬 --- Video Support ---
+            else if(note.file.type.includes('video')){
+              fileEl=document.createElement('video');
+              fileEl.controls=true;
+              fileEl.width=200;
+              fileEl.src=note.file.data;
+            }
+            // 📄 --- Docs (PDF/DOC) ---
+            else {
+              fileEl=document.createElement('a');
+              fileEl.href=note.file.data;
+              fileEl.download=note.file.name;
+              fileEl.textContent='📎 '+note.file.name;
+            }
+
+            left.appendChild(fileEl);
+          }
+
+          const right = document.createElement('div');
+          right.style.display = 'flex';
+          right.style.alignItems = 'center';
+
+          const editBtn = document.createElement('button');
+          editBtn.className = 'icon-small';
+          editBtn.textContent = '✏️';
+          editBtn.title = 'Edit';
+          editBtn.addEventListener('click', () => editNote(i));
+
+          const delBtn=document.createElement('button');
+          delBtn.className='icon-small'; delBtn.textContent='🗑️';
+          delBtn.title='Delete';
+          delBtn.addEventListener('click',()=>{ deleteNote(i); });
+
+          right.appendChild(editBtn);
+          right.appendChild(delBtn);
+          li.appendChild(left); li.appendChild(right); frag.appendChild(li);
+        });
+        list.appendChild(frag);
+      }
+
+              // ---------- Budget Functions ----------
+              function renderBudgets(){
+                const list = byId('budgetList'); list.innerHTML = '';
+                // Ensure appData.budget exists and is an array
+                if (!appData.budget || !Array.isArray(appData.budget)) {
+                  appData.budget = [];
+                }
+                if(appData.budget.length === 0){
+                  const li = document.createElement('li'); li.textContent='No budgets yet.'; li.style.opacity='0.7'; list.appendChild(li);
+                  renderHomeBudgets(); return;
+                }
+                const frag = document.createDocumentFragment();
+                appData.budget.forEach((b,i)=>{
+                  const li=document.createElement('li');
+                  const left=document.createElement('div'); left.className='item-left';
+
+                  // Calculate cost per day
+                  const costPerDay = calculateCostPerDay(b.amount, b.startDate, b.endDate);
+                  const days = daysBetween(b.startDate, b.endDate);
+
+                  const title=document.createElement('div');
+                  title.textContent=`Title: ${b.title}`;
+                  title.style.fontWeight='600';
+
+                  const amounts=document.createElement('div');
+                  amounts.style.fontSize='13px';
+                  amounts.style.opacity='0.85';
+                  amounts.textContent=`Total Budget: ₹${b.amount} | Remaining Days: ${days} | Cost per Day: ₹${costPerDay}`;
+
+                  left.appendChild(title); left.appendChild(amounts);
+
+                  const right=document.createElement('div'); right.style.display='flex'; right.style.alignItems='center';
+                  const editBtn=document.createElement('button'); editBtn.className='icon-small'; editBtn.textContent='✏️'; editBtn.title='Edit'; editBtn.addEventListener('click',()=>editBudget(i));
+                  const delBtn=document.createElement('button'); delBtn.className='icon-small'; delBtn.textContent='🗑️'; delBtn.title='Delete'; delBtn.addEventListener('click',()=>deleteBudget(i));
+
+                  right.appendChild(editBtn); right.appendChild(delBtn);
+                  li.appendChild(left); li.appendChild(right); frag.appendChild(li);
+                });
+                list.appendChild(frag);
+                renderHomeBudgets();
+              }
+
+              function renderHomeBudgets(){
+                const container = byId('homeBudgetsContainer');
+                container.innerHTML='';
+                // Ensure appData.budget exists and is an array
+                if (!appData.budget || !Array.isArray(appData.budget)) {
+                  appData.budget = [];
+                }
+                if(appData.budget.length === 0){
+                  const li=document.createElement('li');
+                  li.textContent='No budgets yet.';
+                  li.style.opacity='0.7';
+                  container.appendChild(li);
+                  return;
+                }
+                const frag=document.createDocumentFragment();
+                appData.budget.forEach(b=>{
+                  // Calculate cost per day
+                  const costPerDay = calculateCostPerDay(b.amount, b.startDate, b.endDate);
+                  const days = daysBetween(b.startDate, b.endDate);
+
+                  const li=document.createElement('li');
+                  li.textContent = `\"${b.title}\" || Total: ₹${b.amount} || Remaining: ${days} days || Cost: ₹${costPerDay}/day`;
+                  frag.appendChild(li);
+                });
+                container.appendChild(frag);
+              }
+
+              function editBudget(i){
+                const b=appData.budget[i];
+                editingBudgetIndex=i;
+                byId('budgetTitle').value=b.title;
+                byId('budgetAmount').value=b.amount;
+                byId('budgetStartDate').value=b.startDate||'';
+                byId('budgetEndDate').value=b.endDate||'';
+                showForm(byId('budgetFormContainer'));
+              }
+
+              function deleteBudget(index){
+                if(!('Delete this budget?')) return;
+                appData.budget.splice(index, 1);
+                saveAll();
+                renderBudgets();
+                renderHomeBudgets();
+              }
+
+              function saveBudget(){
+                const title=byId('budgetTitle').value.trim();
+                const amount=byId('budgetAmount').value;
+                const start=byId('budgetStartDate').value;
+                const end=byId('budgetEndDate').value;
+                if(!title || !amount){ alert('Title and amount required'); return; }
+                const budgetObj={ title, amount, startDate:start, endDate:end };
+                if(editingBudgetIndex!==null){ appData.budget[editingBudgetIndex]=budgetObj; editingBudgetIndex=null; }
+                else{ appData.budget.push(budgetObj); }
+                saveAll(); renderBudgets(); hideForm(byId('budgetFormContainer')); clearBudgetForm();
+              }
+
+              function clearBudgetForm(){
+                byId('budgetTitle').value='';
+                byId('budgetAmount').value='';
+                byId('budgetStartDate').value='';
+                byId('budgetEndDate').value='';
+              }
+
+              // ---------- Reminder Functions ----------
+              function editReminder(i){
+                const r=appData.reminders[i];
+                editingIndex=i;
+                byId('reminderTitle').value=r.title;
+                byId('startDate').value=r.startDate||'';
+                byId('endDate').value=r.endDate||'';
+                showForm(byId('reminderFormContainer'));
+              }
+
+              function deleteReminder(index){
+                if(!('Delete this reminder?')) return;
+                appData.reminders.splice(index, 1);
+                saveAll();
+                renderReminders();
+                renderHomeReminders();
+              }
+
+              function saveReminder(){
+                const title=byId('reminderTitle').value.trim();
+                const start=byId('startDate').value;
+                const end=byId('endDate').value;
+                if(!title){ alert('Title required'); return; }
+                const reminderObj={ title, startDate:start, endDate:end };
+                if(editingIndex!==null){ appData.reminders[editingIndex]=reminderObj; editingIndex=null; }
+                else{ appData.reminders.push(reminderObj); }
+                saveAll(); renderReminders(); hideForm(byId('reminderFormContainer')); clearReminderForm();
+              }
+
+              function clearReminderForm(){ byId('reminderTitle').value=''; byId('startDate').value=''; byId('endDate').value=''; }
+
+              // ---------- Notes Functions ----------
+              function deleteNote(index){
+                if(!('Delete this note?')) return;
+                appData.notes.splice(index,1);
+                saveAll();
+                renderNotes();
+                renderHomeNotes();
+              }
+
+              function editNote(index){
+                const note = appData.notes[index];
+                editingNoteIndex = index;
+
+                byId('noteText').value = note.text || '';
+                byId('tableFormatCheckbox').checked = note.isTable || false;
+
+                // Show the form
+                showForm(byId('noteFormContainer'));
+
+                // Set the save button to update instead of create
+                byId('saveNoteBtn').textContent = 'Update';
+              }
+
+              function saveNote(){
+        const text = byId('noteText').value.trim();
+        const fileInput = byId('noteFile');
+        const file = fileInput.files[0];
+        const isTableFormat = byId('tableFormatCheckbox').checked;
+
+        if(!text && !file){
+          alert('Note cannot be empty (text or file required)');
+          return;
+        }
+
+        const noteObj = {
+          text,
+          createdAt: new Date().toLocaleString('en-US',{
+            hour12:true, hour:'numeric', minute:'numeric', second:'numeric',
+            day:'2-digit', month:'2-digit', year:'numeric'
+          }),
+          file: null,
+          isTable: isTableFormat
+        };
+
+        if(file){
+          const reader = new FileReader();
+          reader.onload = function(e){
+            noteObj.file = {
+              name: file.name,
+              type: file.type,
+              data: e.target.result
+            };
+            if(editingNoteIndex !== null){
+              appData.notes[editingNoteIndex] = noteObj;
+              editingNoteIndex = null;
+            } else {
+              appData.notes.push(noteObj);
+            }
+            saveAll(); renderNotes(); renderHomeNotes();
+          };
+          reader.readAsDataURL(file);
+        } else {
+          if(editingNoteIndex !== null){
+            appData.notes[editingNoteIndex] = noteObj;
+            editingNoteIndex = null;
+          } else {
+            appData.notes.push(noteObj);
+          }
+          saveAll(); renderNotes(); renderHomeNotes();
+        }
+
+        hideForm(byId('noteFormContainer'));
+        byId('noteText').value='';
+        fileInput.value='';
+        byId('tableFormatCheckbox').checked = false;
+        byId('saveNoteBtn').textContent = 'Save';
+      }
+
+              // ---------- Check List Functions ----------
+              function renderChecklists(){
+                const list = byId('checkList'); list.innerHTML = '';
+                // Ensure appData.checklists exists and is an array
+                if (!appData.checklists || !Array.isArray(appData.checklists)) {
+                  appData.checklists = [];
+                }
+                if(appData.checklists.length === 0){
+                  const li = document.createElement('li'); li.textContent='No checklists yet.'; li.style.opacity='0.7'; list.appendChild(li);
+                  renderHomeCheck(); return;
+                }
+                const frag = document.createDocumentFragment();
+                appData.checklists.forEach((check,i)=>{
+                  const li=document.createElement('li');
+                  const left=document.createElement('div'); left.className='item-left';
+
+                  const title=document.createElement('div');
+                  title.textContent=`${check.title}`;
+                  title.style.fontWeight='600';
+
+                  const items=document.createElement('div');
+                  items.style.fontSize='13px';
+                  items.style.opacity='0.85';
+                  items.textContent=`Items: ${check.items.length} | Status: ${check.status}`;
+
+                  const time=document.createElement('div');
+                  time.style.fontSize='12px';
+                  time.style.opacity='0.7';
+                  time.textContent=check.createdAt || '';
+
+                  left.appendChild(title);
+                  left.appendChild(items);
+                  left.appendChild(time);
+
+                  const right = document.createElement('div');
+                  right.style.display = 'flex';
+                  right.style.alignItems = 'center';
+
+                  const editBtn = document.createElement('button');
+                  editBtn.className = 'icon-small';
+                  editBtn.textContent = '✏️';
+                  editBtn.title = 'Edit';
+                  editBtn.addEventListener('click', () => editCheck(i));
+
+                  const delBtn=document.createElement('button');
+                  delBtn.className='icon-small'; delBtn.textContent='🗑️';
+                  delBtn.title='Delete';
+                  delBtn.addEventListener('click',()=>{ deleteCheck(i); });
+
+                  right.appendChild(editBtn);
+                  right.appendChild(delBtn);
+                  li.appendChild(left); li.appendChild(right); frag.appendChild(li);
+                });
+                list.appendChild(frag);
+                renderHomeCheck();
+              }
+
+              function renderHomeCheck(){
+                const container = byId('homeCheckContainer');
+                container.innerHTML = '';
+
+                // Ensure appData.checklists exists and is an array
+                if (!appData.checklists || !Array.isArray(appData.checklists)) {
+                  appData.checklists = [];
+                }
+
+                if(appData.checklists.length === 0){
+                  const li = document.createElement('li');
+                  li.textContent = 'No checklists yet.';
+                  li.style.opacity = '0.7';
+                  container.appendChild(li);
+                  return;
+                }
+
+                const frag = document.createDocumentFragment();
+
+                appData.checklists.forEach(check => {
+                  if(check.status === 'open') {
+                    const li = document.createElement('li');
+                    li.textContent = `\"${check.title}\" - ${check.items.length} items`;
+                    frag.appendChild(li);
+                  }
+                });
+
+                container.appendChild(frag);
+              }
+
+              function deleteCheck(index){
+                if(!('Delete this checklist?')) return;
+                appData.checklists.splice(index,1);
+                saveAll();
+                renderChecklists();
+                renderHomeCheck();
+              }
+
+              function editCheck(index){
+                const check = appData.checklists[index];
+                editingCheckIndex = index;
+
+                byId('checkTitle').value = check.title || '';
+                byId('checkStatus').value = check.status || 'open';
+                byId('checkItems').value = check.items ? check.items.join('\n') : '';
+
+                // Show the form
+                showForm(byId('checkFormContainer'));
+
+                // Set the save button to update instead of create
+                byId('saveCheckBtn').textContent = 'Update';
+              }
+
+              function saveCheck(){
+                const title = byId('checkTitle').value.trim();
+                const status = byId('checkStatus').value;
+                const itemsText = byId('checkItems').value.trim();
+                const items = itemsText ? itemsText.split('\n').filter(item => item.trim() !== '') : [];
+
+                if(!title){
+                  alert('Title required');
+                  return;
+                }
+
+                const checkObj = {
+                  title,
+                  items,
+                  status: status,
+                  createdAt: new Date().toLocaleString('en-US',{
+                    hour12:true, hour:'numeric', minute:'numeric', second:'numeric',
+                    day:'2-digit', month:'2-digit', year:'numeric'
+                  })
+                };
+
+                if(editingCheckIndex !== null){
+                  appData.checklists[editingCheckIndex] = checkObj;
+                  editingCheckIndex = null;
+                } else {
+                  appData.checklists.push(checkObj);
+                }
+
+                saveAll();
+                renderChecklists();
+                renderHomeCheck();
+
+                hideForm(byId('checkFormContainer'));
+                byId('checkTitle').value = '';
+                byId('checkStatus').value = 'open';
+                byId('checkItems').value = '';
+                byId('saveCheckBtn').textContent = 'Save';
+              }
+
+              // ---------- Form Show/Hide ----------
+              function showForm(el){ el.classList.add('visible'); }
+              function hideForm(el){ el.classList.remove('visible'); }
+
+              // ---------- Page Navigation ----------
+              const sidebar = byId('sidebar');
+              const main = byId('main');
+              const toggleBtn = byId('toggleBtn');
+
+              function showPage(pageId){
+                document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
+                byId(pageId).classList.remove('hidden');
+
+                // Auto-hide sidebar instantly when an option is chosen
+                sidebar.style.left = '-220px';
+                main.style.marginLeft = '0';
+                toggleBtn.textContent = '⮞';
+                sidebar.style.transition = 'left 0s';   // instant hide
+                main.style.transition = 'margin-left 0s'; // instant hide
+              }
+
+              // ---------- Sidebar Toggle ----------
+              toggleBtn.addEventListener('click', function() {
+                if (sidebar.style.left === '-220px' || sidebar.style.left === '') {
+                  sidebar.style.left = '0px';
+                  main.style.marginLeft = '220px';
+                  toggleBtn.textContent = '⮜';
+                } else {
+                  sidebar.style.left = '-220px';
+                  main.style.marginLeft = '0';
+                  toggleBtn.textContent = '⮞';
+                }
+              });
+
+              // ---------- Settings Panel (new) ----------
+              const settingsBtn = byId('settingsBtn');
+              const settingsPanel = byId('settingsPanel');
+              if(settingsBtn && settingsPanel){
+                settingsBtn.addEventListener('click', ()=>{
+                  const opened = settingsPanel.classList.toggle('visible');
+                  settingsBtn.setAttribute('aria-expanded', opened);
+                  settingsPanel.setAttribute('aria-hidden', !opened);
+                });
+              }
+
+              // ---------- Dark Mode ----------
+              const darkBtn=byId('darkModeBtn');
+              if(appData.darkMode==='1') document.body.classList.add('dark');
+              darkBtn.addEventListener('click',()=>{
+                document.body.classList.toggle('dark');
+                appData.darkMode=document.body.classList.contains('dark')?'1':'0';
+                saveAll();
+              });
+
+              // ---------- Notification ----------
+              const notificationBtn = byId('notificationBtn');
+              // Initialize notification state
+              if (typeof Notification !== 'undefined') {
+                if (Notification.permission === 'granted') {
+                  notificationBtn.textContent = '🔔 Notifications (ON)';
+                } else {
+                  notificationBtn.textContent = '🔔 Notifications (OFF)';
+                }
+              } else {
+                notificationBtn.textContent = '🔔 Notifications (NOT SUPPORTED)';
+                notificationBtn.disabled = true;
+              }
+
+              notificationBtn.addEventListener('click', function() {
+                if (typeof Notification !== 'undefined') {
+                  if (Notification.permission === 'granted') {
+                    Notification.permission = 'denied';
+                    notificationBtn.textContent = '🔔 Notifications (OFF)';
+                  } else {
+                    Notification.requestPermission().then(function(permission) {
+                      if (permission === 'granted') {
+                        notificationBtn.textContent = '🔔 Notifications (ON)';
+                      } else {
+                        notificationBtn.textContent = '🔔 Notifications (OFF)';
+                      }
+                    });
+                  }
+                }
+              });
+
+              // ---------- Profile ----------
+              const profileNameEl=byId('profileName');
+              if(appData.profileName) profileNameEl.textContent=appData.profileName;
+              byId('editNameBtn').addEventListener('click',()=>{
+                const n=prompt('Enter new name:',appData.profileName||'');
+                if(n){
+                  appData.profileName=n;
+                  profileNameEl.textContent=n;
+                  saveAll();
+                }
+              });
+
+              const profilePhotoInput=byId('photoUpload');
+              profilePhotoInput.addEventListener('change',(e)=>{
+                const file=e.target.files[0];
+                if(file){
+                  const reader=new FileReader();
+                  reader.onload=function(ev){
+                    appData.profilePhoto=ev.target.result;
+                    byId('profilePhoto').src=ev.target.result;
+                    saveAll();
+                  };
+                  reader.readAsDataURL(file);
+                }
+              });
+              if(appData.profilePhoto) byId('profilePhoto').src=appData.profilePhoto;
+
+              // ---------- Event Listeners ----------
+              // Fix: Ensure all event listeners are properly attached
+              byId('showAddFormBtn').addEventListener('click', function() {
+                toggleCollapse(byId('reminderFormContainer'), byId('showAddFormBtn'));
+              });
+
+              byId('cancelReminderBtn').addEventListener('click', function() {
+                hideForm(byId('reminderFormContainer'));
+                editingIndex=null;
+                clearReminderForm();
+              });
+
+              byId('saveReminderBtn').addEventListener('click', saveReminder);
+              byId('viewRemindersToggle').addEventListener('click', function() {
+                toggleCollapse(byId('reminderList'), byId('viewRemindersToggle'));
+              });
+              byId('showAddNoteBtn').addEventListener('click', function() {
+                toggleCollapse(byId('noteFormContainer'), byId('showAddNoteBtn'));
+              });
+
+              byId('cancelNoteBtn').addEventListener('click', function() {
+                hideForm(byId('noteFormContainer'));
+                editingNoteIndex = null;
+                byId('saveNoteBtn').textContent = 'Save';
+              });
+
+              byId('saveNoteBtn').addEventListener('click', saveNote);
+
+              byId('viewNotesToggle').addEventListener('click', function() {
+                toggleCollapse(byId('noteList'), byId('viewNotesToggle'));
+              });
+
+              byId('homeRemindersToggle').addEventListener('click', function() {
+                toggleCollapse(byId('homeRemindersContainer'), byId('homeRemindersToggle'));
+              });
+
+              byId('homeNotesToggle').addEventListener('click', function() {
+                toggleCollapse(byId('homeNotesContainer'), byId('homeNotesToggle'));
+              });
+
+              byId('homeCheckToggle').addEventListener('click', function() {
+                toggleCollapse(byId('homeCheckContainer'), byId('homeCheckToggle'));
+              });
+
+              byId('showAddBudgetBtn').addEventListener('click', function() {
+                toggleCollapse(byId('budgetFormContainer'), byId('showAddBudgetBtn'));
+              });
+
+              byId('cancelBudgetBtn').addEventListener('click', function() {
+                hideForm(byId('budgetFormContainer'));
+                editingBudgetIndex=null;
+                clearBudgetForm();
+              });
+
+              // FIXED: Properly attach saveBudgetBtn event listener
+              byId('saveBudgetBtn').addEventListener('click', saveBudget);
+              byId('viewbudgetToggle').addEventListener('click', function() {
+                toggleCollapse(byId('budgetList'), byId('viewbudgetToggle'));
+              });
+              byId('homeBudgetsToggle').addEventListener('click', function() {
+                toggleCollapse(byId('homeBudgetsContainer'), byId('homeBudgetsToggle'));
+              });
+
+              // Check List Event Listeners
+              byId('showAddCheckBtn').addEventListener('click', function() {
+                toggleCollapse(byId('checkFormContainer'), byId('showAddCheckBtn'));
+              });
+
+              byId('cancelCheckBtn').addEventListener('click', function() {
+                hideForm(byId('checkFormContainer'));
+                editingCheckIndex = null;
+                byId('saveCheckBtn').textContent = 'Save';
+              });
+
+              byId('saveCheckBtn').addEventListener('click', saveCheck);
+
+              byId('viewCheckToggle').addEventListener('click', function() {
+                toggleCollapse(byId('checkList'), byId('viewCheckToggle'));
+              });
+
+              document.querySelectorAll('.menu-btn[data-page]').forEach(btn=>{
+                btn.addEventListener('click',function() {
+                  showPage(this.dataset.page);
+                });
+              });
+
+              function toggleCollapse(el, btn){
+                el.classList.toggle('visible');
+                btn.classList.toggle('open');
+              }
+
+              // ---------- Notifications ----------
+              function checkNotifications(){
+                if(!(Notification && Notification.permission === 'granted')) return;
+
+                const now=new Date();
+                appData.reminders.forEach(r=>{
+                  const diff=daysLeft(r.endDate);
+                  if(diff===0||diff===1||diff<0){
+                    const notifTimes=[8,13,18];
+                    notifTimes.forEach(hour=>{
+                      const notifTime=new Date(now.getFullYear(),now.getMonth(),now.getDate(),hour,0,0,0);
+                      const delay=notifTime-now;
+                      if(delay>0){
+                        setTimeout(()=>{
+                          if(Notification.permission==='granted'){
+                            new Notification("Reminder Alert!", {
+                              body: `${r.title} - ${diff<0?'Expired':diff===0?'Today':'1 day left'}`,
+                              icon:'assets/icon.png'
+                            });
+                          }
+                        }, delay);
+                      }
+                    });
+                  }
+                });
+              }
+              checkNotifications();
+              setInterval(checkNotifications, 24*60*60*1000);
+
+              // ---------- Init ----------
+              renderReminders();
+              renderNotes();
+              renderBudgets();
+              renderChecklists();
+            })();
     </script>
   </body>
 </html>

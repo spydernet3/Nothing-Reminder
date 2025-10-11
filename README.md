@@ -1,5 +1,9 @@
 # Smart Reminder & Notes App 📝⏰
 
+## Overall Performance
+<img width="1018" height="565" alt="image" src="https://github.com/user-attachments/assets/40c9acf2-5c6f-4138-9957-f5bc47314583" />
+
+
 A lightweight, web-based Reminder and Notes application with dark mode, collapsible sections, and IST timestamp support. Designed for **fast note-taking, reminders, and home overview**.
 
 !> Data may fetching slowly based on your browser speed..

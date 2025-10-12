@@ -681,6 +681,19 @@
     </div>
     
     <script>
+      // Service Worker Registration
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((error) => {
+              console.log('SW registration failed: ', error);
+            });
+        });
+      }
+
       (function () {
         // ---------- Storage ----------
         const STORAGE_KEY = 'smart_reminder_app_v1';
@@ -1210,6 +1223,10 @@
               byId('tableFormatCheckbox').checked = false;
               byId('saveNoteBtn').textContent = 'Save';
             };
+            reader.onerror = function() {
+              alert('Error reading file. Please try again.');
+              fileInput.value = '';
+            };
             reader.readAsDataURL(file);
           } else {
             if(editingNoteIndex !== null){
@@ -1226,8 +1243,6 @@
             byId('saveNoteBtn').textContent = 'Save';
           }
         }
-
-
 
         // ---------- Check List Functions ----------
         function renderChecklists(){
@@ -1624,8 +1639,6 @@
         // Initialize notifications
         checkNotifications();
         setInterval(checkNotifications, 24*60*60*1000);
-
-
 
         // ---------- Init ----------
         renderReminders();

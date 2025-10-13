@@ -545,16 +545,21 @@
             formatting the device.
           </p>
           <p>
+            Maximum 500MB allowed You can store or upload files based on this restrictions
+          </p>
+          <p>
+            For the security reasons not allowed import and export datas and sharing datas to others
+          </p>
+          <p>
             If you'd like to contribute, check out here:
             <a href="https://github.com/spydernet3" target="_blank"
-              >Spydernet Github ↠</a
-            >
+              >Spydernet Github ↠</a>
           </p>
         </ul>
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.2</p>
+          <p>Version 13.3</p>
           <p>Last Updated: 13-Sep-2025</p>
           <p>Project: Open source project</p>
         </ul>
@@ -706,6 +711,8 @@
 
       (function () {
         // ---------- Storage ----------
+
+        // Enhanced storage with quota handling
         const STORAGE_KEY = 'smart_reminder_app_v1';
         let appData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
           reminders: [],
@@ -724,7 +731,83 @@
 
         // ---------- Helpers ----------
         function byId(id){ return document.getElementById(id); }
-        function saveAll(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); }
+        
+        // Enhanced save function with quota handling
+        async function saveAll() {
+  try {
+    const dataStr = JSON.stringify(appData);
+    const sizeInMB = new Blob([dataStr]).size / (1024 * 1024);
+
+    if (sizeInMB > 500) {
+      console.warn(`Data too large (${sizeInMB.toFixed(2)} MB). Cleaning up...`);
+      cleanupOldData();
+      return;
+    }
+
+    // Open IndexedDB
+    const request = indexedDB.open("AppDB", 1);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains("storage")) {
+        db.createObjectStore("storage");
+      }
+    };
+
+    request.onsuccess = () => {
+      const db = request.result;
+      const tx = db.transaction("storage", "readwrite");
+      tx.objectStore("storage").put(dataStr, "appData");
+      tx.oncomplete = () => console.log(`Saved successfully: ${sizeInMB.toFixed(2)} MB`);
+    };
+
+    request.onerror = (err) => console.error("DB open error:", err);
+  } catch (err) {
+    console.error("Save failed:", err);
+  }
+}
+
+        
+
+        // Cleanup function to remove old data
+        function cleanupOldData() {
+          // Prevent infinite cleanup loops
+          let maxIterations = 5;
+          let iteration = 0;
+          
+          // Check if we're still over the limit after cleanup
+          while (iteration < maxIterations) {
+            try {
+              const dataStr = JSON.stringify(appData);
+              if (dataStr.length < 500 * 2148 * 2148) {
+                break; // We're under the limit
+              }
+              
+        
+              // Save the cleaned data
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+              iteration++;
+            } catch (e) {
+              console.error("Cleanup failed:", e);
+              // If cleanup fails, try to save with minimal data
+              appData = {
+                reminders: appData.reminders.slice(-10),
+                notes: appData.notes.slice(-10),
+                profileName: appData.profileName,
+                profilePhoto: appData.profilePhoto,
+                darkMode: appData.darkMode,
+                budget: appData.budget.slice(-5),
+                checklists: appData.checklists.slice(-5)
+              };
+              try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+              } catch (e2) {
+                console.error("Even minimal cleanup failed:", e2);
+                alert("Storage is full. Please delete some data to make space.");
+                break;
+              }
+            }
+          }
+        }
 
         function daysLeft(endDateStr){
           if(!endDateStr) return null;
@@ -868,7 +951,7 @@
             if(n.isTable && n.text) {
               // Show first few rows of table in home view
               const lines = n.text.split('\n');
-              let tableHTML = '<table border="1" style="border-collapse: collapse; width: 100%;">';
+              let tableHTML = '<table border=\"1\" style=\"border-collapse: collapse; width: 100%;\">';
 
               lines.forEach((line, index) => {
                 if(line.includes('---')) {
@@ -879,9 +962,9 @@
                   cells.forEach(cell => {
                     const cellContent = cell.trim();
                     if(index === 0) {
-                      tableHTML += `<th style="border: 1px solid #ddd; padding: 4px;">${cellContent}</th>`;
+                      tableHTML += `<th style=\"border: 1px solid #ddd; padding: 4px;\">${cellContent}</th>`;
                     } else {
-                      tableHTML += `<td style="border: 1px solid #ddd; padding: 4px;">${cellContent}</td>`;
+                      tableHTML += `<td style=\"border: 1px solid #ddd; padding: 4px;\">${cellContent}</td>`;
                     }
                   });
                 }
@@ -893,7 +976,7 @@
               left.appendChild(text);
             } else {
               const text = document.createElement('div');
-              text.innerHTML = `<b>${n.text || ''}</b><br><small style="opacity:0.7">${n.createdAt || ''}</small>`;
+              text.innerHTML = `<b>${n.text || ''}</b><br><small style=\"opacity:0.7\">${n.createdAt || ''}</small>`;
               left.appendChild(text);
             }
 
@@ -934,7 +1017,7 @@
             if(note.isTable && note.text) {
               // Convert table format to HTML table
               const lines = note.text.split('\n');
-              let tableHTML = '<table border="1" style="border-collapse: collapse; width: 100%;">';
+              let tableHTML = '<table border=\"1\" style=\"border-collapse: collapse; width: 100%;\">';
 
               lines.forEach((line, index) => {
                 if(line.includes('---')) {
@@ -947,9 +1030,9 @@
                   cells.forEach(cell => {
                     const cellContent = cell.trim();
                     if(index === 0) {
-                      tableHTML += `<th style="border: 1px solid #ddd; padding: 8px;">${cellContent}</th>`;
+                      tableHTML += `<th style=\"border: 1px solid #ddd; padding: 8px;\">${cellContent}</th>`;
                     } else {
-                      tableHTML += `<td style="border: 1px solid #ddd; padding: 8px;">${cellContent}</td>`;
+                      tableHTML += `<td style=\"border: 1px solid #ddd; padding: 8px;\">${cellContent}</td>`;
                     }
                   });
                 }
@@ -959,7 +1042,7 @@
               text.innerHTML = tableHTML;
             } else {
               text.innerHTML=`<b>${note.text||''}</b><br>
-                <small style="opacity:0.7">${note.createdAt||''}</small>`;
+                <small style=\"opacity:0.7\">${note.createdAt||''}</small>`;
             }
             left.appendChild(text);
 

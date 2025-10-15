@@ -1630,7 +1630,7 @@
 
         // ---------- Dark Mode ----------
         const darkBtn=byId('darkModeBtn');
-        if(appData.darkMode==='1') document.body.classList.add('dark');
+        // if(appData.darkMode==='1') document.body.classList.add('dark'); // MOVED
         darkBtn.addEventListener('click',()=>{
           document.body.classList.toggle('dark');
           appData.darkMode=document.body.classList.contains('dark')?'1':'0';
@@ -1639,7 +1639,7 @@
 
         // ---------- Profile ----------
         const profileNameEl=byId('profileName');
-        if(appData.profileName) profileNameEl.textContent=appData.profileName;
+        // if(appData.profileName) profileNameEl.textContent=appData.profileName; // MOVED
         byId('editNameBtn').addEventListener('click',()=>{
           const n=prompt('Enter new name:',appData.profileName||'');
           if(n){
@@ -1662,7 +1662,7 @@
             reader.readAsDataURL(file);
           }
         });
-        if(appData.profilePhoto) byId('profilePhoto').src=appData.profilePhoto;
+        // if(appData.profilePhoto) byId('profilePhoto').src=appData.profilePhoto; // MOVED
 
         // ---------- NEW: Notification Settings Logic ----------
         function updateBrowserPermissionUI() {
@@ -1893,21 +1893,27 @@
           btn.classList.toggle('open');
         }
 
-        // Initialize notifications check on page load and set interval
-        checkNotifications();
-        // Run checkNotifications every 5 minutes to catch the hourly triggers (8, 13, 18) more reliably
-        setInterval(checkNotifications, 5 * 60 * 1000); 
+        // ---------- FIX: Wait for the page to be fully loaded before rendering data ----------
+        window.addEventListener('load', () => {
+            // Set initial UI states from loaded data
+            if (appData.darkMode === '1') document.body.classList.add('dark');
+            if (appData.profileName) byId('profileName').textContent = appData.profileName;
+            if (appData.profilePhoto) byId('profilePhoto').src = appData.profilePhoto;
 
-        // ---------- Init ----------
-        renderReminders();
-        renderNotes();
-        renderBudgets();
-        renderChecklists();
+            // Initial render of all data
+            renderReminders();
+            renderNotes();
+            renderBudgets();
+            renderChecklists();
+            
+            // Setup notifications
+            if ("Notification" in window) {
+                updateBrowserPermissionUI();
+            }
+            checkNotifications();
+            setInterval(checkNotifications, 5 * 60 * 1000); 
+        });
         
-        // Initial call to set the notification UI status (will be rendered fully when page is navigated to)
-        if ("Notification" in window) {
-            updateBrowserPermissionUI();
-        }
       })();
     </script>
   </body>

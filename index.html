@@ -6,232 +6,229 @@
     <title>Nothing Reminder</title>
     <link rel="icon" type="image/png" href="assets/icon.png" />
     <style>
-        :root {
-          --bg: #ffffff;
-          --text: #000000;
-          --muted: #666;
-          --accent: #4CAF50;
-        }
-        * { box-sizing: border-box; }
-        body {
-          margin: 0;
-          font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica          Neue", Arial;
-          background: var(--bg);
-          color: var(--text);
-        }
-        .sidebar {
-          width: 220px;
-          background: #666;
-          color: #fff;
-          position: fixed;
-          height: 100%;
-          left: 0;
-          display: flex;
-          flex-direction: column;
-          padding: 12px;
-          gap: 8px;
-          transition: left 0s;
-        }
-        .profile {
-          display:flex;
-          align-items:center;
-          gap:18px;
-          margin-bottom:8px;
-        }
-        .menu-btn, .icon-btn, .add-btn {
-          display:block;
-          width:100%;
-          padding:10px;
-          border: none;
-          background:#888;
-          font-style: Italic;
-          color:#fff;
-          border-radius:6px;
-          cursor:pointer;
-          text-align:left;
-          font-size:15px;
-          transition: left 0s;
-        }
-        .menu-btn:hover, .icon-btn:hover, .add-btn:hover { background:#aaa; }
-        .main {
-          margin-left: 220px;
-          padding: 20px;
-          min-height: 100vh;
-          transition: margin-left 0s;
-        }
-        .page.hidden { display:none; }
-        .toggle-btn {
-          position: absolute;
-          left: 210px; /* Adjusted to show partial icon */
-          top: 12px;
-          padding:6px 8px;
-          border-radius:8px;
-          border:none;
-          background:#ddd;
-          cursor:pointer;
-          transition: left 0s;
-          z-index: 10;
-          width: 20px; /* Make it smaller to show partial icon */
-          height: 20px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .list { list-style:none; padding:0; margin:0 0 12px 0; }
-        .list li {
-          display:flex;
-          align-items:center;
-          justify-content:space-between;
-          padding:8px;
-          border-radius:6px;
-          margin-bottom:8px;
-          background: rgba(0,0,0,0.03);
-          transition: left 0s;
-        }
-        .item-left { display:flex; flex-direction:column; gap:4px; }
-        .badge { background:#eee; padding:4px 8px; border-radius:12px;
-          font-size:12px; }
-        .form {
-          margin-top: 0;
-          padding: 12px;
-          border-radius: 8px;
-          background: #f5f5f5;
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-          max-width: 520px;
-          overflow: hidden;
-          transition: max-height 0s ease, padding 0s ease;
-          max-height: 0;
-          padding-top: 0;
-          padding-bottom: 0;
-          transition: left 0s;
-        }
-        .form.visible {
-          max-height: 500px;
-          padding-top: 12px;
-          padding-bottom: 12px;
-        }
-        .form label {
-          display:flex;
-          flex-direction:column;
-          font-size:13px;
-          gap:6px;
-          transition: left 0s;
-        }
-        .form input[type="text"], .form input[type="date"], .form textarea,          .form select {
-          padding:8px;
-          border-radius:6px;
-          border:1px solid #ccc;
-          transition: left 0s;
-        }
-        .form-actions {
-          display:flex;
-          gap:8px;
-          margin-top:6px;
-          transition: left 0s;
-        }
-        .primary {
-          background: var(--accent);
-          color: #fff;
-          border:none;
-          padding:8px 12px;
-          border-radius:6px;
-          cursor:pointer;
-        }
-        .secondary {
-          background:#ddd;
-          border:none;
-          padding:8px 12px;
-          border-radius:6px;
-          cursor:pointer;
-        }
-        .icon-small {
-          background:transparent;
-          border:none;
-          cursor:pointer;
-          margin-left:8px;
-          font-size:16px;
-        }
-        .add-area {
-          margin-top: 8px;
-          max-width: 520px;
-        }
-        .dark {
-          --bg: #121212;
-          --text: #f1f1f1;
-        }
-        .dark .main { background:#151515; color:var(--text); }
-        .dark .form { background: #232323; }
-        .dark .menu-btn, .dark .icon-btn { background:#333; color:var(--text);       }
+            :root {
+              --bg: #ffffff;
+              --text: #000000;
+              --muted: #666;
+              --accent: #4CAF50;
+            }
+            * { box-sizing: border-box; }
+            body {
+              margin: 0;
+              font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica          Neue", Arial;
+              background: var(--bg);
+              color: var(--text);
+            }
+            .sidebar {
+              width: 220px;
+              background: #666;
+              color: #fff;
+              position: fixed;
+              height: 100%;
+              left: 0;
+              display: flex;
+              flex-direction: column;
+              padding: 12px;
+              gap: 8px;
+              transition: left 0s;
+            }
+            .profile {
+              display:flex;
+              align-items:center;
+              gap:18px;
+              margin-bottom:8px;
+            }
+            .menu-btn, .icon-btn, .add-btn {
+              display:block;
+              width:100%;
+              padding:10px;
+              border: none;
+              background:#888;
+              font-style: Italic;
+              color:#fff;
+              border-radius:6px;
+              cursor:pointer;
+              text-align:left;
+              font-size:15px;
+              transition: left 0s;
+            }
+            .menu-btn:hover, .icon-btn:hover, .add-btn:hover { background:#aaa; }
+            .main {
+              margin-left: 220px;
+              padding: 20px;
+              min-height: 100vh;
+              transition: margin-left 0s;
+            }
+            .page.hidden { display:none; }
+            .toggle-btn {
+              position: absolute;
+              left: 210px; /* Adjusted to show partial icon */
+              top: 12px;
+              padding:6px 8px;
+              border-radius:8px;
+              border:none;
+              background:#ddd;
+              cursor:pointer;
+              transition: left 0s;
+              z-index: 10;
+              width: 20px; /* Make it smaller to show partial icon */
+              height: 20px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+            .list { list-style:none; padding:0; margin:0 0 12px 0; }
+            .list li {
+              display:flex;
+              align-items:center;
+              justify-content:space-between;
+              padding:8px;
+              border-radius:6px;
+              margin-bottom:8px;
+              background: rgba(0,0,0,0.03);
+              transition: left 0s;
+            }
+            .item-left { display:flex; flex-direction:column; gap:4px; }
+            .badge { background:#eee; padding:4px 8px; border-radius:12px;
+              font-size:12px; }
+            .form {
+              margin-top: 0;
+              padding: 12px;
+              border-radius: 8px;
+              background: #f5f5f5;
+              display: flex;
+              flex-direction: column;
+              gap: 8px;
+              max-width: 520px;
+              overflow: hidden;
+              transition: max-height 0s ease, padding 0s ease;
+              max-height: 0;
+              padding-top: 0;
+              padding-bottom: 0;
+              transition: left 0s;
+            }
+            .form.visible {
+              max-height: 500px;
+              padding-top: 12px;
+              padding-bottom: 12px;
+            }
+            .form label {
+              display:flex;
+              flex-direction:column;
+              font-size:13px;
+              gap:6px;
+              transition: left 0s;
+            }
+            .form input[type="text"], .form input[type="date"], .form textarea,          .form select {
+              padding:8px;
+              border-radius:6px;
+              border:1px solid #ccc;
+              transition: left 0s;
+            }
+            .form-actions {
+              display:flex;
+              gap:8px;
+              margin-top:6px;
+              transition: left 0s;
+            }
+            .primary {
+              background: var(--accent);
+              color: #fff;
+              border:none;
+              padding:8px 12px;
+              border-radius:6px;
+              cursor:pointer;
+            }
+            .secondary {
+              background:#ddd;
+              border:none;
+              padding:8px 12px;
+              border-radius:6px;
+              cursor:pointer;
+            }
+            .icon-small {
+              background:transparent;
+              border:none;
+              cursor:pointer;
+              margin-left:8px;
+              font-size:16px;
+            }
+            .add-area {
+              margin-top: 8px;
+              max-width: 520px;
+            }
+            .dark {
+              --bg: #121212;
+              --text: #f1f1f1;
+            }
+            .dark .main { background:#151515; color:var(--text); }
+            .dark .form { background: #232323; }
+            .dark .menu-btn, .dark .icon-btn { background:#333; color:var(--text);       }
 
-        /* Settings panel styles */
-        .settings-panel {
-          display: none;
-          flex-direction: column;
-          gap: 8px;
-          margin-top: 8px;
-        }
-        .settings-panel.visible { display: flex; }
+            /* Settings panel styles */
+            .settings-panel {
+              display: none;
+              flex-direction: column;
+              gap: 8px;
+              margin-top: 8px;
+            }
+            .settings-panel.visible { display: flex; }
 
-        /* Consistent button styling for all sections */
-        #showAddFormBtn, #homeRemindersToggle, #showAddNoteBtn,                      #viewNotesToggle, #homeNotesToggle,
-        #homeBudgetsToggle, #homeCheckToggle, #showAddBudgetBtn,                     #viewbudgetToggle, #showAddCheckBtn,
-        #viewCheckToggle, #viewRemindersToggle, #monthlyCalendarToggle,              #calculatorToggle, #viewHistoryToggle {
-          position: relative;
-          user-select: none;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          font-weight: 600;
-          font-size: 15px;
-          cursor: pointer;
-          transition: left 0s;
-          padding: 10px;
-          border: none;
-          background: #888;
-          color: #fff;
-          border-radius: 6px;
-          text-align: left;
-        }
+            /* Consistent button styling for all sections */
+            #showAddFormBtn, #homeRemindersToggle, #showAddNoteBtn, #viewNotesToggle, #homeNotesToggle,
+            #homeBudgetsToggle, #homeCheckToggle, #showAddBudgetBtn,#viewbudgetToggle, #showAddCheckBtn,
+            #viewCheckToggle, #viewRemindersToggle, #monthlyCalendarToggle,#calculatorToggle, #viewHistoryToggle {
+              position: relative;
+              user-select: none;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              font-weight: 600;
+              font-size: 15px;
+              cursor: pointer;
+              transition: left 0s;
+              padding: 10px;
+              border: none;
+              background: #888;
+              color: #fff;
+              border-radius: 6px;
+              text-align: left;
+            }
 
-        #showAddFormBtn:hover, #homeRemindersToggle:hover,                           #showAddNoteBtn:hover, #viewNotesToggle:hover,
-        #homeNotesToggle:hover, #homeBudgetsToggle:hover,                            #homeCheckToggle:hover, #showAddBudgetBtn:hover,
-        #viewbudgetToggle:hover, #showAddCheckBtn:hover,                             #viewCheckToggle:hover, #viewRemindersToggle:hover {
-          background: #aaa;
-        }
+            #showAddFormBtn:hover, #homeRemindersToggle:hover, #showAddNoteBtn:hover, #viewNotesToggle:hover,
+            #homeNotesToggle:hover, #homeBudgetsToggle:hover, #homeCheckToggle:hover, #showAddBudgetBtn:hover,
+            #viewbudgetToggle:hover, #showAddCheckBtn:hover,#viewCheckToggle:hover, #viewRemindersToggle:hover {
+              background: #aaa;
+            }
 
-        #showAddFormBtn.open .arrow, #homeRemindersToggle.open .arrow,               #showAddNoteBtn.open .arrow,
-        #viewNotesToggle.open .arrow, #homeNotesToggle.open .arrow,                  #homeBudgetsToggle.open .arrow,
-        #homeCheckToggle.open .arrow, #showAddBudgetBtn.open .arrow,                 #viewbudgetToggle.open .arrow,
-        #showAddCheckBtn.open .arrow, #viewCheckToggle.open .arrow,                  #viewRemindersToggle.open .arrow {
-          transform: rotate(180deg);
-          transition: left 0s;
-        }
+            #showAddFormBtn.open .arrow, #homeRemindersToggle.open .arrow,#showAddNoteBtn.open .arrow,
+            #viewNotesToggle.open .arrow, #homeNotesToggle.open .arrow,#homeBudgetsToggle.open .arrow,
+            #homeCheckToggle.open .arrow, #showAddBudgetBtn.open .arrow,#viewbudgetToggle.open .arrow,
+            #showAddCheckBtn.open .arrow, #viewCheckToggle.open .arrow,#viewRemindersToggle.open .arrow {
+              transform: rotate(180deg);
+              transition: left 0s;
+            }
 
-        /* Add this to your existing <style> block */
+            /* Add this to your existing <style> block */
       .calendar-day {
-          padding: 20px 40px;
-          border: 10px transparent #eee;
-          height: 10px;
-          width:  10px;
+          padding: 8px 4px;
+          border: 1px solid #eee;
+          height: 40px;
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: default;
-        }
+      }
       .calendar-day.today {
           background: var(--accent);
           color: white;
           font-weight: bold;
-          border-radius: 600px;
-          height: 1px;
-          width: 1px;
-        }
+          border-radius: 50%;
+      }
       .calendar-day.spacer {
           background: transparent;
           border: none;
-        }
+      }
       .calculator-mode.hidden { display: none; }
       .normal-btn {
           padding: 10px;
@@ -239,130 +236,130 @@
           border: none;
           border-radius: 6px;
           cursor: pointer;
-        }
+      }
       .normal-btn.primary { background: #e0e0e0; color: #000; }
       .normal-btn.secondary { background: #ccc; color: #000; }
 
-        /* Scrollable lists */
-        .scrollable-list {
-          max-height: 300px;
-          overflow-y: auto;
-          border: 1px solid #ccc;
-          border-radius: 6px;
-          padding: 8px;
-          margin-top: 8px;
-        }
+            /* Scrollable lists */
+            .scrollable-list {
+              max-height: 300px;
+              overflow-y: auto;
+              border: 1px solid #ccc;
+              border-radius: 6px;
+              padding: 8px;
+              margin-top: 8px;
+            }
 
-        /* Scrollbar styling */
-        .scrollable-list::-webkit-scrollbar {
-          width: 8px;
-          border-radius: 4px;
-        }
+            /* Scrollbar styling */
+            .scrollable-list::-webkit-scrollbar {
+              width: 8px;
+              border-radius: 4px;
+            }
 
-        .scrollable-list::-webkit-scrollbar-track {
-          background: #f1f1f1;
-          border-radius: 4px;
-        }
+            .scrollable-list::-webkit-scrollbar-track {
+              background: #f1f1f1;
+              border-radius: 4px;
+            }
 
-        .scrollable-list::-webkit-scrollbar-thumb {
-          background: #888;
-          border-radius: 4px;
-        }
+            .scrollable-list::-webkit-scrollbar-thumb {
+              background: #888;
+              border-radius: 4px;
+            }
 
-        .scrollable-list::-webkit-scrollbar-thumb:hover {
-          background: #555;
-          border-radius: 4px;
-        }
+            .scrollable-list::-webkit-scrollbar-thumb:hover {
+              background: #555;
+              border-radius: 4px;
+            }
 
-        /* Checklist status button */
-        .status-btn {
-          background: #007bff;
-          color: white;
-          border: none;
-          padding: 4px 8px;
-          border-radius: 4px;
-          cursor: pointer;
-          margin-right: 8px;
-          font-size: 12px;
-        }
+            /* Checklist status button */
+            .status-btn {
+              background: #007bff;
+              color: white;
+              border: none;
+              padding: 4px 8px;
+              border-radius: 4px;
+              cursor: pointer;
+              margin-right: 8px;
+              font-size: 12px;
+            }
 
-        /* Branding footer */
-        .branding-footer {
-          position: fixed;
-          bottom: 10px;
-          left: 50%;
-          transform: translateX(-50%);
-          font-size: 12px;
-          color: #666;
-          text-align: center;
-        }
+            /* Branding footer */
+            .branding-footer {
+              position: fixed;
+              bottom: 10px;
+              left: 50%;
+              transform: translateX(-50%);
+              font-size: 12px;
+              color: #666;
+              text-align: center;
+            }
 
-        .branding-footer a {
-          color: #666;
-          text-decoration: none;
-        }
+            .branding-footer a {
+              color: #666;
+              text-decoration: none;
+            }
 
-        /* Notification Page Specific Styles */
-        .notif-status-box {
-          padding: 15px;
-          border-radius: 8px;
-          margin-bottom: 20px;
-          background: #e0f7fa;
-          border: 1px solid #b2ebf2;
-        }
-        .notif-status-box.denied {
-          background: #ffebee;
-          border: 1px solid #ffcdd2;
-        }
-        .notif-setting-item {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 10px 0;
-          border-bottom: 1px solid #eee;
-        }
-        .notif-setting-item:last-child {
-          border-bottom: none;
-        }
-        .toggle-switch {
-          position: relative;
-          display: inline-block;
-          width: 50px;
-          height: 24px;
-        }
-        .toggle-switch input {
-          opacity: 0;
-          width: 0;
-          height: 0;
-        }
-        .slider {
-          position: absolute;
-          cursor: pointer;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background-color: #ccc;
-          transition: 0.4s;
-          border-radius: 24px;
-        }
-        .slider:before {
-          position: absolute;
-          content: "";
-          height: 16px;
-          width: 16px;
-          left: 4px;
-          bottom: 4px;
-          background-color: white;
-          transition: 0.4s;
-          border-radius: 50%;
-        }
-        input:checked + .slider {
-          background-color: var(--accent);
-        }
-        input:checked + .slider:before {
-          transform: translateX(26px);
-        }
+            /* Notification Page Specific Styles */
+            .notif-status-box {
+              padding: 15px;
+              border-radius: 8px;
+              margin-bottom: 20px;
+              background: #e0f7fa;
+              border: 1px solid #b2ebf2;
+            }
+            .notif-status-box.denied {
+              background: #ffebee;
+              border: 1px solid #ffcdd2;
+            }
+            .notif-setting-item {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding: 10px 0;
+              border-bottom: 1px solid #eee;
+            }
+            .notif-setting-item:last-child {
+              border-bottom: none;
+            }
+            .toggle-switch {
+              position: relative;
+              display: inline-block;
+              width: 50px;
+              height: 24px;
+            }
+            .toggle-switch input {
+              opacity: 0;
+              width: 0;
+              height: 0;
+            }
+            .slider {
+              position: absolute;
+              cursor: pointer;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              background-color: #ccc;
+              transition: 0.4s;
+              border-radius: 24px;
+            }
+            .slider:before {
+              position: absolute;
+              content: "";
+              height: 16px;
+              width: 16px;
+              left: 4px;
+              bottom: 4px;
+              background-color: white;
+              transition: 0.4s;
+              border-radius: 50%;
+            }
+            input:checked + .slider {
+              background-color: var(--accent);
+            }
+            input:checked + .slider:before {
+              transform: translateX(26px);
+            }
     </style>
   </head>
   <body>

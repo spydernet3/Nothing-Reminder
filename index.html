@@ -2099,7 +2099,7 @@
               }
 
               function saveHistory(result) {
-                const title = prompt('Enter a title for this calculation:', 'New Calculation');
+                const title = 'New Calculation';
                 if (title) {
                   const historyObj = {
                     title: title,
@@ -2194,7 +2194,7 @@
                 const result = `Age as of ${formatDMY(asOfStr)}: ${age_years} years, ${age_months} months, and ${age_days} days.`;
                 resultEl.textContent = result;
 
-                saveHistory(`Age Calculation: DOB ${formatDMY(dobStr)} vs ${formatDMY(asOfStr)}`, result);
+                saveHistory(`Age as of: ${age_years} years & ${age_months} months, & ${age_days} days.`, result);
               }
 
               // ---------- Date Difference Calculator Logic ----------

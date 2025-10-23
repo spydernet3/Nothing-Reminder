@@ -690,8 +690,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.4.4</p>
-          <p>Last Updated: 19-Sep-2025</p>
+          <p>Version 13.4.5</p>
+          <p>Last Updated: 23-Sep-2025</p>
           <p>Project Type: Open source</p>
         </ul>
       </div>
@@ -1000,6 +1000,13 @@
           >
             <button class="menu-btn" style="width: 180px;">Notepad</button>
           </a>
+          <a
+            href="https://spydernet3.github.io/Smart-Card/"
+            target="_blank"
+            style="text-decoration: none; color: inherit;"
+          >
+            <button class="menu-btn" style="width: 180px;">Smart Card</button>
+          </a>
         </div>
       </div>
     </div>
@@ -1180,7 +1187,7 @@
                 // Filter reminders to show only today and 1 day left
                 const filteredReminders = appData.reminders.filter(r => {
                   const diff = daysLeft(r.endDate);
-                  return diff === 0 || diff === 1;
+                  return diff === 0 || diff === 1 || diff < 0;
                 });
 
                 if(filteredReminders.length === 0){
@@ -2211,7 +2218,7 @@
                 const startDate = new Date(startStr);
                 const endDate = new Date(endStr);
                 const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
 
                 const result = `Difference: ${diffDays} day(s).`;
                 resultEl.textContent = result;

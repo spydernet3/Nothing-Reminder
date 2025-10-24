@@ -691,7 +691,7 @@
         <h3>Version Info!</h3>
         <ul>
           <p>Version 13.4.5</p>
-          <p>Last Updated: 23-Sep-2025</p>
+          <p>Last Updated: 24-Sep-2025</p>
           <p>Project Type: Open source</p>
         </ul>
       </div>
@@ -760,9 +760,8 @@
         <h3>Notification!</h3>
         <hr />
         <ul>
-          <li>Notification will showed by default 3 times in a day</li>
+          <li>Notification will showed once page is active</li>
           <li>You will Turn Notification On/Off</li>
-          <li>Morning 08:00 AM & Afternoon 01:00 PM & Evening 06:00 PM</li>
           <li>You can customize notification as per your requirements</li>
         </ul>
         <h3>Offline Mode</h3>
@@ -770,7 +769,7 @@
         <ul>
           <li>
             Step: Download Source Code Zip File in your Device and Extract foder
-            then Open index.html without internet in any broweser
+            then Open NothingReminder.html without internet in any broweser Note: notifications are not supposed to allowed
           </li>
         </ul>
       </div>
@@ -1000,13 +999,6 @@
           >
             <button class="menu-btn" style="width: 180px;">Notepad</button>
           </a>
-          <a
-            href="https://spydernet3.github.io/Smart-Card/"
-            target="_blank"
-            style="text-decoration: none; color: inherit;"
-          >
-            <button class="menu-btn" style="width: 180px;">Smart Card</button>
-          </a>
         </div>
       </div>
     </div>
@@ -1038,6 +1030,74 @@
             }
 
             (function () {
+              // ---------- Helpers ----------
+              function byId(id){ return document.getElementById(id); }
+
+              // ---------- NEW: Notification Settings Logic ----------
+              // MOVED HERE TO FIX REFERENCE ERROR
+              function updateBrowserPermissionUI() {
+                  const status = Notification.permission;
+                  const textEl = byId('browserPermissionText');
+                  const boxEl = byId('globalNotifStatus');
+                  const btnEl = byId('requestPermissionBtn');
+
+                  boxEl.classList.remove('denied');
+
+                  if (status === 'granted') {
+                      textEl.innerHTML = 'Status: <b style="color: var(--accent);">Granted (ON)</b>';
+                      btnEl.textContent = 'Permission Granted';
+                      btnEl.disabled = true;
+                  } else if (status === 'denied') {
+                      textEl.innerHTML = 'Status: <b style="color: #f44336;">Denied (OFF)</b>. Please change in browser settings.';
+                      btnEl.textContent = 'Permission Denied';
+                      btnEl.disabled = true;
+                      boxEl.classList.add('denied');
+                  } else { // 'default' or not supported
+                      textEl.innerHTML = 'Status: <b style="color: #ff9800;">Not Requested (OFF)</b>';
+                      btnEl.textContent = 'Request Permission';
+                      btnEl.disabled = false;
+                  }
+              }
+
+              function requestNotificationPermission() {
+                if (!("Notification" in window)) {
+                    console.error("This browser does not support desktop notification");
+                    return;
+                }
+                if (Notification.permission === 'granted' || Notification.permission === 'denied') {
+                   updateBrowserPermissionUI();
+                   return;
+                }
+
+                Notification.requestPermission().then(function(permission) {
+                    updateBrowserPermissionUI();
+                });
+              }
+
+              function renderNotificationPage() {
+                  if (!("Notification" in window)) {
+                      byId('globalNotifStatus').innerHTML = '<h3>Browser Permission</h3><p style="color: #f44336;">Notifications are not supported by your browser.</p>';
+                      return;
+                  }
+
+                  updateBrowserPermissionUI();
+
+                  // Setup custom category toggles based on appData
+                  byId('toggleReminders').checked = appData.notifReminders;
+                  byId('toggleNotes').checked = appData.notifNotes;
+                  byId('toggleChecklist').checked = appData.notifChecklist;
+                  byId('toggleBudget').checked = appData.notifBudget;
+              }
+
+              // Function to handle custom toggle changes
+              function handleCustomNotifToggle(category, event) {
+                  appData[category] = event.target.checked;
+                  saveAll();
+                  // Re-check notifications immediately if a new category is toggled on
+                  if (event.target.checked) checkNotifications();
+              }
+              // ---------- END MOVED BLOCK ----------
+
               // ---------- Storage ----------
 
               // Enhanced storage with quota handling
@@ -1078,9 +1138,6 @@
               // ... rest of the script ...
 
 
-              // ---------- Helpers ----------
-              function byId(id){ return document.getElementById(id); }
-
               // Modified save function to use localStorage only
               async function saveAll() {
                 try {
@@ -1089,6 +1146,8 @@
                   console.log("Data saved successfully to localStorage.");
                   // Re-render the notification page whenever data changes
                   renderNotificationPage();
+                  // NOTIFICATION CHANGE: Trigger notification check on every data save.
+                  checkNotifications();
                 } catch (err) {
                   console.error("Save failed:", err);
                   if (err.name === 'QuotaExceededError') {
@@ -1188,6 +1247,7 @@
                 const filteredReminders = appData.reminders.filter(r => {
                   const diff = daysLeft(r.endDate);
                   return diff === 0 || diff === 1 || diff < 0;
+                    
                 });
 
                 if(filteredReminders.length === 0){
@@ -1880,70 +1940,41 @@
               });
 
               // ---------- NEW: Notification Settings Logic ----------
-              function updateBrowserPermissionUI() {
-                  const status = Notification.permission;
-                  const textEl = byId('browserPermissionText');
-                  const boxEl = byId('globalNotifStatus');
-                  const btnEl = byId('requestPermissionBtn');
-
-                  boxEl.classList.remove('denied');
-
-                  if (status === 'granted') {
-                      textEl.innerHTML = 'Status: <b style="color: var(--accent);">Granted (ON)</b>';
-                      btnEl.textContent = 'Permission Granted';
-                      btnEl.disabled = true;
-                  } else if (status === 'denied') {
-                      textEl.innerHTML = 'Status: <b style="color: #f44336;">Denied (OFF)</b>. Please change in browser settings.';
-                      btnEl.textContent = 'Permission Denied';
-                      btnEl.disabled = true;
-                      boxEl.classList.add('denied');
-                  } else { // 'default' or not supported
-                      textEl.innerHTML = 'Status: <b style="color: #ff9800;">Not Requested (OFF)</b>';
-                      btnEl.textContent = 'Request Permission';
-                      btnEl.disabled = false;
-                  }
-              }
-
-              function requestNotificationPermission() {
-                if (!("Notification" in window)) {
-                    console.error("This browser does not support desktop notification");
-                    return;
-                }
-                if (Notification.permission === 'granted' || Notification.permission === 'denied') {
-                   updateBrowserPermissionUI();
-                   return;
-                }
-
-                Notification.requestPermission().then(function(permission) {
-                    updateBrowserPermissionUI();
-                });
-              }
-
-              function renderNotificationPage() {
-                  if (!("Notification" in window)) {
-                      byId('globalNotifStatus').innerHTML = '<h3>Browser Permission</h3><p style="color: #f44336;">Notifications are not supported by your browser.</p>';
-                      return;
-                  }
-
-                  updateBrowserPermissionUI();
-
-                  // Setup custom category toggles based on appData
-                  byId('toggleReminders').checked = appData.notifReminders;
-                  byId('toggleNotes').checked = appData.notifNotes;
-                  byId('toggleChecklist').checked = appData.notifChecklist;
-                  byId('toggleBudget').checked = appData.notifBudget;
-              }
-
-              // Function to handle custom toggle changes
-              function handleCustomNotifToggle(category, event) {
-                  appData[category] = event.target.checked;
-                  saveAll();
-                  // Re-check notifications immediately if a new category is toggled on
-                  if (event.target.checked) checkNotifications();
-              }
+              // (MOVED TO TOP OF IIFE)
 
 
               // ---------- Notifications Logic (Updated for comprehensive summary) ----------
+
+              // Helper 4: Notes (Summary of recent notes) - NEW
+              function buildNotesSummary() {
+                  let summary = [];
+                  if (appData.notes.length === 0) return "No notes added yet.";
+
+                  // Get the most recent 3 notes
+                  const recentNotes = appData.notes.slice(-3).reverse(); // Get last 3, newest first
+
+                  recentNotes.forEach(n => {
+                      let notePreview = n.text;
+                      if (n.isTable) {
+                          notePreview = "[Table Note]";
+                      } else if (notePreview && notePreview.length > 30) {
+                          notePreview = notePreview.substring(0, 30) + "...";
+                      } else if (!notePreview && n.file) {
+                          notePreview = `[File: ${n.file.name}]`;
+                      } else if (!notePreview) {
+                          notePreview = "[Empty Note]";
+                      }
+                      
+                      const datePart = n.createdAt ? n.createdAt.split(' ')[0] : '';
+                      summary.push(`- ${notePreview} (${datePart})`); // Show preview and date part
+                  });
+                  
+                  if (appData.notes.length > 3) {
+                      summary.push(`... and ${appData.notes.length - 3} older notes.`);
+                  }
+
+                  return summary.join('\n');
+              }
 
               // Helper 1: Reminders (Today or Tomorrow)
               function buildReminderSummary() {
@@ -1991,6 +2022,8 @@
               }
 
 
+              // NOTIFICATION CHANGE: This function is now called on page load and on data save (in saveAll).
+              // It now sends separate notifications for each category if they have content.
               function checkNotifications(){
                 // 1. Check global browser permission first
                 if(!(Notification && Notification.permission === 'granted')) {
@@ -1998,55 +2031,60 @@
                    return;
                 }
 
-                const now=new Date();
-                const notifTimes=[8,13,18]; // 8 AM, 1 PM, 6 PM IST
-                const currentHour = now.getHours();
-
-                // Only proceed if it is one of the scheduled hours
-                const isNotificationTime = notifTimes.includes(currentHour);
-                if (!isNotificationTime) return;
-
-                // --- Start Building Composite Notification Body ---
-
-                let notificationBody = "Home Screen Summary:\n\n";
-                let shouldSendNotification = false; // Only send if at least one category is enabled
-
                 // 1. REMINDERS Summary
                 if (appData.notifReminders) {
-                    notificationBody += "⚠️ REMINDERS (Due Today/Tomorrow):\n";
-                    notificationBody += buildReminderSummary() + "\n\n";
-                    shouldSendNotification = true;
+                    const reminderSummary = buildReminderSummary();
+                    // Send notification only if there is something to report (not the default message)
+                    if (reminderSummary !== "No reminders due today/tomorrow.") {
+                        new Notification("Nothing Reminder - ⚠️ Reminders", {
+                            body: reminderSummary,
+                            icon: 'assets/icon.png',
+                            requireInteraction: true,
+                            tag: 'reminders' // Use a tag to replace old reminder notifications
+                        });
+                    }
                 }
 
                 // 2. CHECKLIST Summary
                 if (appData.notifChecklist) {
-                    notificationBody += "✒ CHECKLIST (Open):\n";
-                    notificationBody += buildChecklistSummary() + "\n\n";
-                    shouldSendNotification = true;
+                    const checklistSummary = buildChecklistSummary();
+                    // Send notification only if there is something to report
+                    if (checklistSummary !== "No open checklists.") {
+                         new Notification("Nothing Reminder - ✒ Checklists", {
+                            body: checklistSummary,
+                            icon: 'assets/icon.png',
+                            requireInteraction: true,
+                            tag: 'checklists' // Use a tag to replace
+                        });
+                    }
                 }
 
                 // 3. BUDGET Summary
                 if (appData.notifBudget) {
-                    notificationBody += "💰 BUDGET Overview:\n";
-                    notificationBody += buildBudgetSummary() + "\n\n";
-                    shouldSendNotification = true;
+                    const budgetSummary = buildBudgetSummary();
+                     // Send notification only if there is something to report
+                    if (budgetSummary !== "No active budgets to track." && budgetSummary !== "No active budget overview available.") {
+                         new Notification("Nothing Reminder - 💰 Budget", {
+                            body: budgetSummary,
+                            icon: 'assets/icon.png',
+                            requireInteraction: true,
+                            tag: 'budget' // Use a tag to replace
+                        });
+                    }
                 }
 
-                // 4. NOTES: General sync reminder (only at 6 PM)
-                if (appData.notifNotes && currentHour === 18) {
-                    notificationBody += "📝 NOTES: Remember to review and backup your notes!";
-                    shouldSendNotification = true;
-                }
-
-                // --- Send Single Comprehensive Notification ---
-
-                if (shouldSendNotification) {
-                    new Notification("Nothing Reminder - Home Overview", {
-                        body: notificationBody,
-                        icon: 'assets/icon.png',
-                        // Use requireInteraction for a non-dismissible-like notification
-                        requireInteraction: true
-                    });
+                // 4. NOTES Summary (Using the new helper)
+                if (appData.notifNotes) {
+                    const notesSummary = buildNotesSummary();
+                     // Send notification only if there is something to report
+                    if (notesSummary !== "No notes added yet.") {
+                        new Notification("Nothing Reminder - 📝 Notes", {
+                            body: notesSummary,
+                            icon: 'assets/icon.png',
+                            requireInteraction: true,
+                            tag: 'notes' // Use a tag to replace
+                        });
+                    }
                 }
               }
 
@@ -2205,26 +2243,30 @@
               }
 
               // ---------- Date Difference Calculator Logic ----------
-              function calculateDateDifference() {
-                const startStr = byId('dateDiffStart').value;
-                const endStr = byId('dateDiffEnd').value;
-                const resultEl = byId('dateDiffResult');
+function calculateDateDifference() {
+  const startStr = byId('dateDiffStart').value;
+  const endStr = byId('dateDiffEnd').value;
+  const resultEl = byId('dateDiffResult');
 
-                if (!startStr || !endStr) {
-                  resultEl.textContent = 'Please enter both start and end dates.';
-                  return;
-                }
+  if (!startStr || !endStr) {
+    resultEl.textContent = 'Please enter both start and end dates.';
+    return;
+  }
 
-                const startDate = new Date(startStr);
-                const endDate = new Date(endStr);
-                const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+  const startDate = new Date(startStr);
+  const endDate = new Date(endStr);
 
-                const result = `Difference: ${diffDays} day(s).`;
-                resultEl.textContent = result;
+  // Calculate the difference in time
+  const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
 
-                saveHistory(`Date Difference: ${formatDMY(startStr)} to ${formatDMY(endStr)} = ${diffDays} day(s)`, result);
-              }
+  // Convert to days and add 1 to include both start and end dates
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+  const result = `Difference: ${diffDays} day(s).`;
+  resultEl.textContent = result;
+
+  saveHistory(`Date Difference: ${formatDMY(startStr)} to ${formatDMY(endStr)} = ${diffDays} day(s)`, result);
+}
 
               // ---------- Calculator Mode Switcher ----------
               function switchCalculatorMode() {
@@ -2432,12 +2474,12 @@
               switchCalculatorMode();
               // ... rest of the initial render code ...
 
-              // 3. Setup notifications and periodic check
+              // 3. Setup notifications
+              // NOTIFICATION CHANGE: Removed periodic check (setInterval).
+              // Notifications are now checked on page load (below) and on every data save (in saveAll).
               if ("Notification" in window) {
                   updateBrowserPermissionUI();
-                  checkNotifications();
-                  // Start the periodic check for notifications (every 5 minutes)
-                  setInterval(checkNotifications, 5 * 60 * 1000);
+                  checkNotifications(); // Check once on page load
               }
 
               // ---------- End Initial Render Code ----------

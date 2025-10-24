@@ -1989,7 +1989,7 @@
                   appData.reminders.forEach(r => {
                       const diff = daysLeft(r.endDate);
                       if (diff === 0 || diff === 1) { // Only Today or Tomorrow as per home screen
-                          summary.push(`- ${r.title} | ${diff === 0 ? 'Today' : 'Tomorrow'}`);
+                          summary.push(`- ${r.title} | ${diff === 0 & 1 ? 'Today' : 'Tomorrow'}`);
                       }
                   });
                   return summary.length > 0 ? summary.join('\n') : "No reminders due today/tomorrow.";

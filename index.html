@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Nothing Reminder</title>
     <link rel="icon" type="image/png" href="assets/icon.png" />
+    <link rel="icon" type="image/png" href="assets/icon.png" />
+    <link rel="manifest" href="manifest.json">
     <style>
             :root {
               --bg: #ffffff;
@@ -690,7 +692,7 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.4.5</p>
+          <p>Version 13.4.6</p>
           <p>Last Updated: 24-Sep-2025</p>
           <p>Project Type: Open source</p>
         </ul>
@@ -2488,7 +2490,9 @@ function calculateDateDifference() {
                   updateBrowserPermissionUI();
                   checkNotifications(); // Check once on page load
               }
-
+              if ('serviceWorker' in navigator) {
+                  navigator.serviceWorker.register('service-worker.js');
+              }
               // ---------- End Initial Render Code ----------
 
             })();

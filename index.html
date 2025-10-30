@@ -692,8 +692,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.4.7</p>
-          <p>Last Updated: 27-Sep-2025</p>
+          <p>Version 13.4.8</p>
+          <p>Last Updated: 30-Oct-2025</p>
           <p>Project Type: Open source</p>
         </ul>
       </div>
@@ -2230,20 +2230,23 @@
                   return;
                 }
               
-                const startDate = new Date(startStr);
-                const endDate = new Date(endStr);
-              
-                // Calculate the difference in time
-                const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
-              
-                // Convert to days and add 1 to include both start and end dates
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-              
-                const result = `Difference: ${diffDays} day(s).`;
-                resultEl.textContent = result;
-              
-                saveHistory(`Date Difference: ${formatDMY(startStr)} to ${formatDMY(endStr)} = ${diffDays} day(s)`, result);
-              }
+                const start = new Date(startStr);
+               const end = new Date(endStr);
+              const diffTime = Math.abs(end - start);
+               const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+// Calculate months and remaining days
+const totalMonths = Math.floor(diffDays / 30); // Approximate month as 30 days
+const remainingDays = diffDays % 30;
+
+let result;
+if (diffDays > 31) {
+  result = `${totalMonths} month(s) and ${remainingDays} day(s)`;
+} else {
+  result = `${diffDays} day(s)`;
+}
+
+saveHistory(`Date Difference: ${formatDMY(startStr)} to ${formatDMY(endStr)} = ${result}`, result);
 
               // ---------- Calculator Mode Switcher ----------
               function switchCalculatorMode() {

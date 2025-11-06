@@ -2,11 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nothing Reminder</title>
     <link rel="icon" type="image/png" href="assets/icon.png" />
     <link rel="manifest" href="manifest.json" />
     <style>
+      html, body {
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+      }
+
       :root {
         --bg: #ffffff;
         --text: #000000;
@@ -361,6 +366,20 @@
       input:checked + .slider:before {
         transform: translateX(26px);
       }
+      .sidebar {
+        width: 220px;
+        background: #666;
+        color: #fff;
+        position: fixed;
+        height: 100%;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 12px;
+        gap: 8px;
+        transition: left 0s;
+        overflow-y: auto;
+      }
     </style>
   </head>
   <body>
@@ -390,6 +409,7 @@
       <button class="menu-btn" data-page="budget">💰 Budget Tracker</button>
       <button class="menu-btn" data-page="Check">✒ Check List</button>
       <button class="menu-btn" data-page="utilities">🛠️ Utilities</button>
+      <button class="menu-btn" data-page="trash">🗑️ Trash Bin</button>
       <button class="menu-btn" data-page="other">🎲 Other Apps</button>
 
       <div id="settingsContainer" style="margin-top:auto;">
@@ -700,8 +720,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.4.9</p>
-          <p>Last Updated: 02-Nov-2025</p>
+          <p>Version 13.5</p>
+          <p>Last Updated: 06-Nov-2025</p>
           <p>Project Type: Open source</p>
         </ul>
       </div>
@@ -943,11 +963,15 @@
           ></ul>
         </div>
       </div>
-
+      <div id="trash" class="page hidden">
+        <h2>🗑️ Trash Bin</h2>
+        <p style="opacity:0.8;">Deleted Items are here.</p>
+        <ul id="trashList" class="list scrollable-list form"></ul>
+      </div>
       <div id="other" class="page hidden">
         <h2>🎲 Other Apps</h2>
         <div
-          style="display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px;"
+          style="display: flex; flex-wrap: wrap; gap: 20px; margin-top: 10px;"
         >
           <a
             href="https://you-tube-seven.vercel.app/"
@@ -1050,6 +1074,23 @@
       (function () {
         // ---------- Helpers ----------
         function byId(id){ return document.getElementById(id); }
+        function rerenderFor(type){
+  switch(type){
+    case 'reminders':
+      renderReminders(); renderHomeReminders(); break;
+    case 'notes':
+      renderNotes(); renderHomeNotes(); break;
+    case 'budget':
+      renderBudgets(); renderHomeBudgets(); break;
+    case 'checklists':
+      renderChecklists(); renderHomeCheck(); break;
+    // for future:
+    case 'utilities':
+      // renderUtilities(); // if you add a list later
+      break;
+  }
+}
+
 
         // ---------- NEW: Notification Settings Logic ----------
         function updateBrowserPermissionUI() {
@@ -1136,7 +1177,8 @@
           notifChecklist: true,
           notifBudget: true,
           // NEW: Calculation History
-          calculationHistory: []
+          calculationHistory: [],
+          trash: [],
         };
 
         let appData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultData;
@@ -1548,13 +1590,6 @@
           showForm(byId('budgetFormContainer'));
         }
 
-        function deleteBudget(index){
-          appData.budget.splice(index, 1);
-          saveAll();
-          renderBudgets();
-          renderHomeBudgets();
-        }
-
         function saveBudget(){
           const title=byId('budgetTitle').value.trim();
           const amount=byId('budgetAmount').value;
@@ -1583,13 +1618,6 @@
           showForm(byId('reminderFormContainer'));
         }
 
-        function deleteReminder(index){
-          appData.reminders.splice(index, 1);
-          saveAll();
-          renderReminders();
-          renderHomeReminders();
-        }
-
         function saveReminder(){
           const title=byId('reminderTitle').value.trim();
           const start=byId('startDate').value;
@@ -1607,12 +1635,6 @@
           byId('endDate').value='';
         }
 
-        function deleteNote(index){
-          appData.notes.splice(index,1);
-          saveAll();
-          renderNotes();
-          renderHomeNotes();
-        }
 
         // Updated editNote
         function editNote(index){
@@ -1692,12 +1714,6 @@
           }
         }
 
-        function deleteCheck(index){
-          appData.checklists.splice(index,1);
-          saveAll();
-          renderChecklists();
-          renderHomeCheck();
-        }
 
         function editCheck(index){
           const check = appData.checklists[index];
@@ -1879,6 +1895,63 @@
           list.appendChild(frag);
           renderHomeCheck();
         }
+// ---------- Trash Bin ----------
+function renderTrash(){
+  const list = byId('trashList');
+  if(!list) return;
+  list.innerHTML = '';
+  if(!appData.trash.length){
+    const li = document.createElement('li');
+    li.textContent = 'Trash is empty.';
+    li.style.opacity = '0.7';
+    list.appendChild(li);
+    return;
+  }
+  const frag = document.createDocumentFragment();
+  appData.trash.forEach((t,i)=>{
+    const li = document.createElement('li');
+    const left = document.createElement('div');
+    left.className = 'item-left';
+    left.innerHTML = `<b>${t.type.toUpperCase()}</b><br>${(t.item.title||t.item.text||'Untitled')}<br><small>Deleted: ${new Date(t.deletedAt).toLocaleString()}</small>`;
+    const right = document.createElement('div');
+    right.style.display = 'flex';
+    const restoreBtn = document.createElement('button');
+    restoreBtn.className = 'icon-small';
+    restoreBtn.textContent = '♻️';
+    restoreBtn.title = 'Restore';
+    restoreBtn.onclick = ()=>restoreFromTrash(i);
+    const delBtn = document.createElement('button');
+    delBtn.className = 'icon-small';
+    delBtn.textContent = '❌';
+    delBtn.title = 'Delete Forever';
+    delBtn.onclick = ()=>deleteForever(i);
+    right.appendChild(restoreBtn);
+    right.appendChild(delBtn);
+    li.appendChild(left);
+    li.appendChild(right);
+    frag.appendChild(li);
+  });
+  list.appendChild(frag);
+}
+
+function restoreFromTrash(i){
+  const t = appData.trash[i];
+  if(!t) return;
+  if(Array.isArray(appData[t.type])) appData[t.type].push(t.item);
+  appData.trash.splice(i,1);
+  saveAll();
+  renderTrash();
+  alert(`${t.type} item restored.`);
+}
+
+function deleteForever(i){
+  if(confirm('Delete permanently?')){
+    appData.trash.splice(i,1);
+    saveAll();
+    renderTrash();
+  }
+}
+
 
         // ---------- Form Show/Hide ----------
         function showForm(el){ el.classList.add('visible'); }
@@ -2158,12 +2231,6 @@
                   }
                 }
 
-                function deleteHistory(index) {
-                  // No confirmation, as requested
-                  appData.calculationHistory.splice(index, 1);
-                  saveAll();
-                  renderHistory();
-                }
 
                 // ---------- Normal Calculator Logic ----------
                 let currentExpression = '0';
@@ -2323,6 +2390,45 @@
                     }
                     renderCalendar(currentMonth, currentYear);
                 }
+function moveToTrash(type, item, index) {
+  appData.trash.push({ type, item, deletedAt: new Date().toISOString() });
+  appData[type].splice(index, 1);
+  saveAll();
+  renderTrash();
+  rerenderFor(type); // ⟵ live update the source page + home widgets
+}
+
+function restoreFromTrash(i){
+  const t = appData.trash[i];
+  if(!t) return;
+
+  // put back in its collection
+  if (Array.isArray(appData[t.type])) {
+    appData[t.type].push(t.item);
+  }
+
+  // remove from trash + persist
+  appData.trash.splice(i,1);
+  saveAll();
+
+  // live re-render destination page + home widgets
+  rerenderFor(t.type);
+  renderTrash();
+
+  // optional UX: jump to the restored item's page
+  // ('checklists' page id is 'Check' in your DOM)
+  const targetPageId = (t.type === 'checklists') ? 'Check' : t.type;
+  if (document.getElementById(targetPageId)) {
+    showPage(targetPageId);
+  }
+}
+
+
+// New delete versions
+function deleteReminder(i){ moveToTrash('reminders', appData.reminders[i], i); renderReminders(); renderHomeReminders(); }
+function deleteNote(i){ moveToTrash('notes', appData.notes[i], i); renderNotes(); renderHomeNotes(); }
+function deleteBudget(i){ moveToTrash('budget', appData.budget[i], i); renderBudgets(); renderHomeBudgets(); }
+function deleteCheck(i){ moveToTrash('checklists', appData.checklists[i], i); renderChecklists(); renderHomeCheck(); }
 
                 // ---------- Event Listeners ----------
 
@@ -2469,6 +2575,34 @@
                     updateBrowserPermissionUI();
                     checkNotifications(); // Check once on page load
                 }
+        // ✅ Fix: render Trash only after all scripts + storage loaded
+              window.addEventListener('load', () => {
+                if (!appData.trash) appData.trash = [];
+                renderTrash();
+              });
+              // Ensure only Home is visible and sidebar is hidden on initial page load
+              window.addEventListener('load', () => {
+                const sidebar = document.getElementById('sidebar');
+                const main = document.getElementById('main');
+                const toggleBtn = document.getElementById('toggleBtn');
+              
+                // Hide sidebar off-screen (same positions your toggle uses)
+                if (sidebar) sidebar.style.left = '-220px';
+              
+                // Make main area full width (no left margin)
+                if (main) main.style.marginLeft = '0';
+              
+                // Make toggle button show "closed" state
+                if (toggleBtn) toggleBtn.textContent = '⮞';
+              
+                // Hide all pages and then show only Home
+                document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+                const home = document.getElementById('home');
+                if (home) home.classList.remove('hidden');
+              
+                // Ensure Trash (and other widgets) render after load too
+                if (typeof renderTrash === 'function') renderTrash();
+              });
                 // ---------- End Initial Render Code ----------
 
               })();

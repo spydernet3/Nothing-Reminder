@@ -380,6 +380,11 @@
         transition: left 0s;
         overflow-y: auto;
       }
+      #storageBarContainer { position:relative; background:#333; border-radius:8px; height:16px; width:100%; overflow:visible; }
+#storageBar { background:linear-gradient(90deg,#4caf50,#8bc34a); border-radius:8px; height:100%; width:0%; transition:width 0.4s ease; }
+#storageEmoji { position:absolute; top:-5px; left:0; font-size:18px; z-index:5; pointer-events:none; transition:left 0.4s ease; }
+#viewStorageBtn { flex-direction:column; gap:6px; align-items:flex-start; }
+
     </style>
   </head>
   <body>
@@ -419,7 +424,6 @@
         <div id="settingsPanel" class="settings-panel" aria-hidden="true">
           <button class="menu-btn" id="editNameBtn">✏️ Edit Name</button>
           <button class="icon-btn" id="darkModeBtn">🌙 Dark Mode</button>
-
           <button
             class="menu-btn"
             data-page="notifications"
@@ -432,6 +436,17 @@
             💢 Terms & Conditions
           </button>
           <button class="menu-btn" data-page="how">🧑‍🏫 How to Use</button>
+        <!-- 💾 Storage Usage -->
+        <button id="viewStorageBtn" class="menu-btn" style="flex-direction:column;align-items:flex-start;">
+          <div style="display:flex;justify-content:space-between;width:100%;align-items:center;">
+            <span>💾</span>
+            <span id="storageText" style="font-size:13px;opacity:0.9;">Calculating...</span>
+          </div>
+          <div id="storageBarContainer" style="background:#333;border-radius:8px;height:16px;width:100%;margin-top:8px;overflow:visible;position:relative;">
+            <div id="storageBar" style="background:linear-gradient(90deg,#4caf50,#8bc34a);border-radius:8px;height:100%;width:0%;transition:width 0.4s ease;"></div>
+            <span id="storageEmoji" style="position:absolute;top:-5px;left:0;font-size:18px;z-index:5;pointer-events:none;transition:left 0.4s ease;">🙈</span>
+          </div>
+        </button>
         </div>
       </div>
     </div>
@@ -682,7 +697,7 @@
       </div>
 
       <div id="terms" class="page hidden">
-        <h1>Privacy Policy!</h1>
+        <h2>Privacy Policy!</h2>
         <ul>
           <h2>📂 Data We Colleted</h2>
           <ul>
@@ -720,8 +735,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.5</p>
-          <p>Last Updated: 06-Nov-2025</p>
+          <p>Version 13.5.1</p>
+          <p>Last Updated: 07-Nov-2025</p>
           <p>Project Type: Open source</p>
         </ul>
       </div>
@@ -1074,23 +1089,21 @@
         // ---------- Helpers ----------
         function byId(id){ return document.getElementById(id); }
         function rerenderFor(type){
-  switch(type){
-    case 'reminders':
-      renderReminders(); renderHomeReminders(); break;
-    case 'notes':
-      renderNotes(); renderHomeNotes(); break;
-    case 'budget':
-      renderBudgets(); renderHomeBudgets(); break;
-    case 'checklists':
-      renderChecklists(); renderHomeCheck(); break;
-    // for future:
-    case 'utilities':
-      // renderUtilities(); // if you add a list later
-      break;
-  }
-}
-
-
+        switch(type){
+          case 'reminders':
+            renderReminders(); renderHomeReminders(); break;
+          case 'notes':
+            renderNotes(); renderHomeNotes(); break;
+          case 'budget':
+            renderBudgets(); renderHomeBudgets(); break;
+          case 'checklists':
+            renderChecklists(); renderHomeCheck(); break;
+          // for future:
+          case 'utilities':
+            // renderUtilities(); // if you add a list later
+            break;
+        }
+      }
         // ---------- NEW: Notification Settings Logic ----------
         function updateBrowserPermissionUI() {
             const status = Notification.permission;
@@ -1202,6 +1215,7 @@
             const dataStr = JSON.stringify(appData);
             localStorage.setItem(STORAGE_KEY, dataStr);
             console.log("Data saved successfully to localStorage.");
+            if (typeof updateStorageUsage === "function") updateStorageUsage();
             // Re-render the notification page whenever data changes (if the page is active)
             if (byId('notifications') && !byId('notifications').classList.contains('hidden')) {
                renderNotificationPage();
@@ -1894,64 +1908,62 @@
           list.appendChild(frag);
           renderHomeCheck();
         }
-// ---------- Trash Bin ----------
-function renderTrash(){
-  const list = byId('trashList');
-  if(!list) return;
-  list.innerHTML = '';
-  if(!appData.trash.length){
-    const li = document.createElement('li');
-    li.textContent = 'Trash is empty.';
-    li.style.opacity = '0.7';
-    list.appendChild(li);
-    return;
-  }
-  const frag = document.createDocumentFragment();
-  appData.trash.forEach((t,i)=>{
-    const li = document.createElement('li');
-    const left = document.createElement('div');
-    left.className = 'item-left';
-    left.innerHTML = `<b>${t.type.toUpperCase()}</b><br>${(t.item.title||t.item.text||'Untitled')}<br><small>Deleted: ${new Date(t.deletedAt).toLocaleString()}</small>`;
-    const right = document.createElement('div');
-    right.style.display = 'flex';
-    const restoreBtn = document.createElement('button');
-    restoreBtn.className = 'icon-small';
-    restoreBtn.textContent = '♻️';
-    restoreBtn.title = 'Restore';
-    restoreBtn.onclick = ()=>restoreFromTrash(i);
-    const delBtn = document.createElement('button');
-    delBtn.className = 'icon-small';
-    delBtn.textContent = '❌';
-    delBtn.title = 'Delete Forever';
-    delBtn.onclick = ()=>deleteForever(i);
-    right.appendChild(restoreBtn);
-    right.appendChild(delBtn);
-    li.appendChild(left);
-    li.appendChild(right);
-    frag.appendChild(li);
-  });
-  list.appendChild(frag);
-}
-
-function restoreFromTrash(i){
-  const t = appData.trash[i];
-  if(!t) return;
-  if(Array.isArray(appData[t.type])) appData[t.type].push(t.item);
-  appData.trash.splice(i,1);
-  saveAll();
-  renderTrash();
-  alert(`${t.type} item restored.`);
-}
-
-function deleteForever(i){
-  if(confirm('Delete permanently?')){
-    appData.trash.splice(i,1);
-    saveAll();
-    renderTrash();
-  }
-}
-
-
+          // ---------- Trash Bin ----------
+          function renderTrash(){
+            const list = byId('trashList');
+            if(!list) return;
+            list.innerHTML = '';
+            if(!appData.trash.length){
+              const li = document.createElement('li');
+              li.textContent = 'Trash is empty.';
+              li.style.opacity = '0.7';
+              list.appendChild(li);
+              return;
+            }
+            const frag = document.createDocumentFragment();
+            appData.trash.forEach((t,i)=>{
+              const li = document.createElement('li');
+              const left = document.createElement('div');
+              left.className = 'item-left';
+              left.innerHTML = `<b>${t.type.toUpperCase()}</b><br>${(t.item.title||t.item.text||'Untitled')}<br><small>Deleted: ${new Date(t.deletedAt).toLocaleString()}</small>`;
+              const right = document.createElement('div');
+              right.style.display = 'flex';
+              const restoreBtn = document.createElement('button');
+              restoreBtn.className = 'icon-small';
+              restoreBtn.textContent = '♻️';
+              restoreBtn.title = 'Restore';
+              restoreBtn.onclick = ()=>restoreFromTrash(i);
+              const delBtn = document.createElement('button');
+              delBtn.className = 'icon-small';
+              delBtn.textContent = '❌';
+              delBtn.title = 'Delete Forever';
+              delBtn.onclick = ()=>deleteForever(i);
+              right.appendChild(restoreBtn);
+              right.appendChild(delBtn);
+              li.appendChild(left);
+              li.appendChild(right);
+              frag.appendChild(li);
+            });
+            list.appendChild(frag);
+          }
+          
+          function restoreFromTrash(i){
+            const t = appData.trash[i];
+            if(!t) return;
+            if(Array.isArray(appData[t.type])) appData[t.type].push(t.item);
+            appData.trash.splice(i,1);
+            saveAll();
+            renderTrash();
+            alert(`${t.type} item restored.`);
+          }
+          
+          function deleteForever(i){
+            if(confirm('Delete permanently?')){
+              appData.trash.splice(i,1);
+              saveAll();
+              renderTrash();
+            }
+          }
         // ---------- Form Show/Hide ----------
         function showForm(el){ el.classList.add('visible'); }
         function hideForm(el){ el.classList.remove('visible'); }
@@ -2574,7 +2586,6 @@ function deleteCheck(i){ moveToTrash('checklists', appData.checklists[i], i); re
                     updateBrowserPermissionUI();
                     checkNotifications(); // Check once on page load
                 }
-        // ✅ Fix: render Trash only after all scripts + storage loaded
               window.addEventListener('load', () => {
                 if (!appData.trash) appData.trash = [];
                 renderTrash();
@@ -2602,8 +2613,52 @@ function deleteCheck(i){ moveToTrash('checklists', appData.checklists[i], i); re
                 // Ensure Trash (and other widgets) render after load too
                 if (typeof renderTrash === 'function') renderTrash();
               });
-                // ---------- End Initial Render Code ----------
-
+              // ---------- Storage Usage Feature (500 MB quota; clean display) ----------
+              const viewStorageBtn = document.getElementById('viewStorageBtn');
+              const storageBar = document.getElementById('storageBar');
+              const storageText = document.getElementById('storageText');
+              const storageEmoji = document.getElementById('storageEmoji');
+              const barContainer = document.getElementById('storageBarContainer');
+              if (!viewStorageBtn) return;
+            
+              viewStorageBtn.addEventListener('click', () => updateStorageUsage());
+              window.addEventListener('load', () => setTimeout(updateStorageUsage, 80));
+            
+              function updateStorageUsage() {
+                const usedBytes = getLocalStorageSize();
+                const maxBytes = 500 * 1024 * 1024; // 500 MB quota
+                const percent = Math.min((usedBytes / maxBytes) * 100, 100);
+            
+                // fill bar & color
+                storageBar.style.width = percent.toFixed(1) + '%';
+                if (percent < 80) storageBar.style.background = 'linear-gradient(90deg,#4caf50,#8bc34a)';
+                else if (percent < 95) storageBar.style.background = 'linear-gradient(90deg,#ffb74d,#ff7043)';
+                else storageBar.style.background = 'linear-gradient(90deg,#ff7043,#f44336)';
+            
+                // move 🙈
+                const cw = barContainer.clientWidth;
+                const ew = 18;
+                let left = (percent / 100) * cw - ew / 2;
+                left = Math.max(0, Math.min(cw - ew, left));
+                storageEmoji.style.left = left + 'px';
+            
+                // show only “X MB of 500 MB used”
+                const usedMB = (usedBytes / 1024 / 1024).toFixed(2);
+                storageText.textContent = `${usedMB} MB of 500 MB used`;
+              }
+            
+              function getLocalStorageSize() {
+                let total = 0;
+                for (let i = 0; i < localStorage.length; i++) {
+                  const key = localStorage.key(i);
+                  const val = localStorage.getItem(key);
+                  total += (key ? key.length : 0) + (val ? val.length : 0);
+                }
+                return total;
+              }
+              window.addEventListener('load', () => setTimeout(updateStorageUsage, 80));
+              window.updateStorageUsage = updateStorageUsage;
+              // ---------- End Initial Render Code ----------
               })();
     </script>
   </body>

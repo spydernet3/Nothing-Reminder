@@ -41,7 +41,8 @@
       .profile {
         display:flex;
         align-items:center;
-        gap:18px;
+        gap:21px;
+        margin-top:8px;
         margin-bottom:8px;
       }
       .menu-btn, .icon-btn, .add-btn {
@@ -68,12 +69,12 @@
       .page.hidden { display:none; }
       .toggle-btn {
         position: absolute;
-        left: 210px; /* Adjusted to show partial icon */
-        top: 12px;
+        left: 2px; /* Adjusted to show partial icon */
+        top: 1px;
         padding:6px 8px;
         border-radius:8px;
         border:none;
-        background:#ddd;
+        background:transparent;
         cursor:pointer;
         transition: left 0s;
         z-index: 10;
@@ -452,7 +453,7 @@
     </div>
 
     <div id="main" class="main">
-      <button id="toggleBtn" class="toggle-btn">⮞</button>
+      <button id="toggleBtn" class="toggle-btn">🐵</button>
 
       <div id="home" class="page">
         <h2>Home</h2>
@@ -735,8 +736,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.5.1</p>
-          <p>Last Updated: 07-Nov-2025</p>
+          <p>Version 13.5.2</p>
+          <p>Last Updated: 08-Nov-2025</p>
           <p>Project Type: Open source</p>
         </ul>
       </div>
@@ -1986,7 +1987,7 @@
           // Auto-hide sidebar instantly when an option is chosen
           sidebar.style.left = '-220px';
           main.style.marginLeft = '0';
-          toggleBtn.textContent = '⮞';
+          toggleBtn.textContent = '🐵';
           sidebar.style.transition = 'left 0s';   // instant hide
           main.style.transition = 'margin-left 0s'; // instant hide
         }
@@ -1996,11 +1997,11 @@
           if (sidebar.style.left === '-220px' || sidebar.style.left === '') {
             sidebar.style.left = '0px';
             main.style.marginLeft = '220px';
-            toggleBtn.textContent = '⮜';
+            toggleBtn.textContent = '🐒';
           } else {
             sidebar.style.left = '-220px';
             main.style.marginLeft = '0';
-            toggleBtn.textContent = '⮞';
+            toggleBtn.textContent = '🐵';
           }
         });
 
@@ -2401,48 +2402,48 @@
                     }
                     renderCalendar(currentMonth, currentYear);
                 }
-function moveToTrash(type, item, index) {
-  appData.trash.push({ type, item, deletedAt: new Date().toISOString() });
-  appData[type].splice(index, 1);
-  saveAll();
-  renderTrash();
-  rerenderFor(type); // ⟵ live update the source page + home widgets
-}
-
-function restoreFromTrash(i){
-  const t = appData.trash[i];
-  if(!t) return;
-
-  // put back in its collection
-  if (Array.isArray(appData[t.type])) {
-    appData[t.type].push(t.item);
-  }
-
-  // remove from trash + persist
-  appData.trash.splice(i,1);
-  saveAll();
-
-  // live re-render destination page + home widgets
-  rerenderFor(t.type);
-  renderTrash();
-
-  // optional UX: jump to the restored item's page
-  // ('checklists' page id is 'Check' in your DOM)
-  const targetPageId = (t.type === 'checklists') ? 'Check' : t.type;
-  if (document.getElementById(targetPageId)) {
-    showPage(targetPageId);
-  }
-}
-
-
-// New delete versions
-function deleteReminder(i){ moveToTrash('reminders', appData.reminders[i], i); renderReminders(); renderHomeReminders(); }
-function deleteNote(i){ moveToTrash('notes', appData.notes[i], i); renderNotes(); renderHomeNotes(); }
-function deleteBudget(i){ moveToTrash('budget', appData.budget[i], i); renderBudgets(); renderHomeBudgets(); }
-function deleteCheck(i){ moveToTrash('checklists', appData.checklists[i], i); renderChecklists(); renderHomeCheck(); }
-
-                // ---------- Event Listeners ----------
-
+                function moveToTrash(type, item, index) {
+                  appData.trash.push({ type, item, deletedAt: new Date().toISOString() });
+                  appData[type].splice(index, 1);
+                  saveAll();
+                  renderTrash();
+                  rerenderFor(type); // ⟵ live update the source page + home widgets
+                }
+                
+                function restoreFromTrash(i){
+                  const t = appData.trash[i];
+                  if(!t) return;
+                
+                  // put back in its collection
+                  if (Array.isArray(appData[t.type])) {
+                    appData[t.type].push(t.item);
+                  }
+                
+                  // remove from trash + persist
+                  appData.trash.splice(i,1);
+                  saveAll();
+                
+                  // live re-render destination page + home widgets
+                  rerenderFor(t.type);
+                  renderTrash();
+                
+                  // optional UX: jump to the restored item's page
+                  // ('checklists' page id is 'Check' in your DOM)
+                  const targetPageId = (t.type === 'checklists') ? 'Check' : t.type;
+                  if (document.getElementById(targetPageId)) {
+                    showPage(targetPageId);
+                  }
+                }
+                
+                
+                // New delete versions
+                function deleteReminder(i){ moveToTrash('reminders', appData.reminders[i], i); renderReminders(); renderHomeReminders(); }
+                function deleteNote(i){ moveToTrash('notes', appData.notes[i], i); renderNotes(); renderHomeNotes(); }
+                function deleteBudget(i){ moveToTrash('budget', appData.budget[i], i); renderBudgets(); renderHomeBudgets(); }
+                function deleteCheck(i){ moveToTrash('checklists', appData.checklists[i], i); renderChecklists(); renderHomeCheck(); }
+                
+                                // ---------- Event Listeners ----------
+                
                 // Utilities Listeners
                 byId('monthlyCalendarToggle').addEventListener('click', function() {
                   toggleCollapse(byId('monthlyCalendarContainer'), byId('monthlyCalendarToggle'));
@@ -2601,9 +2602,6 @@ function deleteCheck(i){ moveToTrash('checklists', appData.checklists[i], i); re
               
                 // Make main area full width (no left margin)
                 if (main) main.style.marginLeft = '0';
-              
-                // Make toggle button show "closed" state
-                if (toggleBtn) toggleBtn.textContent = '⮞';
               
                 // Hide all pages and then show only Home
                 document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));

@@ -69,8 +69,8 @@
       .page.hidden { display:none; }
       .toggle-btn {
         position: absolute;
-        left: 2px; /* Adjusted to show partial icon */
-        top: 1px;
+        left: 5px; /* Adjusted to show partial icon */
+        top: 6px;
         padding:6px 8px;
         border-radius:8px;
         border:none;
@@ -78,8 +78,8 @@
         cursor:pointer;
         transition: left 0s;
         z-index: 10;
-        width: 20px; /* Make it smaller to show partial icon */
-        height: 20px;
+        width: 22px; /* Make it smaller to show partial icon */
+        height: 46px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -544,7 +544,7 @@
               Note<textarea
                 id="noteText"
                 rows="4"
-                placeholder="Write your note here..."
+                placeholder="Create a note here, use | to add a title and --- to separate columns for table format."
               ></textarea>
             </label>
 
@@ -736,7 +736,7 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.5.2</p>
+          <p>Version 13.5.3</p>
           <p>Last Updated: 08-Nov-2025</p>
           <p>Project Type: Open source</p>
         </ul>
@@ -783,10 +783,11 @@
           <li>Go to the Budget Tracker page.</li>
           <li>Click + Add New Budget.</li>
           <li>That will showed Total Amount/Remaining Days</li>
-          <li>That will shows Cost per day How much you need to spend</li>
           <li>
-            At Budget reminder it reminders your spend limit hole day with 5
-            Mins Interval
+          <li>That will shows Cost per day How much you need to spend</li>
+          <li> Add Expenses and track everything </li>
+          <li>
+            At Budget reminder it will reminders your spend limit every day
           </li>
           <li>Edit or delete using the ✏️ and 🗑️ button.</li>
         </ul>
@@ -1526,71 +1527,166 @@
         }
 
         // ---------- Budget Functions ----------
-        function renderBudgets(){
-          const list = byId('budgetList'); list.innerHTML = '';
-          // Ensure appData.budget exists and is an array
-          if (!appData.budget || !Array.isArray(appData.budget)) {
-            appData.budget = [];
-          }
-          if(appData.budget.length === 0){
-            const li = document.createElement('li'); li.textContent='No budgets yet.'; li.style.opacity='0.7'; list.appendChild(li);
-            renderHomeBudgets(); return;
-          }
-          const frag = document.createDocumentFragment();
-          appData.budget.forEach((b,i)=>{
-            const li=document.createElement('li');
-            const left=document.createElement('div'); left.className='item-left';
+        function renderBudgets() {
+        const list = byId('budgetList');
+        list.innerHTML = '';
+        if (!appData.budget || !Array.isArray(appData.budget)) appData.budget = [];
 
-            // Calculate cost per day
-            const costPerDay = calculateCostPerDay(b.amount, b.startDate, b.endDate);
-            const days = daysBetween(b.startDate, b.endDate);
+        if (appData.budget.length === 0) {
+          const li = document.createElement('li');
+          li.textContent = 'No budgets yet.';
+          li.style.opacity = '0.7';
+          list.appendChild(li);
+          renderHomeBudgets();
+          return;
+        }
 
-            const title=document.createElement('div');
-            title.textContent=`Title: ${b.title}`;
-            title.style.fontWeight='600';
+        const frag = document.createDocumentFragment();
 
-            const amounts=document.createElement('div');
-            amounts.style.fontSize='13px';
-            amounts.style.opacity='0.85';
-            amounts.textContent=`Total Budget: ₹${b.amount} | Remaining Days: ${days} | Cost per Day: ₹${costPerDay}`;
+        appData.budget.forEach((b, i) => {
+        const li = document.createElement('li');
+        const left = document.createElement('div');
+         left.className = 'item-left';
 
-            left.appendChild(title); left.appendChild(amounts);
+          const used = b.expenses ? b.expenses.reduce((sum, e) => sum + e.amount, 0) : 0;
+          const remaining = b.amount - used;
+          const start = b.startDate ? new Date(b.startDate) : null;
+          const end = b.endDate ? new Date(b.endDate) : null;
+          const days = (start && end) ? daysBetween(b.startDate, b.endDate) : 1;
+          const remainingPerDay = days > 0 ? (remaining / days).toFixed(2) : remaining;
+          const title = document.createElement('div');
+          title.textContent = `Title: ${b.title}`;
+          title.style.fontWeight = '600';
+          title.style.fontSize = '15px';
 
-            const right=document.createElement('div'); right.style.display='flex'; right.style.alignItems='center';
-            const editBtn=document.createElement('button'); editBtn.className='icon-small'; editBtn.textContent='✏️'; editBtn.title='Edit'; editBtn.addEventListener('click',()=>editBudget(i));
-            const delBtn=document.createElement('button'); delBtn.className='icon-small'; delBtn.textContent='🗑️'; delBtn.title='Delete'; delBtn.addEventListener('click',()=>deleteBudget(i));
+          const amounts = document.createElement('div');
+          amounts.style.fontSize = '13px';
+          amounts.style.opacity = '0.9';
+          amounts.textContent = `💰 Total: ₹${b.amount} | Used: ₹${used} | Remaining: ₹${remaining}`;
 
-            right.appendChild(editBtn); right.appendChild(delBtn);
-            li.appendChild(left); li.appendChild(right); frag.appendChild(li);
+          const expList = document.createElement('div');
+          expList.style.marginTop = '6px';
+          expList.style.fontSize = '13px';
+          
+          expList.innerHTML = (b.expenses && b.expenses.length)
+        ? b.expenses
+            .map(
+              e =>
+                `<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px dashed #333;padding:3px 0;">
+                  <span>📅 ${e.date}</span>
+                  <span>💸 ${e.title}</span>
+                  <span>₹${e.amount}</span>
+                </div>`
+            )
+            .join('')
+        : `<p style="opacity:0.6;">No expenses yet</p>`;
+
+            // --- EXPANDABLE FORM for adding expenses ---
+            const expForm = document.createElement('div');
+            expForm.className = 'expense-form';
+            expForm.style.display = 'none';
+            expForm.style.marginTop = '8px';
+            expForm.innerHTML = `
+              <input type="text" placeholder="Expense title" class="exp-title" 
+                style="background:#ddd;color:#black;border:1px solid #444;border-radius:6px;padding:4px 6px;width:100%;margin-bottom:4px;">
+              <input type="number" placeholder="Amount (₹)" class="exp-amount" 
+                style="background:#ddd;color:#black;border:1px solid #444;border-radius:6px;padding:4px 6px;width:100%;margin-bottom:4px;">
+              <button class="add-exp-confirm" style="background:#4caf50;color:#fff;border:none;border-radius:6px;padding:4px 8px;width:100%;">Add Expense</button>
+            `;
+
+            // --- Buttons section ---
+            const right = document.createElement('div');
+            right.style.display = 'flex';
+            right.style.alignItems = 'center';
+            right.style.gap = '4px';
+
+            const addBtn = document.createElement('button');
+            addBtn.textContent = '➕';
+            addBtn.className = 'icon-small';
+            addBtn.title = 'Add Expense';
+            addBtn.addEventListener('click', () => {
+              expForm.style.display = expForm.style.display === 'none' ? 'block' : 'none';
+            });
+
+            const editBtn = document.createElement('button');
+            editBtn.textContent = '✏️';
+            editBtn.className = 'icon-small';
+            editBtn.title = 'Edit';
+            editBtn.addEventListener('click', () => editBudget(i));
+
+            const delBtn = document.createElement('button');
+            delBtn.textContent = '🗑️';
+            delBtn.className = 'icon-small';
+            delBtn.title = 'Delete';
+            delBtn.addEventListener('click', () => deleteBudget(i));
+
+            right.append(addBtn, editBtn, delBtn);
+
+            // --- Expense add button logic ---
+            expForm.querySelector('.add-exp-confirm').addEventListener('click', () => {
+              const expTitle = expForm.querySelector('.exp-title').value.trim();
+              const expAmt = parseFloat(expForm.querySelector('.exp-amount').value.trim());
+              if (!expTitle || isNaN(expAmt) || expAmt <= 0) return alert('Enter valid details');
+              const expDate = new Date().toLocaleDateString('en-IN');
+
+              if (!b.expenses) b.expenses = [];
+              b.expenses.push({ title: expTitle, amount: expAmt, date: expDate });
+              b.amount = b.amount - expAmt;
+
+              saveAll();
+              renderBudgets();
+            });
+
+            left.append(title, amounts, expList, expForm);
+            li.append(left, right);
+            frag.appendChild(li);
           });
+
           list.appendChild(frag);
           renderHomeBudgets();
         }
 
-        function renderHomeBudgets(){
+        function renderHomeBudgets() {
           const container = byId('homeBudgetsContainer');
-          container.innerHTML='';
+          container.innerHTML = '';
+
           // Ensure appData.budget exists and is an array
           if (!appData.budget || !Array.isArray(appData.budget)) {
             appData.budget = [];
           }
-          if(appData.budget.length === 0){
-            const li=document.createElement('li');
-            li.textContent='No budgets yet.';
-            li.style.opacity='0.7';
+
+          if (appData.budget.length === 0) {
+            const li = document.createElement('li');
+            li.textContent = 'No budgets yet.';
+            li.style.opacity = '0.7';
             container.appendChild(li);
             return;
           }
-          const frag=document.createDocumentFragment();
-          appData.budget.forEach(b=>{
-            // Calculate cost per day
-            const costPerDay = calculateCostPerDay(b.amount, b.startDate, b.endDate);
+
+          const frag = document.createDocumentFragment();
+
+          appData.budget.forEach(b => {
+            if (!b.expenses) b.expenses = [];
+
+            // Calculate total expenses and remaining
+            const used = b.expenses.reduce((sum, e) => sum + Number(e.amount), 0);
+            const remaining = b.amount - used;
+
+            // Calculate cost per day (optional — still using full amount)
+            const costPerDay = calculateCostPerDay(remaining, b.startDate, b.endDate);
             const days = daysBetween(b.startDate, b.endDate);
 
-            const li=document.createElement('li');
-            li.textContent = `\"${b.title}\" || Total: ₹${b.amount} || Remaining: ${days} days || Cost: ₹${costPerDay}/day`;
+            const li = document.createElement('li');
+            li.style.fontSize = '14px';
+            li.style.marginBottom = '5px';
+            li.innerHTML = `
+              <strong>"${b.title}"</strong><br>
+              💰 Total: ₹${b.amount} &nbsp; | &nbsp; 💸 Used: ₹${used} &nbsp; | &nbsp; 🏦 Remaining: ₹${remaining}<br>
+              🕒 ${days} days remaining &nbsp; | &nbsp; Cost: ₹${costPerDay}/day
+            `;
             frag.appendChild(li);
           });
+
           container.appendChild(frag);
         }
 

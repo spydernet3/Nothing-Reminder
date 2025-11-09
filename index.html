@@ -1101,7 +1101,7 @@
           case 'checklists':
             renderChecklists(); renderHomeCheck(); break;
           case 'calculationHistoryList':
-          targetPageId = 'Utilities'; // ✅ correct redirect for Utilities
+          targetPageId = 'utilities';
           break;
               }
             }
@@ -2521,15 +2521,11 @@
                   // live re-render destination page + home widgets
                   rerenderFor(t.type);
                   renderTrash();
-                // ✅ Handle restored Utilities history instantly
                   if (t.type === 'calculationHistory' || t.type === 'utilities') {
-                    // Re-render the Utilities history list
                     if (typeof renderHistory === 'function') renderHistory();
-                  
-                    // Redirect user to the Utilities page (make sure its id="Utilities" in HTML)
-                    const utilitiesPage = document.getElementById('Utilities');
+                    const utilitiesPage = document.getElementById('utilities');
                     if (utilitiesPage) {
-                      showPage('Utilities');
+                      showPage('utilities');
                     }
                   
                     // Optional: scroll to bottom of Utilities history smoothly

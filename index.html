@@ -736,8 +736,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.5.3</p>
-          <p>Last Updated: 08-Nov-2025</p>
+          <p>Version 13.5.4</p>
+          <p>Last Updated: 09-Nov-2025</p>
           <p>Project Type: Open source</p>
         </ul>
       </div>
@@ -1100,12 +1100,11 @@
             renderBudgets(); renderHomeBudgets(); break;
           case 'checklists':
             renderChecklists(); renderHomeCheck(); break;
-          // for future:
-          case 'utilities':
-            // renderUtilities(); // if you add a list later
-            break;
-        }
-      }
+          case 'calculationHistoryList':
+          targetPageId = 'Utilities'; // ✅ correct redirect for Utilities
+          break;
+              }
+            }
         // ---------- NEW: Notification Settings Logic ----------
         function updateBrowserPermissionUI() {
             const status = Notification.permission;
@@ -2522,24 +2521,39 @@
                   // live re-render destination page + home widgets
                   rerenderFor(t.type);
                   renderTrash();
-                
+                // ✅ Handle restored Utilities history instantly
+                  if (t.type === 'calculationHistory' || t.type === 'utilities') {
+                    // Re-render the Utilities history list
+                    if (typeof renderHistory === 'function') renderHistory();
+                  
+                    // Redirect user to the Utilities page (make sure its id="Utilities" in HTML)
+                    const utilitiesPage = document.getElementById('Utilities');
+                    if (utilitiesPage) {
+                      showPage('Utilities');
+                    }
+                  
+                    // Optional: scroll to bottom of Utilities history smoothly
+                    setTimeout(() => {
+                      const list = document.getElementById('calculationHistoryList');
+                      if (list) list.scrollTop = list.scrollHeight;
+                    }, 300);
+                  
+                    return; // stop further navigation so it doesn’t jump to wrong section
+                  }
                   // optional UX: jump to the restored item's page
-                  // ('checklists' page id is 'Check' in your DOM)
                   const targetPageId = (t.type === 'checklists') ? 'Check' : t.type;
                   if (document.getElementById(targetPageId)) {
                     showPage(targetPageId);
                   }
                 }
                 
-                
                 // New delete versions
                 function deleteReminder(i){ moveToTrash('reminders', appData.reminders[i], i); renderReminders(); renderHomeReminders(); }
                 function deleteNote(i){ moveToTrash('notes', appData.notes[i], i); renderNotes(); renderHomeNotes(); }
                 function deleteBudget(i){ moveToTrash('budget', appData.budget[i], i); renderBudgets(); renderHomeBudgets(); }
                 function deleteCheck(i){ moveToTrash('checklists', appData.checklists[i], i); renderChecklists(); renderHomeCheck(); }
-                
+                function deleteHistory(i){moveToTrash('calculationHistory', appData.calculationHistory[i], i); renderHistory(); }
                                 // ---------- Event Listeners ----------
-                
                 // Utilities Listeners
                 byId('monthlyCalendarToggle').addEventListener('click', function() {
                   toggleCollapse(byId('monthlyCalendarContainer'), byId('monthlyCalendarToggle'));

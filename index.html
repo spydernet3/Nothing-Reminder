@@ -2421,7 +2421,7 @@
                    const start = new Date(startStr);
                const end = new Date(endStr);
               const diffTime = Math.abs(end - start);
-               const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+               const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)+1);
 
             // Calculate months and remaining days
             const totalMonths = Math.floor(diffDays / 30); // Approximate month as 30 days

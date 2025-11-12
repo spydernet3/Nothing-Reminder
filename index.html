@@ -184,7 +184,7 @@
       /* Consistent button styling for all sections */
       #showAddFormBtn, #homeRemindersToggle, #showAddNoteBtn, #viewNotesToggle, #homeNotesToggle,
       #homeBudgetsToggle, #homeCheckToggle, #showAddBudgetBtn,#viewbudgetToggle, #showAddCheckBtn,
-      #viewCheckToggle, #viewRemindersToggle, #monthlyCalendarToggle,#calculatorToggle, #viewHistoryToggle {
+      #viewCheckToggle, #viewRemindersToggle, #monthlyCalendarToggle,#calculatorToggle, #viewHistoryToggle , #moonPhaseToggle {
         position: relative;
         user-select: none;
         display: flex;
@@ -385,6 +385,80 @@
 #storageBar { background:linear-gradient(90deg,#4caf50,#8bc34a); border-radius:8px; height:100%; width:0%; transition:width 0.4s ease; }
 #storageEmoji { position:absolute; top:-5px; left:0; font-size:18px; z-index:5; pointer-events:none; transition:left 0.4s ease; }
 #viewStorageBtn { flex-direction:column; gap:6px; align-items:flex-start; }
+/* Compact BMI layout */
+#bmiCalculator {
+  max-width: 350px;
+  margin: 10px auto;
+}
+
+.bmi-input-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px; /* reduced from default 20+px */
+}
+
+#bmiCalculator label {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+#bmiCalculator input {
+  padding: 7px 9px;
+  font-size: 17px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+#calcBMIButton {
+  margin-top: 8px;
+  padding: 10px 80px;
+  border: none;
+  background: #4caf50;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+#calcBMIButton:hover {
+  background: #43a047;
+}
+#moonPhaseToggle {
+  background: #888;
+  color: #fff;
+  font-weight: 600;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 520px;
+  margin-top: 8px;
+}
+
+#moonPhaseContainer {
+  background: #ffffff;
+  color: black;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-top: 5px;
+  display: none;
+}
+
+#moonPhaseContainer.visible { display: block; }
+
+.moon-day {
+  display: flex;
+  justify-content: space-between;
+  margin: 3px 0;
+  padding: 5px 6px;
+  border-bottom: 1px solid #444;
+}
+
+.moon-day:last-child { border: none; }
+
 
     </style>
   </head>
@@ -731,13 +805,13 @@
             <a href="https://github.com/spydernet3" target="_blank"
               >Spydernet Github ↠</a>
           </p>
-          <p> mersalmgblog@gmail.com</p>
+          <p> Developer : mersalmgblog@gmail.com</p>
         </ul>
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.5.4</p>
-          <p>Last Updated: 11-Nov-2025</p>
+          <p>Version 13.5.5</p>
+          <p>Last Updated: 12-Nov-2025</p>
           <p>Project Mode: Open source</p>
           <p>App Size    : 7.0KB </p>
         </ul>
@@ -885,6 +959,7 @@
                 <option value="normal">Normal Calculator</option>
                 <option value="age">Age Calculator</option>
                 <option value="date">Date Difference Calculator</option>
+                <option value="bmi">BMI Calculator</option>
                 <option value="scientific" disabled>
                   Scientific Calculator (WIP)
                 </option>
@@ -968,8 +1043,32 @@
                 style="margin-top: 10px; font-weight: 600;"
               ></p>
             </div>
+<!-- ---------- BMI Calculator ---------- -->
+<div class="calculator-mode hidden" id="bmiCalculator">
+  <h3>🧮 BMI Calculator</h3>
+
+  <div class="bmi-input-group">
+    <label>Age:</label>
+    <input type="number" id="bmiAge" min="1" placeholder="Enter age" />
+  </div>
+
+  <div class="bmi-input-group">
+    <label>Height (cm):</label>
+    <input type="number" id="bmiHeight" min="50" placeholder="Enter height in cm" />
+  </div>
+
+  <div class="bmi-input-group">
+    <label>Weight (kg):</label>
+    <input type="number" id="bmiWeight" min="1" placeholder="Enter weight in kg" />
+  </div>
+
+  <button id="calcBMIButton">Calculate BMI</button>
+  <p id="bmiResult" style="margin-top: 8px; font-weight: 600;"></p>
+</div>
           </div>
         </div>
+        <button id="moonPhaseToggle">🌙 MOON PHASE <span class="arrow">▼</span></button>
+<div id="moonPhaseContainer" class="hidden"></div>
         <div class="add-area">
           <button id="viewHistoryToggle" class="add-btn" aria-expanded="false">
             ⏳ VIEW HISTORY <span class="arrow">▼</span>
@@ -2436,6 +2535,126 @@
 
             saveHistory(`Date Difference: ${formatDMY(startStr)} to ${formatDMY(endStr)} = ${result}`, result);
                 }
+                // ---------- BMI Calculator Logic ----------
+function calculateBMI() {
+  const age = parseInt(byId('bmiAge').value);
+  const height = parseFloat(byId('bmiHeight').value);
+  const weight = parseFloat(byId('bmiWeight').value);
+  const resultEl = byId('bmiResult');
+
+  if (!age || !height || !weight) {
+    resultEl.textContent = '⚠️ Please fill all fields.';
+    return;
+  }
+
+  // Calculate BMI
+  const bmi = (weight / ((height / 100) ** 2)).toFixed(1);
+
+  // Determine category
+  let category = '';
+  if (bmi < 18.5) category = 'Underweight';
+  else if (bmi < 25) category = 'Normal';
+  else if (bmi < 30) category = 'Overweight';
+  else category = 'Obese';
+
+  // Include age relevance
+  let ageNote = '';
+  if (age < 18 && bmi > 24) ageNote = '⚠️ For children/teens, consult pediatric BMI charts.';
+  else if (age >= 18 && bmi > 24.9) ageNote = '⚠️ High for adult. Consider healthy diet/exercise.';
+
+  resultEl.textContent = `BMI: ${bmi} (${category}) ${ageNote}`;
+
+  // Save BMI history to appData
+  const historyObj = {
+    title: `BMI Result`,
+    result: `Age: ${age} | Height: ${height}cm | Weight: ${weight}kg | BMI: ${bmi} (${category})`,
+    createdAt: formatDateDMYWithTime(new Date())
+  };
+  if (!appData.calculationHistory) appData.calculationHistory = [];
+  appData.calculationHistory.push(historyObj);
+  saveAll();
+  renderHistory();
+}
+
+byId('calcBMIButton').addEventListener('click', calculateBMI);
+// ---------- MOON PHASE FEATURE ----------
+const moonToggle = document.getElementById('moonPhaseToggle');
+const moonContainer = document.getElementById('moonPhaseContainer');
+
+moonToggle.addEventListener('click', () => {
+  moonContainer.classList.toggle('visible');
+  if (moonContainer.classList.contains('visible')) {
+    renderMoonPhases();
+  }
+});
+
+function renderMoonPhases() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  moonContainer.innerHTML = `<h3>🌙 ${now.toLocaleString('default', { month: 'long' })} ${year} – Moon Phases</h3>`;
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const phaseName = getMoonPhase(year, month, d);
+    const tamilName = tamilPhase(phaseName);
+    const emoji = moonEmoji(phaseName);
+    const div = document.createElement('div');
+    div.className = 'moon-day';
+    div.innerHTML = `<span>${d}/${month + 1}/${year}</span><span>${phaseName} (${tamilName}) ${emoji}</span>`;
+    moonContainer.appendChild(div);
+  }
+}
+
+// Simple moon-phase algorithm
+function getMoonPhase(y, m, d) {
+  const lp = 2551443;
+  const new_moon = new Date(1970, 0, 7, 20, 35, 0);
+  const phase = ((new Date(y, m, d).getTime() - new_moon.getTime()) / 1000) % lp;
+  const index = Math.floor((phase / lp) * 8 + 0.5) % 8;
+  const names = [
+    "New Moon",
+    "Waxing Crescent",
+    "First Quarter",
+    "Waxing Gibbous",
+    "Full Moon",
+    "Waning Gibbous",
+    "Last Quarter",
+    "Waning Crescent"
+  ];
+  return names[index];
+}
+
+function tamilPhase(eng) {
+  switch (eng) {
+    case "New Moon": return "அமாவாசை (Amavasai)";
+    case "Waxing Crescent": return "பிறை (Pirai)";
+    case "First Quarter": return "அரைக்கதிர் (Araikathir)";
+    case "Waxing Gibbous": return "பௌர்ணமி நெருங்கல் (Pournami Nerungal)";
+    case "Full Moon": return "பௌர்ணமி (Pournami)";
+    case "Waning Gibbous": return "மறைவிறை (Maraivirai)";
+    case "Last Quarter": return "அரை அமைதி (Arai Amaithi)";
+    case "Waning Crescent": return "தேய்பிறை (Theipirai)";
+    default: return "";
+  }
+}
+
+function moonEmoji(eng) {
+  const icons = {
+    "New Moon": "🌑",
+    "Waxing Crescent": "🌒",
+    "First Quarter": "🌓",
+    "Waxing Gibbous": "🌔",
+    "Full Moon": "🌕",
+    "Waning Gibbous": "🌖",
+    "Last Quarter": "🌗",
+    "Waning Crescent": "🌘"
+  };
+  return icons[eng] || "🌙";
+}
+
+
                 // ---------- Calculator Mode Switcher ----------
                 function switchCalculatorMode() {
                   const mode = byId('calculatorMode').value;
@@ -2448,6 +2667,10 @@
                   } else if (mode === 'date') {
                     byId('dateCalculator').classList.remove('hidden');
                   }
+                  else if (mode === 'bmi') {
+  byId('bmiCalculator').classList.remove('hidden');
+}
+
                   // Reset history index when mode changes
                   editingHistoryIndex = null;
                 }

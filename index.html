@@ -184,7 +184,7 @@
       /* Consistent button styling for all sections */
       #showAddFormBtn, #homeRemindersToggle, #showAddNoteBtn, #viewNotesToggle, #homeNotesToggle,
       #homeBudgetsToggle, #homeCheckToggle, #showAddBudgetBtn,#viewbudgetToggle, #showAddCheckBtn,
-      #viewCheckToggle, #viewRemindersToggle, #monthlyCalendarToggle,#calculatorToggle, #viewHistoryToggle , #moonPhaseToggle {
+      #viewCheckToggle, #viewRemindersToggle,#moonPhaseToggle ,#monthlyCalendarToggle,#calculatorToggle, #viewHistoryToggle {
         position: relative;
         user-select: none;
         display: flex;
@@ -399,19 +399,19 @@
 
 #bmiCalculator label {
   font-weight: 600;
-  margin-bottom: 6px;
+  margin-bottom: 3px;
 }
 
 #bmiCalculator input {
-  padding: 7px 9px;
-  font-size: 17px;
+  padding: 6px 8px;
+  font-size: 15px;
   border-radius: 6px;
   border: 1px solid #ccc;
 }
 
 #calcBMIButton {
-  margin-top: 8px;
-  padding: 10px 80px;
+  margin-top: 6px;
+  padding: 8px 122px;
   border: none;
   background: #4caf50;
   color: #fff;
@@ -458,8 +458,6 @@
 }
 
 .moon-day:last-child { border: none; }
-
-
     </style>
   </head>
   <body>
@@ -811,7 +809,7 @@
         <h3>Version Info!</h3>
         <ul>
           <p>Version 13.5.5</p>
-          <p>Last Updated: 12-Nov-2025</p>
+          <p>Last Updated: 14-Nov-2025</p>
           <p>Project Mode: Open source</p>
           <p>App Size    : 7.0KB </p>
         </ul>
@@ -1043,7 +1041,7 @@
                 style="margin-top: 10px; font-weight: 600;"
               ></p>
             </div>
-<!-- ---------- BMI Calculator ---------- -->
+            <!-- ---------- BMI Calculator ---------- -->
 <div class="calculator-mode hidden" id="bmiCalculator">
   <h3>🧮 BMI Calculator</h3>
 
@@ -1065,9 +1063,12 @@
   <button id="calcBMIButton">Calculate BMI</button>
   <p id="bmiResult" style="margin-top: 8px; font-weight: 600;"></p>
 </div>
-        </div>
-        <button id="moonPhaseToggle">🌙 MOON PHASE <span class="arrow">▼</span></button>
+      
+          </div>
+                  <button id="moonPhaseToggle">🌙 MOON PHASE<span class="arrow">▼</span></button>
 <div id="moonPhaseContainer" class="hidden"></div>
+
+        </div>
         <div class="add-area">
           <button id="viewHistoryToggle" class="add-btn" aria-expanded="false">
             ⏳ VIEW HISTORY <span class="arrow">▼</span>
@@ -2576,7 +2577,75 @@ function calculateBMI() {
 }
 
 byId('calcBMIButton').addEventListener('click', calculateBMI);
-// ---------- MOON PHASE FEATURE ----------
+
+                // ---------- Calculator Mode Switcher ----------
+                function switchCalculatorMode() {
+                  const mode = byId('calculatorMode').value;
+                  document.querySelectorAll('.calculator-mode').forEach(el => el.classList.add('hidden'));
+
+                  if (mode === 'normal') {
+                    byId('normalCalculator').classList.remove('hidden');
+                  } else if (mode === 'age') {
+                    byId('ageCalculator').classList.remove('hidden');
+                  } else if (mode === 'date') {
+                    byId('dateCalculator').classList.remove('hidden');
+                  }
+                  
+else if (mode === 'bmi') {
+  byId('bmiCalculator').classList.remove('hidden');
+}
+
+                  // Reset history index when mode changes
+                  editingHistoryIndex = null;
+                }
+
+                // ---------- Monthly Calendar Logic ----------
+                function renderCalendar(month, year) {
+                  const today = new Date();
+                  const grid = byId('calendarGrid');
+                  const monthYearHeader = byId('currentMonthYear');
+                  grid.innerHTML = '<div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>'; // Weekday headers
+
+                  const date = new Date(year, month);
+                  monthYearHeader.textContent = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+                  const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0 for Sunday, 1 for Monday, etc.
+                  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                  // Add spacer days for the start of the month
+                  for (let i = 0; i < firstDayOfMonth; i++) {
+                    const spacer = document.createElement('div');
+                    spacer.className = 'calendar-day spacer';
+                    grid.appendChild(spacer);
+                  }
+
+                  // Add days of the month
+                  for (let day = 1; day <= daysInMonth; day++) {
+                    const dayEl = document.createElement('div');
+                    dayEl.className = 'calendar-day';
+                    dayEl.textContent = day;
+
+                    // Highlight today
+                    if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+                      dayEl.classList.add('today');
+                    }
+
+                    grid.appendChild(dayEl);
+                  }
+                }
+
+                function changeMonth(delta) {
+                    currentMonth += delta;
+                    if (currentMonth > 11) {
+                        currentMonth = 0;
+                        currentYear++;
+                    } else if (currentMonth < 0) {
+                        currentMonth = 11;
+                        currentYear--;
+                    }
+                    renderCalendar(currentMonth, currentYear);
+                }
+                               // ---------- MOON PHASE FEATURE ----------
 const moonToggle = document.getElementById('moonPhaseToggle');
 const moonContainer = document.getElementById('moonPhaseContainer');
 
@@ -2652,74 +2721,6 @@ function moonEmoji(eng) {
   };
   return icons[eng] || "🌙";
 }
-
-
-                // ---------- Calculator Mode Switcher ----------
-                function switchCalculatorMode() {
-                  const mode = byId('calculatorMode').value;
-                  document.querySelectorAll('.calculator-mode').forEach(el => el.classList.add('hidden'));
-
-                  if (mode === 'normal') {
-                    byId('normalCalculator').classList.remove('hidden');
-                  } else if (mode === 'age') {
-                    byId('ageCalculator').classList.remove('hidden');
-                  } else if (mode === 'date') {
-                    byId('dateCalculator').classList.remove('hidden');
-                  }
-                  else if (mode === 'bmi') {
-  byId('bmiCalculator').classList.remove('hidden');
-}
-
-                  // Reset history index when mode changes
-                  editingHistoryIndex = null;
-                }
-
-                // ---------- Monthly Calendar Logic ----------
-                function renderCalendar(month, year) {
-                  const today = new Date();
-                  const grid = byId('calendarGrid');
-                  const monthYearHeader = byId('currentMonthYear');
-                  grid.innerHTML = '<div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>'; // Weekday headers
-
-                  const date = new Date(year, month);
-                  monthYearHeader.textContent = date.toLocaleString('default', { month: 'long', year: 'numeric' });
-
-                  const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0 for Sunday, 1 for Monday, etc.
-                  const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-                  // Add spacer days for the start of the month
-                  for (let i = 0; i < firstDayOfMonth; i++) {
-                    const spacer = document.createElement('div');
-                    spacer.className = 'calendar-day spacer';
-                    grid.appendChild(spacer);
-                  }
-
-                  // Add days of the month
-                  for (let day = 1; day <= daysInMonth; day++) {
-                    const dayEl = document.createElement('div');
-                    dayEl.className = 'calendar-day';
-                    dayEl.textContent = day;
-
-                    // Highlight today
-                    if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
-                      dayEl.classList.add('today');
-                    }
-
-                    grid.appendChild(dayEl);
-                  }
-                }
-
-                function changeMonth(delta) {
-                    currentMonth += delta;
-                    if (currentMonth > 11) {
-                        currentMonth = 0;
-                        currentYear++;
-                    } else if (currentMonth < 0) {
-                        currentMonth = 11;
-                        currentYear--;
-                    }
-                    renderCalendar(currentMonth, currentYear);
-                }
                 function moveToTrash(type, item, index) {
                   appData.trash.push({ type, item, deletedAt: new Date().toISOString() });
                   appData[type].splice(index, 1);
@@ -2765,7 +2766,7 @@ function moonEmoji(eng) {
                     showPage(targetPageId);
                   }
                 }
-                
+
                 // New delete versions
                 function deleteReminder(i){ moveToTrash('reminders', appData.reminders[i], i); renderReminders(); renderHomeReminders(); }
                 function deleteNote(i){ moveToTrash('notes', appData.notes[i], i); renderNotes(); renderHomeNotes(); }

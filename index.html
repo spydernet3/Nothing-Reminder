@@ -184,7 +184,7 @@
       /* Consistent button styling for all sections */
       #showAddFormBtn, #homeRemindersToggle, #showAddNoteBtn, #viewNotesToggle, #homeNotesToggle,
       #homeBudgetsToggle, #homeCheckToggle, #showAddBudgetBtn,#viewbudgetToggle, #showAddCheckBtn,
-      #viewCheckToggle, #viewRemindersToggle,#moonPhaseToggle ,#monthlyCalendarToggle,#calculatorToggle, #viewHistoryToggle {
+      #viewCheckToggle, #viewRemindersToggle,#moonPhaseToggle, #sunBtn,#monthlyCalendarToggle,#calculatorToggle, #viewHistoryToggle {
         position: relative;
         user-select: none;
         display: flex;
@@ -382,82 +382,113 @@
         overflow-y: auto;
       }
       #storageBarContainer { position:relative; background:#333; border-radius:8px; height:16px; width:100%; overflow:visible; }
-#storageBar { background:linear-gradient(90deg,#4caf50,#8bc34a); border-radius:8px; height:100%; width:0%; transition:width 0.4s ease; }
-#storageEmoji { position:absolute; top:-5px; left:0; font-size:18px; z-index:5; pointer-events:none; transition:left 0.4s ease; }
-#viewStorageBtn { flex-direction:column; gap:6px; align-items:flex-start; }
-/* Compact BMI layout */
-#bmiCalculator {
-  max-width: 350px;
-  margin: 10px auto;
-}
-
-.bmi-input-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 8px; /* reduced from default 20+px */
-}
-
-#bmiCalculator label {
-  font-weight: 600;
-  margin-bottom: 3px;
-}
-
-#bmiCalculator input {
-  padding: 6px 8px;
-  font-size: 15px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-#calcBMIButton {
-  margin-top: 6px;
-  padding: 8px 122px;
-  border: none;
-  background: #4caf50;
-  color: #fff;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-#calcBMIButton:hover {
-  background: #43a047;
-}
-#moonPhaseToggle {
-  background: #888;
-  color: #fff;
-  font-weight: 600;
-  padding: 10px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  margin-top: 8px;
-}
-
-#moonPhaseContainer {
-  background: #ffffff;
-  color: black;
-  padding: 10px 12px;
-  border-radius: 8px;
-  margin-top: 5px;
-  display: none;
-}
-
-#moonPhaseContainer.visible { display: block; }
-
-.moon-day {
-  display: flex;
-  justify-content: space-between;
-  margin: 3px 0;
-  padding: 5px 6px;
-  border-bottom: 1px solid #444;
-}
-
-.moon-day:last-child { border: none; }
+      #storageBar { background:linear-gradient(90deg,#4caf50,#8bc34a); border-radius:8px; height:100%; width:0%; transition:width 0.4s ease; }
+      #storageEmoji { position:absolute; top:-5px; left:0; font-size:18px; z-index:5; pointer-events:none; transition:left 0.4s ease; }
+      #viewStorageBtn { flex-direction:column; gap:6px; align-items:flex-start; }
+      /* Compact BMI layout */
+      #bmiCalculator {
+        max-width: 350px;
+        margin: 10px auto;
+      }
+      
+      .bmi-input-group {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 8px; /* reduced from default 20+px */
+      }
+      
+      #bmiCalculator label {
+        font-weight: 600;
+        margin-bottom: 3px;
+      }
+      
+      #bmiCalculator input {
+        padding: 6px 8px;
+        font-size: 15px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+      }
+      
+      #calcBMIButton {
+        margin-top: 6px;
+        padding: 8px 122px;
+        border: none;
+        background: #4caf50;
+        color: #fff;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      
+      #calcBMIButton:hover {
+        background: #43a047;
+      }
+      #moonPhaseToggle {
+        background: #888;
+        color: #fff;
+        font-weight: 600;
+        padding: 10px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        margin-top: 8px;
+      }
+      
+      #moonPhaseContainer {
+        background: #ffffff;
+        color: black;
+        padding: 10px 12px;
+        border-radius: 8px;
+        margin-top: 5px;
+        display: none;
+      }
+      
+      #moonPhaseContainer.visible { display: block; }
+      
+      .moon-day {
+        display: flex;
+        justify-content: space-between;
+        margin: 3px 0;
+        padding: 5px 6px;
+        border-bottom: 1px solid #444;
+      }
+      
+      .moon-day:last-child { border: none; }
+      #sunBtn {
+        background:#888;
+        color:#fff;
+        padding:10px;
+        width:100%;
+        border:none;
+        border-radius:6px;
+        margin-top:8px;
+        font-weight:600;
+      }
+      
+      #sunBox {
+        background:white;
+        padding:10px;
+        border-radius:8px;
+        margin-top:6px;
+        color:black;
+        display:none;
+      }
+      
+      #sunBox.visible {
+        display:block;
+      }
+      
+      #sunCity, #latInput, #lngInput {
+        width:100%;
+        padding:8px;
+        border-radius:6px;
+        border:1px solid #444;
+        margin-top:5px;
+      }
     </style>
   </head>
   <body>
@@ -808,8 +839,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.5.5</p>
-          <p>Last Updated: 14-Nov-2025</p>
+          <p>Version 13.5.6</p>
+          <p>Last Updated: 16-Nov-2025</p>
           <p>Project Mode: Open source</p>
           <p>App Size    : 7.0KB </p>
         </ul>
@@ -945,7 +976,6 @@
             </div>
           </div>
         </div>
-
         <div class="add-area">
           <button id="calculatorToggle" class="add-btn" aria-expanded="false">
             🧮 CALCULATOR <span class="arrow">▼</span>
@@ -1042,32 +1072,52 @@
               ></p>
             </div>
             <!-- ---------- BMI Calculator ---------- -->
-<div class="calculator-mode hidden" id="bmiCalculator">
-  <h3>🧮 BMI Calculator</h3>
-
-  <div class="bmi-input-group">
-    <label>Age:</label>
-    <input type="number" id="bmiAge" min="1" placeholder="Enter age" />
-  </div>
-
-  <div class="bmi-input-group">
-    <label>Height (cm):</label>
-    <input type="number" id="bmiHeight" min="50" placeholder="Enter height in cm" />
-  </div>
-
-  <div class="bmi-input-group">
-    <label>Weight (kg):</label>
-    <input type="number" id="bmiWeight" min="1" placeholder="Enter weight in kg" />
-  </div>
-
-  <button id="calcBMIButton">Calculate BMI</button>
-  <p id="bmiResult" style="margin-top: 8px; font-weight: 600;"></p>
-</div>
-      
+        <div class="calculator-mode hidden" id="bmiCalculator">
+          <h3>🧮 BMI Calculator</h3>
+        
+          <div class="bmi-input-group">
+            <label>Age:</label>
+            <input type="number" id="bmiAge" min="1" placeholder="Enter age" />
           </div>
-                  <button id="moonPhaseToggle">🌙 MOON PHASE<span class="arrow">▼</span></button>
-<div id="moonPhaseContainer" class="hidden"></div>
-
+        
+          <div class="bmi-input-group">
+            <label>Height (cm):</label>
+            <input type="number" id="bmiHeight" min="50" placeholder="Enter height in cm" />
+          </div>
+        
+          <div class="bmi-input-group">
+            <label>Weight (kg):</label>
+            <input type="number" id="bmiWeight" min="1" placeholder="Enter weight in kg" />
+          </div>
+        
+          <button id="calcBMIButton">Calculate BMI</button>
+          <p id="bmiResult" style="margin-top: 8px; font-weight: 600;"></p>
+        </div>
+        </div>
+        <button id="moonPhaseToggle">🌙 MOON PHASE<span class="arrow">▼</span></button>
+        <div id="moonPhaseContainer" class="hidden"></div>
+        <button id="sunBtn">🌅 SUNRISE & SUNSET<span class="arrow">▼</span></button>
+        <div id="sunBox" class="hidden">
+          <label>Select Location</label>
+          <select id="sunCity">
+            <option value="kanyakumari">Kanyakumari</option>
+            <option value="chennai">Chennai</option>
+            <option value="madurai">Madurai</option>
+            <option value="coimbatore">Coimbatore</option>
+            <option value="trichy">Trichy</option>
+            <option value="tirunelveli">Tirunelveli</option>
+            <option value="pondicherry">Pondicherry</option>
+            <option value="bengaluru">Bengaluru</option>
+            <option value="mumbai">Mumbai</option>
+            <option value="delhi">Delhi</option>
+            <option value="custom">Custom (Lat/Lng)</option>
+          </select>
+          <div id="customInputs" style="display:none; margin-top:5px;">
+            <input type="number" id="latInput" placeholder="Latitude (e.g. 8.0883)">
+            <input type="number" id="lngInput" placeholder="Longitude (e.g. 77.5385)">
+          </div>
+          <div id="sunResult" style="margin-top:10px; font-weight:600;"></div>
+        </div>
         </div>
         <div class="add-area">
           <button id="viewHistoryToggle" class="add-btn" aria-expanded="false">
@@ -2590,14 +2640,13 @@ byId('calcBMIButton').addEventListener('click', calculateBMI);
                   } else if (mode === 'date') {
                     byId('dateCalculator').classList.remove('hidden');
                   }
-                  
-else if (mode === 'bmi') {
-  byId('bmiCalculator').classList.remove('hidden');
-}
+                    else if (mode === 'bmi') {
+                    byId('bmiCalculator').classList.remove('hidden');
+                  }
 
                   // Reset history index when mode changes
                   editingHistoryIndex = null;
-                }
+                  }
 
                 // ---------- Monthly Calendar Logic ----------
                 function renderCalendar(month, year) {
@@ -2646,81 +2695,197 @@ else if (mode === 'bmi') {
                     renderCalendar(currentMonth, currentYear);
                 }
                                // ---------- MOON PHASE FEATURE ----------
-const moonToggle = document.getElementById('moonPhaseToggle');
-const moonContainer = document.getElementById('moonPhaseContainer');
-
-moonToggle.addEventListener('click', () => {
-  moonContainer.classList.toggle('visible');
-  if (moonContainer.classList.contains('visible')) {
-    renderMoonPhases();
-  }
-});
-
-function renderMoonPhases() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-  moonContainer.innerHTML = `<h3>🌙 ${now.toLocaleString('default', { month: 'long' })} ${year} – Moon Phases</h3>`;
-
-  for (let d = 1; d <= daysInMonth; d++) {
-    const phaseName = getMoonPhase(year, month, d);
-    const tamilName = tamilPhase(phaseName);
-    const emoji = moonEmoji(phaseName);
-    const div = document.createElement('div');
-    div.className = 'moon-day';
-    div.innerHTML = `<span>${d}/${month + 1}/${year}</span><span>${phaseName} (${tamilName}) ${emoji}</span>`;
-    moonContainer.appendChild(div);
-  }
-}
-
-// Simple moon-phase algorithm
-function getMoonPhase(y, m, d) {
-  const lp = 2551443;
-  const new_moon = new Date(1970, 0, 7, 20, 35, 0);
-  const phase = ((new Date(y, m, d).getTime() - new_moon.getTime()) / 1000) % lp;
-  const index = Math.floor((phase / lp) * 8 + 0.5) % 8;
-  const names = [
-    "New Moon",
-    "Waxing Crescent",
-    "First Quarter",
-    "Waxing Gibbous",
-    "Full Moon",
-    "Waning Gibbous",
-    "Last Quarter",
-    "Waning Crescent"
-  ];
-  return names[index];
-}
-
-function tamilPhase(eng) {
-  switch (eng) {
-    case "New Moon": return "அமாவாசை (Amavasai)";
-    case "Waxing Crescent": return "பிறை (Pirai)";
-    case "First Quarter": return "அரைக்கதிர் (Araikathir)";
-    case "Waxing Gibbous": return "பௌர்ணமி நெருங்கல் (Pournami Nerungal)";
-    case "Full Moon": return "பௌர்ணமி (Pournami)";
-    case "Waning Gibbous": return "மறைவிறை (Maraivirai)";
-    case "Last Quarter": return "அரை அமைதி (Arai Amaithi)";
-    case "Waning Crescent": return "தேய்பிறை (Theipirai)";
-    default: return "";
-  }
-}
-
-function moonEmoji(eng) {
-  const icons = {
-    "New Moon": "🌑",
-    "Waxing Crescent": "🌒",
-    "First Quarter": "🌓",
-    "Waxing Gibbous": "🌔",
-    "Full Moon": "🌕",
-    "Waning Gibbous": "🌖",
-    "Last Quarter": "🌗",
-    "Waning Crescent": "🌘"
-  };
-  return icons[eng] || "🌙";
-}
+                const moonToggle = document.getElementById('moonPhaseToggle');
+                const moonContainer = document.getElementById('moonPhaseContainer');
+                
+                moonToggle.addEventListener('click', () => {
+                  moonContainer.classList.toggle('visible');
+                  if (moonContainer.classList.contains('visible')) {
+                    renderMoonPhases();
+                  }
+                });
+                
+                function renderMoonPhases() {
+                  const now = new Date();
+                  const year = now.getFullYear();
+                  const month = now.getMonth();
+                  const daysInMonth = new Date(year, month + 1, 0).getDate();
+                
+                  moonContainer.innerHTML = `<h3>🌙 ${now.toLocaleString('default', { month: 'long' })} ${year} – Moon Phases</h3>`;
+                
+                  for (let d = 1; d <= daysInMonth; d++) {
+                    const phaseName = getMoonPhase(year, month, d);
+                    const tamilName = tamilPhase(phaseName);
+                    const emoji = moonEmoji(phaseName);
+                    const div = document.createElement('div');
+                    div.className = 'moon-day';
+                    div.innerHTML = `<span>${d}/${month + 1}/${year}</span><span>${phaseName} (${tamilName}) ${emoji}</span>`;
+                    moonContainer.appendChild(div);
+                  }
+                }
+                
+                // Simple moon-phase algorithm
+                function getMoonPhase(y, m, d) {
+                  const lp = 2551443;
+                  const new_moon = new Date(1970, 0, 7, 20, 35, 0);
+                  const phase = ((new Date(y, m, d).getTime() - new_moon.getTime()) / 1000) % lp;
+                  const index = Math.floor((phase / lp) * 8 + 0.5) % 8;
+                  const names = [
+                    "New Moon",
+                    "Waxing Crescent",
+                    "First Quarter",
+                    "Waxing Gibbous",
+                    "Full Moon",
+                    "Waning Gibbous",
+                    "Last Quarter",
+                    "Waning Crescent"
+                  ];
+                  return names[index];
+                }
+                
+                function tamilPhase(eng) {
+                  switch (eng) {
+                    case "New Moon": return "அமாவாசை (Amavasai)";
+                    case "Waxing Crescent": return "பிறை (Pirai)";
+                    case "First Quarter": return "அரைக்கதிர் (Araikathir)";
+                    case "Waxing Gibbous": return "பௌர்ணமி நெருங்கல் (Pournami Nerungal)";
+                    case "Full Moon": return "பௌர்ணமி (Pournami)";
+                    case "Waning Gibbous": return "மறைவிறை (Maraivirai)";
+                    case "Last Quarter": return "அரை அமைதி (Arai Amaithi)";
+                    case "Waning Crescent": return "தேய்பிறை (Theipirai)";
+                    default: return "";
+                  }
+                }
+                
+                function moonEmoji(eng) {
+                  const icons = {
+                    "New Moon": "🌑",
+                    "Waxing Crescent": "🌒",
+                    "First Quarter": "🌓",
+                    "Waxing Gibbous": "🌔",
+                    "Full Moon": "🌕",
+                    "Waning Gibbous": "🌖",
+                    "Last Quarter": "🌗",
+                    "Waning Crescent": "🌘"
+                  };
+                  return icons[eng] || "🌙";
+                }
+                // ---------------- SUNRISE / SUNSET ----------------
+                document.getElementById("sunBtn").addEventListener("click", () => {
+                  let box = document.getElementById("sunBox");
+                  box.classList.toggle("visible");
+                  if (box.classList.contains("visible")) showSunrise();
+                });
+                
+                // Popular Indian Cities
+                const CITY = {
+                  kanyakumari:{lat:8.0883, lng:77.5385},
+                  chennai:{lat:13.0827, lng:80.2707},
+                  madurai:{lat:9.9252, lng:78.1198},
+                  coimbatore:{lat:11.0168, lng:76.9558},
+                  trichy:{lat:10.7905, lng:78.7047},
+                  tirunelveli:{lat:8.7139, lng:77.7567},
+                  pondicherry:{lat:11.9416, lng:79.8083},
+                  bengaluru:{lat:12.9716, lng:77.5946},
+                  mumbai:{lat:19.0760, lng:72.8777},
+                  delhi:{lat:28.7041, lng:77.1025}
+                };
+                
+                // City selection
+                document.getElementById("sunCity").addEventListener("change", () => {
+                  let v = sunCity.value;
+                  document.getElementById("customInputs").style.display =
+                    v === "custom" ? "block" : "none";
+                  showSunrise();
+                });
+                
+                // ------- Main Calculation -------
+                function showSunrise() {
+                  const city = document.getElementById("sunCity").value;
+                  const result = document.getElementById("sunResult");
+                  let lat, lng;
+                
+                  if (city === "custom") {
+                    lat = parseFloat(document.getElementById("latInput").value);
+                    lng = parseFloat(document.getElementById("lngInput").value);
+                
+                    if (!lat || !lng) {
+                      result.innerHTML = "Enter Latitude & Longitude";
+                      return;
+                    }
+                  } else {
+                    lat = CITY[city].lat;
+                    lng = CITY[city].lng;
+                  }
+                
+                  const today = new Date();
+                  const rise = calcSun(true, today, lat, lng);
+                  const set = calcSun(false, today, lat, lng);
+                
+                  result.innerHTML = `
+                    📍 <b>${cityName(city)}</b><br>
+                    🌅 <b>Sunrise:</b> ${rise}<br>
+                    🌇 <b>Sunset:</b> ${set}
+                  `;
+                }
+                
+                function cityName(c) {
+                  if (c === "custom") return "Custom Location";
+                  return c.charAt(0).toUpperCase() + c.slice(1);
+                }
+                
+                // -------- NOAA Algorithm (Offline) --------
+                function calcSun(isRise, date, lat, lng){
+                  const rad = Math.PI/180;
+                
+                  let N = date.getDate();
+                  for(let m=0;m<date.getMonth();m++){
+                    N += [31,28+(isLeap(date.getFullYear())?1:0),31,30,31,30,31,31,30,31,30,31][m];
+                  }
+                
+                  let lngHour = lng / 15;
+                  let t = isRise ? N + (6 - lngHour)/24 : N + (18 - lngHour)/24;
+                
+                  let M = (0.9856*t) - 3.289;
+                  let L = M + (1.916*Math.sin(rad*M)) + (0.020*Math.sin(rad*2*M)) + 282.634;
+                  L = (L + 360) % 360;
+                
+                  let RA = Math.atan(0.91764*Math.tan(rad*L)) / rad;
+                  RA = (RA + 360) % 360;
+                
+                  let Lquadrant  = Math.floor(L/90)*90;
+                  let RAquadrant = Math.floor(RA/90)*90;
+                  RA = RA + (Lquadrant - RAquadrant);
+                  RA /= 15;
+                
+                  let sinDec = 0.39782 * Math.sin(rad*L);
+                  let cosDec = Math.cos(Math.asin(sinDec));
+                  let cosH = (Math.cos(rad*90.833) - sinDec*Math.sin(rad*lat)) / (cosDec*Math.cos(rad*lat));
+                
+                  if (cosH > 1) return "Sun doesn't rise";
+                  if (cosH < -1) return "Sun doesn't set";
+                
+                  let H = isRise ? 360 - Math.acos(cosH)/rad : Math.acos(cosH)/rad;
+                  H /= 15;
+                
+                  let T = H + RA - (0.06571*t) - 6.622;
+                  let UT = (T - lngHour + 24) % 24;
+                
+                  let IST = UT + 5.5;
+                  return formatTime(IST);
+                }
+                
+                function isLeap(y){ return (y%4===0 && y%100!==0) || y%400===0; }
+                
+                function formatTime(dec){
+                  let h = Math.floor(dec);
+                  let m = Math.round((dec - h)*60);
+                  if(m===60){h++;m=0;}
+                  let ampm = h>=12 ? "PM" : "AM";
+                  if(h>12) h-=12;
+                  return `${h}:${m.toString().padStart(2,"0")} ${ampm}`;
+                }
+                // ---------------- TRASH BIN ----------------
                 function moveToTrash(type, item, index) {
                   appData.trash.push({ type, item, deletedAt: new Date().toISOString() });
                   appData[type].splice(index, 1);

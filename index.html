@@ -839,8 +839,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.5.6</p>
-          <p>Last Updated: 16-Nov-2025</p>
+          <p>Version 13.5.7</p>
+          <p>Last Updated: 17-Nov-2025</p>
           <p>Project Mode: Open source</p>
           <p>App Size    : 7.0KB </p>
         </ul>
@@ -2317,12 +2317,19 @@
             let summary = [];
             appData.reminders.forEach(r => {
                 const diff = daysLeft(r.endDate);
-                if (diff === 0 || diff === 1) {
-                    summary.push(`- ${r.title} | ${diff === 0 ? 'Today' : 'Tomorrow'}`);
-                }
-            });
-            return summary.length > 0 ? summary.join('\n') : "No reminders due today/tomorrow.";
-        }
+                if (diff < 0) {
+              summary.push(`${r.title} — ❗Expired (${formatDMY(r.endDate)})`);
+              }
+              else if (diff === 0) {
+                  summary.push(`${r.title} — Today`);
+              }
+              else if (diff === 1) {
+                  summary.push(`${r.title} — Tomorrow`);
+              }
+      
+                  });
+                  return summary.length > 0 ? summary.join('\n') : "No reminders due today/tomorrow.";
+              }
 
         // Helper 2: Checklist (Open status)
         function buildChecklistSummary() {

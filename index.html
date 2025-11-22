@@ -519,7 +519,7 @@
       <button class="menu-btn" data-page="Check">✒ Check List</button>
       <button class="menu-btn" data-page="utilities">🛠️ Utilities</button>
       <button class="menu-btn" data-page="trash">🗑️ Trash Bin</button>
-      <button class="menu-btn" data-page="other">🎲 Other Apps</button>
+      <button class="menu-btn" data-page="other">🎲 More Apps</button>
 
       <div id="settingsContainer" style="margin-top:auto;">
         <button id="settingsBtn" class="icon-btn" aria-expanded="false">
@@ -798,8 +798,14 @@
             <span class="slider"></span>
           </label>
         </div>
+        <div class="notif-setting-item">
+          <span>🌙 Moon Phase Alerts</span>
+          <label class="toggle-switch">
+          <input type="checkbox" id="toggleMoonPhase">
+          <span class="slider"></span>
+          </label>
+       </div>
       </div>
-
       <div id="terms" class="page hidden">
         <h2>Privacy Policy!</h2>
         <ul>
@@ -839,22 +845,30 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.5.7</p>
-          <p>Last Updated: 17-Nov-2025</p>
+          <p>Version 13.5.8</p>
+          <p>Last Updated: 22-Nov-2025</p>
           <p>Project Mode: Open source</p>
           <p>App Size    : 7.0KB </p>
         </ul>
       </div>
-
       <div id="how" class="page hidden">
         <h3>Install App</h3>
         <hr />
         <ul>
           <li>
             By Pressing Add to Home Screen Button There You can see Install App
-            to install page as PWA
+            to install page as PWA [Faster and unique icon compared to webpage] 
           </li>
-          <li>In App Notification logic used </li>
+          </ul>
+          <h3>App Lock</h3>
+        <hr />
+        <ul>
+          <li>
+            By installing page as PWA you can use By Defauly App lock that contains your device
+        </li>
+        <li>
+          By enabling App lock for Browswer also the way you can protect the data without intalling page as app
+        </li>
         </ul>
         <h3>Reminder!</h3>
         <hr />
@@ -936,9 +950,9 @@
             then Open index.html without internet in any broweser.
           </li>
           <li>Note: notifications are not supposed to working</li>
+          <li> New features you may missed</li>
         </ul>
       </div>
-
       <div id="utilities" class="page hidden">
         <h2>🛠️ Utilities</h2>
         <div class="add-area">
@@ -1136,7 +1150,7 @@
         <ul id="trashList" class="list scrollable-list form"></ul>
       </div>
       <div id="other" class="page hidden">
-        <h2>🎲 Other Apps</h2>
+        <h2>🎲 More Apps</h2>
         <div
           style="display: flex; flex-wrap: wrap; gap: 20px; margin-top: 10px;"
         >
@@ -1311,6 +1325,7 @@
             if(byId('toggleNotes')) byId('toggleNotes').checked = appData.notifNotes;
             if(byId('toggleChecklist')) byId('toggleChecklist').checked = appData.notifChecklist;
             if(byId('toggleBudget')) byId('toggleBudget').checked = appData.notifBudget;
+            if(byId('toggleMoonPhase')) byId('toggleMoonPhase').checked = appData.notifMoonPhase;
         }
 
         // Function to handle custom toggle changes
@@ -1320,6 +1335,9 @@
             // Re-check notifications immediately if a new category is toggled on
             if (event.target.checked) checkNotifications();
         }
+        byId('toggleMoonPhase')?.addEventListener('change', (e) =>
+         handleCustomNotifToggle('notifMoonPhase', e)
+        );
 
         // ---------- Storage ----------
 
@@ -1339,6 +1357,7 @@
           notifNotes: true,
           notifChecklist: true,
           notifBudget: true,
+          notifMoonPhase: true,
           // NEW: Calculation History
           calculationHistory: [],
           trash: [],
@@ -1355,7 +1374,6 @@
         let editingCheckIndex = null;
         let editingNoteIndex = null;
         let editingHistoryIndex = null; // NEW: for history editing
-
         let currentMonth = new Date().getMonth(); // NEW: Calendar state
         let currentYear = new Date().getFullYear(); // NEW: Calendar state
 
@@ -1373,13 +1391,13 @@
             }
             // NOTIFICATION CHANGE: Trigger notification check on every data save.
             await checkNotifications(); // Correctly awaiting the async function
-          } catch (err) {
-            console.error("Save failed:", err);
-            if (err.name === 'QuotaExceededError') {
-              console.error("Storage is full. Please delete some data to make space.");
+            } catch (err) {
+              console.error("Save failed:", err);
+              if (err.name === 'QuotaExceededError') {
+                console.error("Storage is full. Please delete some data to make space.");
+              }
             }
           }
-        }
 
         function daysLeft(endDateStr){
           if(!endDateStr) return null;
@@ -2359,6 +2377,7 @@
 
         // The single, correct checkNotifications function using registration.showNotification()
         async function checkNotifications(){
+          showMoonPhaseNotification();
           if(!(Notification && Notification.permission === 'granted')) {
              console.log("Global notification permission not granted. Skipping custom checks.");
              return;
@@ -2593,47 +2612,47 @@
             saveHistory(`Date Difference: ${formatDMY(startStr)} to ${formatDMY(endStr)} = ${result}`, result);
                 }
                 // ---------- BMI Calculator Logic ----------
-function calculateBMI() {
-  const age = parseInt(byId('bmiAge').value);
-  const height = parseFloat(byId('bmiHeight').value);
-  const weight = parseFloat(byId('bmiWeight').value);
-  const resultEl = byId('bmiResult');
-
-  if (!age || !height || !weight) {
-    resultEl.textContent = '⚠️ Please fill all fields.';
-    return;
-  }
-
-  // Calculate BMI
-  const bmi = (weight / ((height / 100) ** 2)).toFixed(1);
-
-  // Determine category
-  let category = '';
-  if (bmi < 18.5) category = 'Underweight';
-  else if (bmi < 25) category = 'Normal';
-  else if (bmi < 30) category = 'Overweight';
-  else category = 'Obese';
-
-  // Include age relevance
-  let ageNote = '';
-  if (age < 18 && bmi > 24) ageNote = '⚠️ For children/teens, consult pediatric BMI charts.';
-  else if (age >= 18 && bmi > 24.9) ageNote = '⚠️ High for adult. Consider healthy diet/exercise.';
-
-  resultEl.textContent = `BMI: ${bmi} (${category}) ${ageNote}`;
-
-  // Save BMI history to appData
-  const historyObj = {
-    title: `BMI Result`,
-    result: `Age: ${age} | Height: ${height}cm | Weight: ${weight}kg | BMI: ${bmi} (${category})`,
-    createdAt: formatDateDMYWithTime(new Date())
-  };
-  if (!appData.calculationHistory) appData.calculationHistory = [];
-  appData.calculationHistory.push(historyObj);
-  saveAll();
-  renderHistory();
-}
-
-byId('calcBMIButton').addEventListener('click', calculateBMI);
+                function calculateBMI() {
+                  const age = parseInt(byId('bmiAge').value);
+                  const height = parseFloat(byId('bmiHeight').value);
+                  const weight = parseFloat(byId('bmiWeight').value);
+                  const resultEl = byId('bmiResult');
+                
+                  if (!age || !height || !weight) {
+                    resultEl.textContent = '⚠️ Please fill all fields.';
+                    return;
+                  }
+                
+                  // Calculate BMI
+                  const bmi = (weight / ((height / 100) ** 2)).toFixed(1);
+                
+                  // Determine category
+                  let category = '';
+                  if (bmi < 18.5) category = 'Underweight';
+                  else if (bmi < 25) category = 'Normal';
+                  else if (bmi < 30) category = 'Overweight';
+                  else category = 'Obese';
+                
+                  // Include age relevance
+                  let ageNote = '';
+                  if (age < 18 && bmi > 24) ageNote = '⚠️ For children/teens, consult pediatric BMI charts.';
+                  else if (age >= 18 && bmi > 24.9) ageNote = '⚠️ High for adult. Consider healthy diet/exercise.';
+                
+                  resultEl.textContent = `BMI: ${bmi} (${category}) ${ageNote}`;
+                
+                  // Save BMI history to appData
+                  const historyObj = {
+                    title: `BMI Result`,
+                    result: `Age: ${age} | Height: ${height}cm | Weight: ${weight}kg | BMI: ${bmi} (${category})`,
+                    createdAt: formatDateDMYWithTime(new Date())
+                  };
+                  if (!appData.calculationHistory) appData.calculationHistory = [];
+                  appData.calculationHistory.push(historyObj);
+                  saveAll();
+                  renderHistory();
+                }
+                
+                byId('calcBMIButton').addEventListener('click', calculateBMI);
 
                 // ---------- Calculator Mode Switcher ----------
                 function switchCalculatorMode() {
@@ -2776,6 +2795,14 @@ byId('calcBMIButton').addEventListener('click', calculateBMI);
                     "Waning Crescent": "🌘"
                   };
                   return icons[eng] || "🌙";
+                }
+                function getTodayPhase() {
+                const now = new Date();
+                const phase = getMoonPhase(now.getFullYear(), now.getMonth(), now.getDate());
+            
+                if (phase === "Full Moon") return "pournami";
+                if (phase === "New Moon") return "amavasai";
+                return "none";
                 }
                 // ---------------- SUNRISE / SUNSET ----------------
                 document.getElementById("sunBtn").addEventListener("click", () => {
@@ -3079,10 +3106,34 @@ byId('calcBMIButton').addEventListener('click', calculateBMI);
                 renderBudgets();
                 renderChecklists();
                 renderHistory(); // NEW: Initial render for history
-
                 // NEW: Initialize calculator mode
                 switchCalculatorMode();
+                async function showMoonPhaseNotification() {
+                    if (!appData.notifMoonPhase) return;
+                    if (Notification.permission !== "granted") return;
 
+                    const registration = await navigator.serviceWorker.getRegistration();
+                    if (!registration) return;
+
+                    const phase = getTodayPhase();
+
+                    if (phase === "pournami") {
+                        registration.showNotification("🌕 Pournami Today!", {
+                            body: "Full Moon (Pournami) is happening today.",
+                            icon: "assets/icon.png",
+                            requireInteraction: true,
+                            tag: "moon-phase"
+                        });
+                    }
+                    else if (phase === "amavasai") {
+                        registration.showNotification("🌑 Amavasai Today!", {
+                            body: "New Moon (Amavasai) is today.",
+                            icon: "assets/icon.png",
+                            requireInteraction: true,
+                            tag: "moon-phase"
+                        });
+                    }
+                }
                 // 3. Setup notifications
                 // Notifications are now checked on page load (below) and on every data save (in saveAll).
                 if ("Notification" in window) {

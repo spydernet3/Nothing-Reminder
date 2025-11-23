@@ -184,7 +184,7 @@
       /* Consistent button styling for all sections */
       #showAddFormBtn, #homeRemindersToggle, #showAddNoteBtn, #viewNotesToggle, #homeNotesToggle,
       #homeBudgetsToggle, #homeCheckToggle, #showAddBudgetBtn,#viewbudgetToggle, #showAddCheckBtn,
-      #viewCheckToggle, #viewRemindersToggle,#moonPhaseToggle, #sunBtn,#monthlyCalendarToggle,#calculatorToggle, #viewHistoryToggle {
+      #viewCheckToggle,#homeOverviewToggle ,#viewRemindersToggle,#moonPhaseToggle, #sunBtn,#monthlyCalendarToggle,#calculatorToggle, #viewHistoryToggle {
         position: relative;
         user-select: none;
         display: flex;
@@ -589,7 +589,33 @@
           </button>
           <div id="homeCheckContainer" class="form" aria-hidden="true"></div>
         </div>
+        <div class="add-area">
+          <button id="homeOverviewToggle" class="add-btn" aria-expanded="false">
+            📊 REMINDERS OVERVIEW <span class="arrow">▼</span>
+          </button>
 
+          <div id="homeOverviewContainer" class="form" aria-hidden="true">
+            <table style="width:100%; border-collapse: collapse; text-align:center;">
+              <tr style="font-weight:600;">
+                <td>TITLE</td>
+                <td>ACTIVE</td>
+                <td>INACTIVE</td>
+              </tr>
+
+              <tr>
+                <td>Reminders</td>
+                <td id="activeRemindersCount">0</td>
+                <td id="inactiveRemindersCount">0</td>
+              </tr>
+
+              <tr>
+                <td>Checklists</td>
+                <td id="activeChecklistsCount">0</td>
+                <td id="inactiveChecklistsCount">0</td>
+              </tr>
+            </table>
+          </div>
+        </div>
         <div class="branding-footer">
           <a href="https://github.com/spydernet3" target="_blank"
             >By Spydernet</a
@@ -642,7 +668,6 @@
                 accept="image/*,.pdf,.doc,.docx,.mp3,.mp4"
               />
             </label>
-
             <label>
               Note<textarea
                 id="noteText"
@@ -650,12 +675,10 @@
                 placeholder="Create a note here, use | to add a title and --- to separate columns for table format."
               ></textarea>
             </label>
-
             <label>
               Table Format<input type="checkbox" id="tableFormatCheckbox" />
               <span>Enable table format</span>
             </label>
-
             <div class="form-actions">
               <button id="saveNoteBtn" class="primary">Save</button>
               <button id="cancelNoteBtn" class="secondary">Cancel</button>
@@ -669,7 +692,6 @@
           <ul id="noteList" class="list scrollable-list form"></ul>
         </div>
       </div>
-
       <div id="budget" class="page hidden">
         <h2>💰 Budget Tracker</h2>
         <div class="add-area">
@@ -704,7 +726,6 @@
           <ul id="budgetList" class="list scrollable-list form"></ul>
         </div>
       </div>
-
       <div id="Check" class="page hidden">
         <h2>✒ Check List</h2>
         <div class="add-area">
@@ -745,7 +766,6 @@
           <ul id="checkList" class="list scrollable-list form"></ul>
         </div>
       </div>
-
       <div id="notifications" class="page hidden">
         <h2>🔔 Notification Settings</h2>
 
@@ -845,8 +865,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.5.8</p>
-          <p>Last Updated: 22-Nov-2025</p>
+          <p>Version 13.5.9</p>
+          <p>Last Updated: 23-Nov-2025</p>
           <p>Project Mode: Open source</p>
           <p>App Size    : 7.0KB </p>
         </ul>
@@ -1453,7 +1473,7 @@
           const list = byId('reminderList'); list.innerHTML = '';
             if(appData.reminders.length === 0){
             const li = document.createElement('li'); li.textContent='No reminders yet.'; li.style.opacity='0.7'; list.appendChild(li);
-            renderHomeReminders(); renderHomeNotes(); renderHomeCheck(); return;
+            renderHomeReminders(); renderHomeNotes(); renderHomeCheck();renderHomeOverview(); return;
           }
           const frag = document.createDocumentFragment();
           appData.reminders.forEach((r,i)=>{
@@ -1480,7 +1500,7 @@
             li.appendChild(left); li.appendChild(right); frag.appendChild(li);
           });
           list.appendChild(frag);
-          renderHomeReminders(); renderHomeNotes(); renderHomeCheck();
+          renderHomeReminders(); renderHomeNotes(); renderHomeCheck();renderHomeOverview();
         }
 
         function renderHomeReminders(){
@@ -1543,7 +1563,7 @@
             if(n.isTable && n.text) {
               // Show first few rows of table in home view
               const lines = n.text.split('\n');
-              let tableHTML = '<table border=\"1\" style=\"border-collapse: collapse; width: 100%;\">';
+              let tableHTML = '<table border=\"1\" style=\"border-collapse: collapse;text-align:center; width: 100%;\">';
 
               lines.forEach((line, index) => {
                 if(line.includes('---')) {
@@ -1554,9 +1574,9 @@
                   cells.forEach(cell => {
                     const cellContent = cell.trim();
                     if(index === 0) {
-                      tableHTML += `<th style=\"border: 1px solid #ddd; padding: 4px;\">${cellContent}</th>`;
+                      tableHTML += `<th style=\"border: 1px solid #ddd;text-align:center; padding: 4px;\">${cellContent}</th>`;
                     } else {
-                      tableHTML += `<td style=\"border: 1px solid #ddd; padding: 4px;\">${cellContent}</td>`;
+                      tableHTML += `<td style=\"border: 1px solid #ddd;text-align:center; padding: 4px;\">${cellContent}</td>`;
                     }
                   });
                 }
@@ -1903,7 +1923,7 @@
           const reminderObj={ title, startDate:start, endDate:end };
           if(editingIndex!==null){ appData.reminders[editingIndex]=reminderObj; editingIndex=null; }
           else{ appData.reminders.push(reminderObj); }
-          saveAll(); renderReminders(); hideForm(byId('reminderFormContainer')); clearReminderForm();
+          saveAll(); renderReminders();renderHomeOverview(); hideForm(byId('reminderFormContainer')); clearReminderForm();
         }
 
         function clearReminderForm(){
@@ -2097,7 +2117,7 @@
           }
           if(appData.checklists.length === 0){
             const li = document.createElement('li'); li.textContent='No checklists yet.'; li.style.opacity='0.7'; list.appendChild(li);
-            renderHomeCheck(); return;
+            renderHomeCheck();return;
           }
           const frag = document.createDocumentFragment();
           appData.checklists.forEach((check,i)=>{
@@ -2170,7 +2190,7 @@
             li.appendChild(left); li.appendChild(right); frag.appendChild(li);
           });
           list.appendChild(frag);
-          renderHomeCheck();
+          renderHomeCheck();renderHomeOverview();
         }
           // ---------- Trash Bin ----------
           function renderTrash(){
@@ -3001,7 +3021,6 @@
                 byId('toggleChecklist').addEventListener('change', (e) => handleCustomNotifToggle('notifChecklist', e));
                 byId('toggleBudget').addEventListener('change', (e) => handleCustomNotifToggle('notifBudget', e));
 
-
                 byId('showAddFormBtn').addEventListener('click', function() {
                   toggleCollapse(byId('reminderFormContainer'), byId('showAddFormBtn'));
                 });
@@ -3046,7 +3065,9 @@
                 byId('homeCheckToggle').addEventListener('click', function() {
                   toggleCollapse(byId('homeCheckContainer'), byId('homeCheckToggle'));
                 });
-
+                byId('homeOverviewToggle').addEventListener('click', function() {
+                  toggleCollapse(byId('homeOverviewContainer'), byId('homeOverviewToggle'));
+                });
                 byId('showAddBudgetBtn').addEventListener('click', function() {
                   toggleCollapse(byId('budgetFormContainer'), byId('showAddBudgetBtn'));
                 });
@@ -3209,6 +3230,31 @@
               }
               window.addEventListener('load', () => setTimeout(updateStorageUsage, 80));
               window.updateStorageUsage = updateStorageUsage;
+             function renderHomeOverview() {
+              // --- Reminders Count ---
+              let activeRem = 0;
+              let inactiveRem = 0;
+
+              appData.reminders.forEach(r => {
+                const diff = daysLeft(r.endDate);
+                if (diff < 0) inactiveRem++;
+                else activeRem++;
+              });
+
+              // --- Checklists Count ---
+              let activeChk = 0;
+              let inactiveChk = 0;
+
+              appData.checklists.forEach(c => {
+                if (c.status === "open") activeChk++;
+                else inactiveChk++;
+              });
+
+              byId("activeRemindersCount").textContent = activeRem;
+              byId("inactiveRemindersCount").textContent = inactiveRem;
+              byId("activeChecklistsCount").textContent = activeChk;
+              byId("inactiveChecklistsCount").textContent = inactiveChk;
+            }
               // ---------- End Initial Render Code ----------
               })();
     </script>

@@ -865,7 +865,7 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.5.9</p>
+          <p>Version 13.5.10</p>
           <p>Last Updated: 23-Nov-2025</p>
           <p>Project Mode: Open source</p>
           <p>App Size    : 7.0KB </p>
@@ -1166,7 +1166,10 @@
       </div>
       <div id="trash" class="page hidden">
         <h2>🗑️ Trash Bin</h2>
-        <p style="opacity:0.8;">Deleted Items are here.</p>
+        <p style="opacity:0.8;">DELETED ITEM'S ARE HERE.</p>
+        <button id="emptyTrashBtn" class="icon-small" style="margin-bottom:10px;background:#d9534f;color:white;border:none;border-radius:6px;padding:9px 50px;cursor:pointer;">
+          🧹 EMPTY TRASH
+        </button>
         <ul id="trashList" class="list scrollable-list form"></ul>
       </div>
       <div id="other" class="page hidden">
@@ -2248,6 +2251,19 @@
               renderTrash();
             }
           }
+          function emptyTrashAll() {
+          if (!appData.trash || appData.trash.length === 0) {
+            alert("Trash already empty.");
+            return;
+          }
+
+          if (!confirm("Clear all items from Trash?")) return;
+
+          appData.trash = [];
+          saveAll();
+          renderTrash();
+          alert("Trash cleared successfully.");
+        }
         // ---------- Form Show/Hide ----------
         function showForm(el){ el.classList.add('visible'); }
         function hideForm(el){ el.classList.remove('visible'); }
@@ -3164,6 +3180,7 @@
               window.addEventListener('load', () => {
                 if (!appData.trash) appData.trash = [];
                 renderTrash();
+                byId('emptyTrashBtn')?.addEventListener('click', emptyTrashAll);
               });
               // Ensure only Home is visible and sidebar is hidden on initial page load
               window.addEventListener('load', () => {

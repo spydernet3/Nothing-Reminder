@@ -85,24 +85,23 @@ REMINDER APP [ https://spydernet3.github.io/Nothing-Reminder/]
 ---
 
 ### PWAs
-| Feature               | Description                                     |
-| --------------------- | ----------------------------------------------- |
-| 🎨 **Custom Theme**   | Uses CSS variable `--bg` for easy theme control |
-| 🚀 **Offline Access** | Caches pages for offline browsing               |
-| 📲 **Installable**    | Add to home screen / desktop                    |
-| ⚡ **Fast Load**      | Cache-first strategy                            |
-| 🧩 **Cross-Platform** | Works on Android, iOS & Desktop                 |
-| 🔐 **Secure (HTTPS)** | GitHub Pages provides free SSL                  |
+| Feature               | Description                                     | Limitation                          | Description                                               |
+| --------------------- | ----------------------------------------------- | ----------------------------------- | --------------------------------------------------------- |
+| 🎨 **Custom Theme**   | Uses CSS variable `--bg` for easy theme control | ❌ **No Backend**                   | Static hosting, no real-time database or APIs             |
+| 🚀 **Offline Access** | Caches pages for offline browsing               | ⚡ **Offline Cache Limits**         | Browsers restrict cache size                              |
+| 📲 **Installable**    | Add to home screen / desktop                    | 📱 **iOS Limitations**              | No push notifications / background sync                   |
+| ⚡ **Fast Load**      | Cache-first strategy                            | 🕒 **First Load Requires Internet** | Offline only after first successful load                  |
+| 🧩 **Cross-Platform** | Works on Android, iOS & Desktop                 | 🧩 **Storage Quota**                | Browser limits offline storage                            |
+| 🔐 **Secure (HTTPS)** | GitHub Pages provides free SSL                  | 🌗 **Dynamic Theme Requires JS**    | `--bg` value must be updated manually for dark/light mode |
+                                                                          
+                                                                          
 
----
 
-| Limitation                          | Description                                               |
-| ----------------------------------- | --------------------------------------------------------- |
-| ❌ **No Backend**                   | Static hosting, no real-time database or APIs             |
-| ⚡ **Offline Cache Limits**         | Browsers restrict cache size                              |
-| 📱 **iOS Limitations**              | No push notifications / background sync                   |
-| 🔄 **Manual Refresh Needed**        | Cached content must be refreshed manually                 |
-| 🕒 **First Load Requires Internet** | Offline only after first successful load                  |
-| 🧰 **Push Notifs Disabled**         | Needs Firebase or server                                  |
-| 🧩 **Storage Quota**                | Browser limits offline storage                            |
-| 🌗 **Dynamic Theme Requires JS**    | `--bg` value must be updated manually for dark/light mode |
+
+
+
+
+
+
+
+

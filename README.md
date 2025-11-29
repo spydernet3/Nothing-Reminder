@@ -4,9 +4,9 @@
 <img width="1018" height="565" alt="image" src="https://github.com/user-attachments/assets/40c9acf2-5c6f-4138-9957-f5bc47314583" />
 
 
-A lightweight, web-based Reminder and Notes application with dark mode, collapsible sections, and IST timestamp support. Designed for **fast note-taking, reminders, and home overview**.
+A lightweight, web-based Reminder and Notes application with dark mode support, Designed for **fast note-taking, reminders, and more**.
 
-!> Data may fetching slowly based on your browser speed..
+!> Users Data's are stored only local storage avoid data losses before format or erase all ...
 ---
 REMINDER APP [ https://spydernet3.github.io/Nothing-Reminder/]
 ---
@@ -25,58 +25,50 @@ REMINDER APP [ https://spydernet3.github.io/Nothing-Reminder/]
 ---
 ## Features
 
+- **Install App**
+  - By pressing the Add to Home Screen Button, there you can see the Install App to Install page as PWA [Faster and Native icon compared to webpage]
+  - Due to compatibility concerns of all platforms (Android, iOS, Windows.Chrome OS, Linux) PWA as a better companion for all.
+
+- **Privacy Focused**
+  - Apart from Notification permission no other direct or indirect permission are asked to users
+  - No Ads and trackers are implemented to affect users privacy
+  - Users data's are stored user local storage only no external servers are used to store everything 
+ 
+- **App Lock**
+  - By installing page as PWA you can use By Defauly App lock that contains your device
+  - By enabling App lock for Browswer also the way you can protect the data without intalling page as app
+
 - **Reminders**
   - Add, edit, delete reminders.
-  - Track start & end dates.
-  - See “days left” until reminder expires.
-  - Urgent/Expired reminders automatically appear in the Home page.
-  - Bold display of reminders in Home page.
+  - Track remaining days left.
+  - Urgent/Expired reminders automatically appear in the Home page and remind it as notification.
   
 - **Notes**
   - Add, view, and delete notes.
   - Automatic **date & time (IST)** added to each note when created.
   - Collapsible sections for better organization.
-  - Editable profile with image upload.
-  
-- **Dark Mode**
-  - Switch between light and dark themes.
-  - Settings persist in localStorage.
+  - Editable notes with media upload.
+ 
+- **Budget Tracker**
+  - Go to the Budget Tracker page.
+  - Click + Add New Budget.
+  - That will showed Total Amount/Remaining Days
+  - That will shows Cost per day How much you need to spend
+  - Add Expenses and track everything
+  - At Budget reminder it will remind your spend limits every day
+  - Edit or delete using the ✏️ and 🗑️ button.
 
-- **Home Overview**
-  - Quick view of urgent reminders and latest notes.
+- **Checklist**
+  - Add, view, edit and delete checklists.
+  - Create title and checklist items and select status will be open it will be remind you everyday untill you closed this tasks
 
-- **Responsive Sidebar**
-  - Collapsible sidebar with toggle button.
-  - Easy navigation between Home, Reminders, and Notes pages.
-
----
-
-## How to Use
-
-### Reminders
-1. Go to the **Reminders** page.
-2. Click **+ Add New Reminder**.
-3. Fill **Title, Start Date, End Date**.
-4. Click **Save**.  
-5. Edit or delete using the ✏️ and 🗑️ buttons.
-6. Urgent reminders appear on the **Home** page automatically.
-
-### Notes
-1. Go to the **Notes** page.
-2. Click **+ Add New Note**.
-3. Write your note in the textarea.
-4. Click **Save**. IST **date & time** is added automatically.
-5. View notes in the collapsible **View Notes** section.
-6. Delete notes with 🗑️ button.
-
-### Profile
-- Click the profile picture to upload a new image.
-- Click **Edit Name** to update the username.
-
-### Dark Mode
-- Click the 🌙 button in the sidebar to toggle dark mode.
-- Dark mode preference is saved.
-
+- **Utilities**
+  - At utilities there you can access Monthly Calender,Calculator with (4 Modes) ,Moon Phase,Sun rise/sun set and more lots of features.
+ 
+- **Notification**
+  - In app Notification logic ware used to notify the items
+  - In Notification page by enabling notification permission there you can customize the Notifications what you want like(Reminder,Notes,checklist,Budget,Moon phase) everything
+   
 ---
 
 ## Differences from Other Note Apps (Table View)
@@ -85,12 +77,10 @@ REMINDER APP [ https://spydernet3.github.io/Nothing-Reminder/]
 |---------|---------|----------------------------|
 | **Date & Time** | Automatic IST timestamp | Often no timestamp or UTC only |
 | **Home Overview** | Shows urgent reminders & notes | Usually requires manual sorting |
-| **Collapsible Sections** | Yes | Often static table view |
-| **Bold Urgent Reminders** | Yes | Not highlighted |
-| **Edit & Delete** | Both available | Sometimes only edit |
 | **Lightweight** | Pure HTML/CSS/JS, no backend | May require database |
 | **Dark Mode** | Persistent | Sometimes absent |
 | **User Profile** | Editable image & name | Rarely included |
+| **Storage** | Compared to other apps it will be just 7kb also web app|Other apps needs more storage and permission and trackers to run smoothly|
 
 ---
 

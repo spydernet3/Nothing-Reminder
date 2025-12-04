@@ -490,7 +490,7 @@
         border:1px solid #444;
         margin-top:5px;
       }
-      
+     
       .form.visible {
           max-height: 5000px;   /* LARGE SAFE VALUE */
           overflow: visible;
@@ -506,6 +506,7 @@
       .gold-table-wrapper::-webkit-scrollbar {
           display: none;
       }
+      
     </style>
   </head>
   <body>
@@ -882,8 +883,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.6</p>
-          <p>Last Updated: 03-Dec-2025</p>
+          <p>Version 13.6.1</p>
+          <p>Last Updated: 04-Dec-2025</p>
           <p>Project Mode: Open source</p>
           <p>App Size    : 7.0KB </p>
         </ul>
@@ -1026,12 +1027,11 @@
               </div>
             </div>
             <!-- CURRENT TAMIL MONTH BOX -->
-<div id="currentTamilMonthBox"
-     style="padding:10px;margin-bottom:10px;border:1px solid #ccc;border-radius:6px;background:#f8f8f8;">
-  <h3 style="text-align:center;margin:0 0 8px 0;">இன்றைய தமிழ் மாதம்</h3>
-  <p id="currentTamilMonthText" style="font-weight:600;text-align:center;"></p>
-</div>
-
+          <div id="currentTamilMonthBox"
+               style="padding:10px;margin-bottom:10px;border:1px solid #ccc;border-radius:6px;background:#f8f8f8;">
+            <h3 style="text-align:center;margin:0 0 8px 0;">இன்றைய தமிழ் மாதம்</h3>
+            <p id="currentTamilMonthText" style="font-weight:600;text-align:center;"></p>
+          </div>
           </div>
         </div>
         <div class="add-area">
@@ -2906,18 +2906,18 @@
                 }
                 // TAMIL MONTH DATA (STATIC RANGE)
                 const tamilMonths = [
-                  { name: "சித்திரை",   start: "04-14", end: "05-14", info: "Tamil New Year, Chitra Pournami" },
-                  { name: "வைகாசி",    start: "05-15", end: "06-14", info: "Vaikasi Visakam" },
-                  { name: "ஆனி",       start: "06-15", end: "07-16", info: "Aani Thirumanjanam" },
-                  { name: "ஆடி",       start: "07-17", end: "08-16", info: "Aadi Perukku, Aadi Amavasai" },
-                  { name: "ஆவணி",     start: "08-17", end: "09-16", info: "Avani Avittam" },
-                  { name: "புரட்டாசி", start: "09-17", end: "10-16", info: "Purattasi Saturdays" },
-                  { name: "ஐப்பசி",    start: "10-17", end: "11-15", info: "Deepavali" },
-                  { name: "கார்த்திகை", start: "11-16", end: "12-15", info: "Karthigai Deepam" },
-                  { name: "மார்கழி",   start: "12-16", end: "01-13", info: "Tiruppavai, Thiruvempavai" },
-                  { name: "தை",        start: "01-14", end: "02-12", info: "Pongal, Thai Poosam" },
-                  { name: "மாசி",      start: "02-13", end: "03-13", info: "Maasi Magam" },
-                  { name: "பங்குனி",   start: "03-14", end: "04-13", info: "Panguni Uthiram" }
+                  { name: "சித்திரை",   start: "04-14", end: "05-14", info: "On This Month Tamil New Year, Chitra Pournami" },
+                  { name: "வைகாசி",    start: "05-15", end: "06-14", info: "On This Month Vaikasi Visakam" },
+                  { name: "ஆனி",       start: "06-15", end: "07-16", info: "On This Month Aani Thirumanjanam" },
+                  { name: "ஆடி",       start: "07-17", end: "08-16", info: "On This Month Aadi Perukku, Aadi Amavasai" },
+                  { name: "ஆவணி",     start: "08-17", end: "09-16", info: "On This Month Avani Avittam" },
+                  { name: "புரட்டாசி", start: "09-17", end: "10-16", info: "On This Month Purattasi Saturdays" },
+                  { name: "ஐப்பசி",    start: "10-17", end: "11-15", info: "On This Month Deepavali" },
+                  { name: "கார்த்திகை", start: "11-16", end: "12-15", info: "On This Month Karthigai Deepam" },
+                  { name: "மார்கழி",   start: "12-16", end: "01-13", info: "On This Month Tiruppavai, Thiruvempavai" },
+                  { name: "தை",        start: "01-14", end: "02-12", info: "On This Month Pongal, Thai Poosam" },
+                  { name: "மாசி",      start: "02-13", end: "03-13", info: "On This Month Maasi Magam" },
+                  { name: "பங்குனி",   start: "03-14", end: "04-13", info: "On This Month Panguni Uthiram" }
                 ];
                 
                 // FUNCTION — Returns current Tamil month object
@@ -3447,7 +3447,7 @@
             
               const load = k => {try{return JSON.parse(localStorage.getItem(k)||"{}")}catch(e){return{}}};
               const save = (k,v)=>localStorage.setItem(k,JSON.stringify(v));
-              const fmt = v => v==null?"—":"₹ " + Number(v).toLocaleString("en-IN");
+              const fmt = v => v==null ? "—" : "₹ " + Math.round(Number(v)).toLocaleString("en-IN");
             
               // populate dropdowns
               (function(){
@@ -3536,13 +3536,13 @@
                 rate18k = (rate18k * (1 + RETAIL_MARKUP)) * (1 + GST_RATE);
                 // -----------------------------------------------------
             
-                return {
-                  "18k": rate18k,
-                  "22k": rate22k,
-                  "24k": rate24k,
-                  "place": place,
-                  "time": new Date().getTime(),
-                }
+               return {
+                "18k": Math.round(rate18k),
+                "22k": Math.round(rate22k),
+                "24k": Math.round(rate24k),
+                "place": place,
+                "time": new Date().getTime(),
+              }
               }
             
               /* ---------------- SAVE SNAPSHOT ---------------- */
@@ -3562,7 +3562,13 @@
             
               /* ---------------- BUILD TABLE ---------------- */
               function buildTable(place,t,y){
-                const diff=(a,b)=>(!a||!b)?"—":`${a-b>0?"+":"-"}₹${Math.abs(a-b)}`;
+                const diff = (a, b) => {
+                if (!a || !b) return "—";
+                const change = Math.round(a - b);
+                const sign = change > 0 ? "+" : "-";
+                return `${sign}₹${Math.abs(change)}`;
+              };
+
                 return `
                   <div class="gold-table-wrapper">
                     <div style="border:1px solid #ddd;border-radius:10px;padding:12px;margin-bottom:15px;background:#fff;">
@@ -3689,81 +3695,193 @@
               }
             
               async function fetchWeather(city){
-                statusEl.textContent = "⏳ Fetching live weather…";
+              statusEl.textContent = "⏳ Fetching hourly forecast…";
             
-                // guaranteed JSON
-                const url = `https://wttr.in/${city}?format=j1`;
-                const res = await fetch(url);
-                const data = await res.json();
+              // 1) geocode the city (open-meteo geocoding)
+              const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`;
+              const gres = await fetch(geoUrl, { cache: 'no-store' });
+              if(!gres.ok) throw new Error('Geocode failed');
+              const gdata = await gres.json();
+              const place = (gdata.results && gdata.results[0]);
+              if(!place) throw new Error('City not found');
             
-                // SAFE extraction
-                const today = data.weather?.[0]?.hourly?.[4] || data.weather?.[0]?.hourly?.[0];
-                const tomorrow = data.weather?.[1]?.hourly?.[4] || data.weather?.[1]?.hourly?.[0];
+              const lat = place.latitude;
+              const lon = place.longitude;
             
-                if(!today || !tomorrow){
-                  throw new Error("Invalid weather structure");
-                }
+              // 2) prepare date range: today and tomorrow (ISO YYYY-MM-DD)
+              const todayDate = new Date();
+              const todayISO = todayDate.toISOString().slice(0,10);
+              const tomorrowDate = new Date(todayDate);
+              tomorrowDate.setDate(tomorrowDate.getDate()+1);
+              const tomorrowISO = tomorrowDate.toISOString().slice(0,10);
+              // fetch full 2-day hourly data (start today 00:00 -> end tomorrow 23:00)
+              const start = todayISO;
+              const end = tomorrowISO;
             
-                const w = {
-                  today: {
-                    temp: today.tempC,
-                    rain: today.chanceofrain,
-                    humidity: today.humidity,
-                    desc: today.weatherDesc?.[0]?.value || "—",
-                  },
-                  tomorrow: {
-                    temp: tomorrow.tempC,
-                    rain: tomorrow.chanceofrain,
-                    humidity: tomorrow.humidity,
-                    desc: tomorrow.weatherDesc?.[0]?.value || "—",
-                  }
-                };
+              // 3) fetch hourly forecast from Open-Meteo
+              // request: temperature_2m, relativehumidity_2m, precipitation_probability, weathercode
+              const params = [
+                `latitude=${lat}`,
+                `longitude=${lon}`,
+                `hourly=temperature_2m,relativehumidity_2m,precipitation_probability,weathercode`,
+                `start_date=${start}`,
+                `end_date=${end}`,
+                `timezone=Asia/Kolkata`
+              ].join('&');
             
-                w.today.icon = getIcon(w.today.desc);
-                w.tomorrow.icon = getIcon(w.tomorrow.desc);
-                return w;
+              const fUrl = `https://api.open-meteo.com/v1/forecast?${params}`;
+              const fres = await fetch(fUrl, { cache: 'no-store' });
+              if(!fres.ok) throw new Error('Forecast fetch failed');
+              const fdata = await fres.json();
+            
+              // 4) normalize hourly arrays into objects keyed by ISO date-time 'YYYY-MM-DDTHH:MM'
+              const times = fdata.hourly.time || []; // e.g. "2025-12-04T00:00"
+              const temps = fdata.hourly.temperature_2m || [];
+              const hums  = fdata.hourly.relativehumidity_2m || [];
+              const precs = fdata.hourly.precipitation_probability || [];
+              const wc    = fdata.hourly.weathercode || [];
+            
+              // build list of hourly entries
+              const hourly = [];
+              for(let i=0;i<times.length;i++){
+                const tISO = times[i];                   // "YYYY-MM-DDTHH:MM"
+                const dt = new Date(tISO);
+                const hour24 = dt.getHours();            // 0..23 (local tz because we requested Asia/Kolkata)
+                const date = tISO.slice(0,10);           // YYYY-MM-DD
+                hourly.push({
+                  date,
+                  hour24,
+                  timeISO: tISO,
+                  temp: temps[i] != null ? Math.round(temps[i]) : null,
+                  humidity: hums[i] != null ? Math.round(hums[i]) : null,
+                  precipProb: precs[i] != null ? Math.round(precs[i]) : null,
+                  weathercode: wc[i] != null ? wc[i] : null
+                });
               }
             
+              // 5) pick today's 0..23 and tomorrow's 0..23 arrays (ensures full 24 entries each)
+              const todayHours = [];
+              const tomorrowHours = [];
+            
+              for(let h=0; h<24; h++){
+                // find hour entry for today date + hour h
+                const tEntry = hourly.find(x => x.date === todayISO && x.hour24 === h) || {
+                  date: todayISO, hour24: h, timeISO: `${todayISO}T${String(h).padStart(2,'0')}:00`, temp:null, humidity:null, precipProb:null, weathercode:null
+                };
+                todayHours.push(tEntry);
+            
+                const tmEntry = hourly.find(x => x.date === tomorrowISO && x.hour24 === h) || {
+                  date: tomorrowISO, hour24: h, timeISO: `${tomorrowISO}T${String(h).padStart(2,'0')}:00`, temp:null, humidity:null, precipProb:null, weathercode:null
+                };
+                tomorrowHours.push(tmEntry);
+              }
+            
+              // 6) map to UI-friendly format: time12, temp, rain, humidity, icon
+              const getIconFromCodeOrProb = (entry) => {
+                // If precipitation probability high -> rain; else use weathercode bands
+                if(entry.precipProb != null && entry.precipProb >= 50) return '🌧️';
+                const code = entry.weathercode;
+                if(code === null || code === undefined) {
+                  // fallback by temp/humidity
+                  if(entry.temp != null && entry.temp >= 30) return '☀️';
+                  return '⛅';
+                }
+                // open-meteo weathercode mapping (simple)
+                // 0 clear, 1-3 partly cloudy, 45/48 fog, 51-67 drizzle/rain, 71-77 snow, 95-99 thunder
+                if(code === 0) return '☀️';
+                if(code >= 1 && code <= 3) return '⛅';
+                if(code === 45 || code === 48) return '🌫️';
+                if((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return '🌧️';
+                if(code >= 71 && code <= 77) return '❄️';
+                if(code >= 95) return '⛈️';
+                return '⛅';
+              };
+            
+              const to12 = (h) => {
+                let hr = Number(h) % 24;
+                const ampm = hr >= 12 ? 'PM' : 'AM';
+                hr = hr % 12;
+                if(hr === 0) hr = 12;
+                return `${hr}:00 ${ampm}`;
+              };
+            
+              const todayUI = todayHours.map(e => ({
+                time12: to12(e.hour24),
+                temp: e.temp,
+                rain: e.precipProb,
+                humidity: e.humidity,
+                icon: getIconFromCodeOrProb(e)
+              }));
+            
+              const tomorrowUI = tomorrowHours.map(e => ({
+                time12: to12(e.hour24),
+                temp: e.temp,
+                rain: e.precipProb,
+                humidity: e.humidity,
+                icon: getIconFromCodeOrProb(e)
+              }));
+            
+              // final normalized object
+              return {
+                cityResolved: place.name + (place.country ? (', ' + place.country) : ''),
+                todayHours: todayUI,
+                tomorrowHours: tomorrowUI
+              };
+            }
               function buildWeatherUI(city, w){
-                return `
-                  <div style="border:1px solid #ddd;border-radius:10px;padding:12px;background:#fff;">
-                    <h3>${city}</h3>
+              const tableRows = arr => arr.map(h=>`
+                <tr>
+                  <td style="padding:6px 8px;width:14%">${h.time12}</td>
+                  <td style="padding:6px 8px;width:8%;text-align:center">${h.icon}</td>
+                  <td style="padding:6px 8px;width:24%;text-align:center">${h.temp==null?'—':h.temp+'°C'}</td>
+                  <td style="padding:6px 8px;width:24%;text-align:center">${h.rain==null?'—':h.rain+'%'}</td>
+                  <td style="padding:6px 8px;width:24%;text-align:center">${h.humidity==null?'—':h.humidity+'%'}</td>
+                </tr>
+              `).join('');
+            
+              return `
+                <div style="border:1px solid #ddd;border-radius:10px;padding:12px;background:#fff;">
+                  <h3 style="margin:0 0 8px 0">${city} — Hourly Forecast</h3>
+            
+                  <h4 style="margin:8px 0 6px 0;font-size:14px">Today</h4>
+                  <div style="overflow-x:auto">
                     <table style="width:100%;border-collapse:collapse;">
-                      <tr style="background:#f3f3f3;font-weight:700;">
-                        <td>Day</td><td>Icon</td><td>Temp</td><td>Rain %</td><td>Humidity</td>
+                      <tr style="background:#f3f3f3;font-weight:700">
+                        <td>Time</td><td style="text-align:center">Icon</td><td style="text-align:center">Temp</td><td style="text-align:center">Rain %</td><td style="text-align:center">Humidity</td>
                       </tr>
-                      <tr>
-                        <td>Today</td>
-                        <td>${w.today.icon}</td>
-                        <td>${w.today.temp}°C</td>
-                        <td>${w.today.rain}%</td>
-                        <td>${w.today.humidity}%</td>
-                      </tr>
-                      <tr>
-                        <td>Tomorrow</td>
-                        <td>${w.tomorrow.icon}</td>
-                        <td>${w.tomorrow.temp}°C</td>
-                        <td>${w.tomorrow.rain}%</td>
-                        <td>${w.tomorrow.humidity}%</td>
-                      </tr>
+                      ${tableRows(w.todayHours)}
                     </table>
                   </div>
-                `;
-              }
             
-              async function renderWeather(){
-                try{
-                  const city = citySel.value;
-                  const data = await fetchWeather(city);
-                  outEl.innerHTML = buildWeatherUI(city, data);
-                  statusEl.textContent = "✔ Weather updated";
-                } catch(e){
-                  console.error(e);
-                  statusEl.textContent = "❌ Weather fetch failed";
-                  outEl.innerHTML = `<div style="padding:10px;color:red;">Failed to fetch weather.</div>`;
-                }
+                  <h4 style="margin:12px 0 6px 0;font-size:14px">Tomorrow</h4>
+                  <div style="overflow-x:auto">
+                    <table style="width:100%;border-collapse:collapse;">
+                      <tr style="background:#f3f3f3;font-weight:700">
+                        <td>Time</td><td style="text-align:center">Icon</td><td style="text-align:center">Temp</td><td style="text-align:center">Rain %</td><td style="text-align:center">Humidity</td>
+                      </tr>
+                      ${tableRows(w.tomorrowHours)}
+                    </table>
+                  </div>
+                </div>
+              `;
+            }
+             async function renderWeather(){
+              try{
+                const city = citySel.value || citySel.options[0]?.value;
+                statusEl.textContent = '⏳ Fetching hourly forecast...';
+                const w = await fetchWeather(city);
+                outEl.innerHTML = buildWeatherUI(w.cityResolved, w);
+                statusEl.textContent = '✔ Hourly forecast updated';
+                // save last city for notifications if you use that
+                localStorage.setItem('last_weather_city', city);
+                // optionally save snapshot for offline fallback
+                localStorage.setItem('weather_snapshot_' + new Date().toISOString().slice(0,10), JSON.stringify(w));
+              } catch(err){
+                console.error('Weather error', err);
+                statusEl.textContent = '❌ Hourly forecast failed: ' + (err.message||'');
+                outEl.innerHTML = `<div style="color:#d32f2f;padding:10px;border:1px solid #ffdede;border-radius:8px;">Failed to fetch hourly forecast.</div>`;
               }
-            
+            }
               toggleBtn.addEventListener("click", ()=>{
                 const exp = toggleBtn.getAttribute("aria-expanded") === "true";
                 toggleBtn.setAttribute("aria-expanded", !exp);

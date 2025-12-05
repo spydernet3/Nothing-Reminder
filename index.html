@@ -21,7 +21,7 @@
       * { box-sizing: border-box; }
       body {
         margin: 0;
-        font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica          Neue", Arial;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
         background: var(--bg);
         color: var(--text);
       }
@@ -170,7 +170,7 @@
       }
       .dark .main { background:#151515; color:var(--text); }
       .dark .form { background: #232323; }
-      .dark .menu-btn, .dark .icon-btn { background:#333; color:var(--text);       }
+      .dark .menu-btn, .dark .icon-btn { background:#333; color:var(--text); }
 
       /* Settings panel styles */
       .settings-panel {
@@ -883,8 +883,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.6.1</p>
-          <p>Last Updated: 04-Dec-2025</p>
+          <p>Version 13.6.2</p>
+          <p>Last Updated: 05-Dec-2025</p>
           <p>Project Mode: Open source</p>
           <p>App Size    : 7.0KB </p>
         </ul>
@@ -1804,9 +1804,10 @@
 
           const used = b.expenses ? b.expenses.reduce((sum, e) => sum + e.amount, 0) : 0;
           const remaining = b.amount - used;
+          
           const start = b.startDate ? new Date(b.startDate) : null;
           const end = b.endDate ? new Date(b.endDate) : null;
-          const days = (start && end) ? daysBetween(b.startDate, b.endDate) : 1;
+          const days = daysLeft(b.endDate);
           const remainingPerDay = days > 0 ? (remaining / days).toFixed(2) : remaining;
           const title = document.createElement('div');
           title.textContent = `Title: ${b.title}`;
@@ -1851,9 +1852,11 @@
             // --- Buttons section ---
             const right = document.createElement('div');
             right.style.display = 'flex';
+            right.style.flexDirection = 'column';
+            right.style.justifyContent = 'center';
             right.style.alignItems = 'center';
-            right.style.gap = '4px';
-
+            right.style.gap = '10px';
+            right.style.paddingTop = '6px';
             const addBtn = document.createElement('button');
             addBtn.textContent = '➕';
             addBtn.className = 'icon-small';
@@ -1885,8 +1888,6 @@
 
               if (!b.expenses) b.expenses = [];
               b.expenses.push({ title: expTitle, amount: expAmt, date: expDate });
-              b.amount = b.amount - expAmt;
-
               saveAll();
               renderBudgets();
             });
@@ -1922,14 +1923,15 @@
           appData.budget.forEach(b => {
             if (!b.expenses) b.expenses = [];
 
-            // Calculate total expenses and remaining
+             // Calculate total expenses and remaining
             const used = b.expenses.reduce((sum, e) => sum + Number(e.amount), 0);
             const remaining = b.amount - used;
-
-            // Calculate cost per day (optional — still using full amount)
-            const costPerDay = calculateCostPerDay(remaining, b.startDate, b.endDate);
-            const days = daysBetween(b.startDate, b.endDate);
-
+            
+            // Correct dynamic remaining days
+            const days = daysLeft(b.endDate);  
+            
+            // Recalculate cost per day
+            const costPerDay = days > 0 ? (remaining / days).toFixed(2) : 0;
             const li = document.createElement('li');
             li.style.fontSize = '14px';
             li.style.marginBottom = '5px';
@@ -2466,7 +2468,7 @@
             let summary = [];
             if (appData.budget.length === 0) return "No active budgets to track.";
             appData.budget.forEach(b => {
-                const days = daysBetween(b.startDate, b.endDate);
+                const days = daysLeft(b.endDate);
                 const costPerDay = calculateCostPerDay(b.amount, b.startDate, b.endDate);
                 if (days > 0 && costPerDay > 0) {
                     summary.push(`- ${b.title}: ₹${costPerDay}/day for ${days} days`);

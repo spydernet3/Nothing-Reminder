@@ -506,7 +506,10 @@
       .gold-table-wrapper::-webkit-scrollbar {
           display: none;
       }
-      
+      #ebCalculator label {
+    display: block;
+    margin-bottom: 15px; /* controls spacing between each input */
+    }
     </style>
   </head>
   <body>
@@ -884,7 +887,7 @@
         <h3>Version Info!</h3>
         <ul>
           <p>Version 13.6.2</p>
-          <p>Last Updated: 05-Dec-2025</p>
+          <p>Last Updated: 04-Dec-2025</p>
           <p>Project Mode: Open source</p>
           <p>App Size    : 7.0KB </p>
         </ul>
@@ -1046,6 +1049,7 @@
                 <option value="age">Age Calculator</option>
                 <option value="date">Date Difference Calculator</option>
                 <option value="bmi">BMI Calculator</option>
+                <option value="eb">EB Calculator</option>
                 <option value="scientific" disabled>
                   Scientific Calculator (WIP)
                 </option>
@@ -1150,6 +1154,38 @@
         
           <button id="calcBMIButton">Calculate BMI</button>
           <p id="bmiResult" style="margin-top: 8px; font-weight: 600;"></p>
+        </div>
+        <div id="ebCalculator" class="calculator-mode hidden">
+        <h3>⚡ EB BILL CALCULATOR</h3>
+      
+        <label>
+          CONSUMER NO / NAME
+          <input type="text" id="ebConsumerName" placeholder="Optional">
+        </label>
+      
+        <label>
+          Old EB Reading
+          <input type="number" id="ebOldReading" placeholder="e.g., 1000">
+        </label>
+      
+        <label>
+          New EB Reading
+          <input type="number" id="ebNewReading" placeholder="e.g., 1200">
+        </label>
+      
+        <label>
+          Consumed Units
+          <input type="number" id="ebConsumedUnits"placeholder="auto return"; readonly style="background:#eee;">
+        </label>
+      
+        <button id="calcEbBtn" class="primary">Calculate EB Bill</button>
+      
+        <h4>Editable Tariff Table</h4>
+        <table id="ebTariffTable" style="width:100%;border-collapse:collapse;"></table>
+      
+        <button id="resetSlabs" class="secondary" style="margin-top:8px;">Reset Slabs to Default</button>
+      
+        <p id="ebResult" style="margin-top:12px;font-weight:700;"></p>
         </div>
         </div>
         <button id="moonPhaseToggle">🌙 MOON PHASE<span class="arrow">▼</span></button>
@@ -2700,19 +2736,19 @@
               const diffTime = Math.abs(end - start);
                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)+1);
 
-            // Calculate months and remaining days
-            const totalMonths = Math.floor(diffDays / 30); // Approximate month as 30 days
-            const remainingDays = diffDays % 30;
-
-            let result;
-            if (diffDays > 31) {
-              result = `${totalMonths} month(s) and ${remainingDays} day(s)`;
-            } else {
-              result = `${diffDays} day(s)`;
-            }
-
-            saveHistory(`Date Difference: ${formatDMY(startStr)} to ${formatDMY(endStr)} = ${result}`, result);
-                }
+              // Calculate months and remaining days
+              const totalMonths = Math.floor(diffDays / 30); // Approximate month as 30 days
+              const remainingDays = diffDays % 30;
+  
+              let result;
+              if (diffDays > 31) {
+                result = `${totalMonths} month(s) and ${remainingDays} day(s)`;
+              } else {
+                result = `${diffDays} day(s)`;
+              }
+  
+              saveHistory(`Date Difference: ${formatDMY(startStr)} to ${formatDMY(endStr)} = ${result}`, result);
+                  }
                 // ---------- BMI Calculator Logic ----------
                 function calculateBMI() {
                   const age = parseInt(byId('bmiAge').value);
@@ -2771,7 +2807,10 @@
                     else if (mode === 'bmi') {
                     byId('bmiCalculator').classList.remove('hidden');
                   }
-
+                    else if (mode === "eb") {
+                    document.getElementById("ebCalculator").classList.remove("hidden");
+                    renderEbTable(); // Load editable tariff table
+                }
                   // Reset history index when mode changes
                   editingHistoryIndex = null;
                   }
@@ -3266,6 +3305,7 @@
                 renderBudgets();
                 renderChecklists();
                 renderHistory(); // NEW: Initial render for history
+                renderCalculationHistory()
                 // NEW: Initialize calculator mode
                 switchCalculatorMode();
                 async function showMoonPhaseNotification() {
@@ -3896,6 +3936,183 @@
               citySel.addEventListener("change", renderWeather);
             
             })();
+            /* ==========================
+             EB TAMIL NADU TARIFF SLABS
+             USER EDITABLE
+            ========================== */
+
+            let ebSlabs = [
+              { from: 1, to: 100, cost: 0 },
+              { from: 101, to: 200, cost: 2.35 },
+              { from: 201, to: 400, cost: 4.70 },
+              { from: 401, to: 500, cost: 6.30 },
+              { from: 501, to: 600, cost: 8.40 },
+              { from: 601, to: 800, cost: 9.45 },
+              { from: 801, to: 1000, cost: 10.50 },
+              { from: 1001, to: Infinity, cost: 11.55 }
+            ];
+            
+            /* Build editable tariff table */
+              function renderEbTable() {
+              const tbl = document.getElementById("ebTariffTable");
+            
+              tbl.innerHTML = `
+                <tr style="background:#ddd; text-align:center;">
+                  <th>From</th>
+                  <th>To</th>
+                  <th>Rate ₹</th>
+                </tr>
+              `;
+            
+              ebSlabs.forEach((s, i) => {
+                const row = document.createElement("tr");
+            
+                row.innerHTML = `
+                  <td style="text-align:center; padding:6px;">${s.from}</td>
+                  <td style="text-align:center; padding:6px;">${s.to === Infinity ? "∞" : s.to}</td>
+                  <td style="text-align:center; padding:6px;">
+                    <input type="number" 
+                           id="slab_${i}" 
+                           value="${s.cost}" 
+                           style="width:80px;padding:4px;border-radius:6px;border:1px solid #aaa;text-align:center;">
+                  </td>
+                `;
+            
+                tbl.appendChild(row);
+              });
+            }
+            
+            byId("resetSlabs").addEventListener("click", () => {
+              ebSlabs = [
+                { from: 1, to: 100, cost: 0 },
+                { from: 101, to: 200, cost: 2.35 },
+                { from: 201, to: 400, cost: 4.70 },
+                { from: 401, to: 500, cost: 6.30 },
+                { from: 501, to: 600, cost: 8.40 },
+                { from: 601, to: 800, cost: 9.45 },
+                { from: 801, to: 1000, cost: 10.50 },
+                { from: 1001, to: Infinity, cost: 11.55 }
+              ];
+              renderEbTable();
+            });
+            /* Calculate EB Amount */
+            function calculateEbBill(units) {
+              let total = 0;
+            
+              // update slab rates from user editable inputs
+              ebSlabs.forEach((slab, i) => {
+                const box = document.getElementById(`slab_${i}`);
+                if (box) slab.cost = parseFloat(box.value);
+              });
+            
+              ebSlabs.forEach(slab => {
+                if (units >= slab.from) {
+                  const used = Math.min(units, slab.to) - slab.from + 1;
+                  if (used > 0) total += used * slab.cost;
+                }
+              });
+            
+              return total.toFixed(2);
+            }
+            byId("calcEbBtn").addEventListener("click", () => {
+
+            const name = byId("ebConsumerName").value.trim();
+            const oldR = parseFloat(byId("ebOldReading").value);
+            const newR = parseFloat(byId("ebNewReading").value);
+            const units = parseFloat(byId("ebConsumedUnits").value);
+          
+            if (isNaN(oldR) || isNaN(newR) || units <= 0) {
+              alert("Enter valid readings");
+              return;
+            }
+          
+            const amount = calculateEbBill(units);
+              // Show result
+              byId("ebResult").innerHTML = `
+              <div style="padding:10px;background:#f2f2f2;border-radius:6px;">
+                <b>${name || "New Calculation"}</b><br>
+                Old (${oldR}) - New (${newR}) = Units (${units})<br>
+                Price: ₹${amount}
+              </div>
+            `;
+              // -------------- SAVE TO HISTORY --------------
+              appData.calculationHistory.push({
+                type: name || "New Calculation",
+                title: `Old(${oldR}) - New(${newR}) = Units(${units})`,
+                value: `₹${amount}`,
+                timestamp: new Date().toISOString()
+              });
+            
+              saveAll();
+              renderCalculationHistory();
+            });
+            function renderCalculationHistory() {
+              const list = document.getElementById("calculationHistoryList");
+              list.innerHTML = "";
+            
+              if (!appData.calculationHistory || appData.calculationHistory.length === 0) {
+                list.innerHTML = `<li>No calculation history yet.</li>`;
+                return;
+              }
+            
+              appData.calculationHistory.forEach((h, index) => {
+                const li = document.createElement("li");
+            
+                const type = h.type || "Calculation";        // fallback for old entries
+                const title = h.title || h.input || "—";     // fallback for old entries
+                const value = h.value || h.result || "—";    // fallback for old entries
+                const time = h.timestamp || h.createdAt || ""; 
+            
+                const formattedDate = time 
+                    ? new Date(time).toLocaleString()
+                    : "";
+            
+                const left = document.createElement("div");
+                left.className = "item-left";
+            
+                left.innerHTML = `
+                  <div><b>${type}</b></div>
+                  <div>${title}</div>
+                  <div>${value}</div>
+                  <small style="opacity:0.7;">${formattedDate}</small>
+                `;
+            
+                const right = document.createElement("div");
+                right.style.display = "flex";
+                right.style.alignItems = "center";
+            
+                const editBtn = document.createElement("button");
+                editBtn.className = "icon-small";
+                editBtn.textContent = "✏️";
+                editBtn.onclick = () => editHistory(index);
+            
+                const delBtn = document.createElement("button");
+                delBtn.className = "icon-small";
+                delBtn.textContent = "🗑️";
+                delBtn.onclick = () => deleteHistory(index);
+            
+                right.appendChild(editBtn);
+                right.appendChild(delBtn);
+            
+                li.appendChild(left);
+                li.appendChild(right);
+            
+                list.appendChild(li);
+              });
+            }
+            byId("ebNewReading").addEventListener("input", () => {
+              const oldR = parseFloat(byId("ebOldReading").value) || 0;
+              const newR = parseFloat(byId("ebNewReading").value) || 0;
+              const units = newR - oldR;
+              byId("ebConsumedUnits").value = units > 0 ? units : 0;
+            });
+            
+            byId("ebOldReading").addEventListener("input", () => {
+              const oldR = parseFloat(byId("ebOldReading").value) || 0;
+              const newR = parseFloat(byId("ebNewReading").value) || 0;
+              const units = newR - oldR;
+              byId("ebConsumedUnits").value = units > 0 ? units : 0;
+            });
               // ---------- End Initial Render Code ----------
               })();
     </script>

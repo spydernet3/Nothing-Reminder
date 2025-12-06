@@ -507,29 +507,29 @@
           display: none;
       }
       #ebCalculator label {
-    display: block;
-    margin-bottom: 15px; /* controls spacing between each input */
+      display: block;
+      margin-bottom: 15px; /* controls spacing between each input */
+      }
+      #installBtn {
+      position: fixed;
+      top: 10px;
+      right: 12px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(6px);
+      padding: 8px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 8px;
+      color: black;
+      font-weight: bold;
+      font-size: 14px;
+      z-index: 9999;
+      display: none;
+      cursor: pointer;
     }
-    #installBtn {
-    position: fixed;
-    top: 10px;
-    right: 12px;
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(6px);
-    padding: 8px 14px;
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    border-radius: 8px;
-    color: black;
-    font-weight: bold;
-    font-size: 14px;
-    z-index: 9999;
-    display: none;
-    cursor: pointer;
-  }
-  
-  #installBtn:hover {
-    background: rgba(255, 255, 255, 0.25);
-  }
+    
+    #installBtn:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
     </style>
   </head>
   <body>
@@ -909,7 +909,7 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.6.4</p>
+          <p>Version 13.6.5</p>
           <p>Last Updated: 06-Dec-2025</p>
           <p>Project Mode: Open source</p>
           <p>App Size    : 7.0KB </p>
@@ -1897,18 +1897,30 @@
           expList.style.marginTop = '6px';
           expList.style.fontSize = '13px';
           
-          expList.innerHTML = (b.expenses && b.expenses.length)
-        ? b.expenses
-            .map(
-              e =>
-                `<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px dashed #333;padding:3px 0;">
+         expList.innerHTML = (b.expenses && b.expenses.length)
+          ? b.expenses
+              .map(
+                (e, idx) => `
+              <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px dashed #333;padding:6px 0;">
+        
+                <!-- LEFT SIDE: DATE | TITLE | AMOUNT -->
+                <div style="display:flex;gap:18px;align-items:center;font-size:14px;">
                   <span>📅 ${e.date}</span>
                   <span>💸 ${e.title}</span>
                   <span>₹${e.amount}</span>
-                </div>`
-            )
-            .join('')
-        : `<p style="opacity:0.6;">No expenses yet</p>`;
+                </div>
+        
+                <!-- RIGHT SIDE: EDIT + DELETE -->
+                <div style="display:flex;flex-direction:column;gap:4px;">
+                  <button class="icon-small" onclick="editExpense(${i},${idx})">✏️</button>
+                  <button class="icon-small" onclick="deleteExpense(${i},${idx})">🗑️</button>
+                </div>
+        
+              </div>
+              `
+              )
+              .join('')
+          : `<p style="opacity:0.6;">No expenses yet</p>`;
 
             // --- EXPANDABLE FORM for adding expenses ---
             const expForm = document.createElement('div');
@@ -2030,18 +2042,42 @@
           showForm(byId('budgetFormContainer'));
         }
 
-        function saveBudget(){
-          const title=byId('budgetTitle').value.trim();
-          const amount=byId('budgetAmount').value;
-          const start=byId('budgetStartDate').value;
-          const end=byId('budgetEndDate').value;
-          if(!title || !amount){ alert('Title and amount are required to save a budget.'); return; }
-          const budgetObj={ title, amount, startDate:start, endDate:end };
-          if(editingBudgetIndex!==null){ appData.budget[editingBudgetIndex]=budgetObj; editingBudgetIndex=null; }
-          else{ appData.budget.push(budgetObj); }
-          saveAll(); renderBudgets(); hideForm(byId('budgetFormContainer')); clearBudgetForm();
+        function saveBudget() {
+        const title = byId('budgetTitle').value.trim();
+        const amount = Number(byId('budgetAmount').value);
+        const start = byId('budgetStartDate').value;
+        const end = byId('budgetEndDate').value;
+      
+        if (!title || !amount) {
+          alert("Title and amount are required.");
+          return;
         }
-
+      
+        // New budget object (base data)
+        const updatedObj = {
+          title,
+          amount,
+          startDate: start,
+          endDate: end,
+        };
+      
+        // --------------- FIX 1: KEEP OLD EXPENSES ----------------
+        if (editingBudgetIndex !== null) {
+          const old = appData.budget[editingBudgetIndex];
+          updatedObj.expenses = old.expenses ? [...old.expenses] : [];
+          appData.budget[editingBudgetIndex] = updatedObj;
+          editingBudgetIndex = null;
+        } else {
+          updatedObj.expenses = []; // new budget starts empty
+          appData.budget.push(updatedObj);
+        }
+      
+        saveAll();
+        renderBudgets();
+        renderHomeBudgets();
+        hideForm(byId("budgetFormContainer"));
+        clearBudgetForm();
+      }
         function clearBudgetForm(){
           byId('budgetTitle').value='';
           byId('budgetAmount').value='';
@@ -2334,7 +2370,7 @@
           });
           list.appendChild(frag);
           renderHomeCheck();renderHomeOverview();
-        }
+          }
           // ---------- Trash Bin ----------
           function renderTrash(){
             const list = byId('trashList');
@@ -3201,11 +3237,58 @@
                     showPage(targetPageId);
                   }
                 }
-
                 // New delete versions
                 function deleteReminder(i){ moveToTrash('reminders', appData.reminders[i], i); renderReminders(); renderHomeReminders(); }
                 function deleteNote(i){ moveToTrash('notes', appData.notes[i], i); renderNotes(); renderHomeNotes(); }
                 function deleteBudget(i){ moveToTrash('budget', appData.budget[i], i); renderBudgets(); renderHomeBudgets(); }
+                 // make global so inline onclick="" can find them
+                window.editExpense = function(bIndex, expIndex) {
+                  const exp = appData.budget[bIndex].expenses[expIndex];
+                  if(!exp) return alert('Expense not found.');
+                
+                  const newTitle = prompt("Edit expense title:", exp.title);
+                  if (newTitle === null) return; // cancelled
+                
+                  const newAmtStr = prompt("Edit amount (numbers only):", exp.amount);
+                  if (newAmtStr === null) return; // cancelled
+                  const newAmt = Number(newAmtStr);
+                  if (isNaN(newAmt)) return alert('Enter a valid number.');
+                
+                  appData.budget[bIndex].expenses[expIndex] = {
+                    ...exp,
+                    title: newTitle.trim(),
+                    amount: newAmt
+                  };
+                
+                  saveAll();
+                  renderBudgets();
+                  renderHomeBudgets();
+                };
+                
+                window.deleteExpense = function(bIndex, expIndex) {
+                  const b = appData.budget[bIndex];
+                  if(!b || !Array.isArray(b.expenses) || !b.expenses[expIndex]) {
+                    return alert('Expense not found.');
+                  }
+                  b.expenses.splice(expIndex, 1);
+                  saveAll();
+                  renderBudgets();
+                  renderHomeBudgets();
+                };
+                
+                // event delegation for expense edit/delete
+                document.querySelectorAll('.edit-exp').forEach(btn => {
+                  btn.addEventListener('click', (ev) => {
+                    const b = Number(btn.dataset.b), e = Number(btn.dataset.e);
+                    editExpense(b, e); // can be inner or window function
+                  });
+                });
+                document.querySelectorAll('.del-exp').forEach(btn => {
+                  btn.addEventListener('click', (ev) => {
+                    const b = Number(btn.dataset.b), e = Number(btn.dataset.e);
+                    deleteExpense(b, e);
+                  });
+                });
                 function deleteCheck(i){ moveToTrash('checklists', appData.checklists[i], i); renderChecklists(); renderHomeCheck(); }
                 function deleteHistory(i){moveToTrash('calculationHistory', appData.calculationHistory[i], i); renderHistory(); }
                                 // ---------- Event Listeners ----------

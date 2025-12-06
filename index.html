@@ -2626,16 +2626,37 @@
               }
           }
 
-          // BUDGET Summary
-          if (appData.notifBudget) {
-              const budgetSummary = buildBudgetSummary();
-              if (budgetSummary !== "No active budgets to track." && budgetSummary !== "No active budget overview available.") {
-                   registration.showNotification("Nothing Reminder - 💰 Budget", {
-                      body: budgetSummary, icon: 'assets/icon.png', requireInteraction: true, tag: 'budget'
-                  });
-              }
-          }
-
+         if (appData.notifBudget) {
+          appData.budget.forEach(b => {
+        
+            // Calculate used amount
+            const used = b.expenses
+              ? b.expenses.reduce((sum, e) => sum + Number(e.amount), 0)
+              : 0;
+        
+            // Correct remaining
+            const remaining = Number(b.amount) - used;
+        
+            // Correct dynamic days left
+            const days = b.endDate ? daysLeft(b.endDate) : null;
+        
+            // Per-day calculation safely
+            const perDay = (days && days > 0)
+              ? (remaining / days).toFixed(2)
+              : remaining;
+        
+            // Notification text
+            const body = `
+              Total: ₹${b.amount}
+              Used: ₹${used}
+              Remaining: ₹${remaining}
+              Per Day: ₹${perDay}
+              Days Left: ${days !== null ? days : 'N/A'}
+            `;
+        
+            sendNotification("Budget Update", body.trim());
+          });
+        }
           // NOTES Summary
           if (appData.notifNotes) {
               const notesSummary = buildNotesSummary();

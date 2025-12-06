@@ -886,8 +886,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.6.2</p>
-          <p>Last Updated: 04-Dec-2025</p>
+          <p>Version 13.6.3</p>
+          <p>Last Updated: 05-Dec-2025</p>
           <p>Project Mode: Open source</p>
           <p>App Size    : 7.0KB </p>
         </ul>
@@ -1043,7 +1043,7 @@
           </button>
           <div id="calculatorContainer" class="form" aria-hidden="true">
             <label>
-              Select Mode:
+              SELECT MODE:
               <select id="calculatorMode">
                 <option value="normal">Normal Calculator</option>
                 <option value="age">Age Calculator</option>
@@ -1164,17 +1164,17 @@
         </label>
       
         <label>
-          Old EB Reading
+          OLD EB READING
           <input type="number" id="ebOldReading" placeholder="e.g., 1000">
         </label>
       
         <label>
-          New EB Reading
+          NEW EB READING
           <input type="number" id="ebNewReading" placeholder="e.g., 1200">
         </label>
       
         <label>
-          Consumed Units
+          CONSUMED UNITS
           <input type="number" id="ebConsumedUnits"placeholder="auto return"; readonly style="background:#eee;">
         </label>
       
@@ -1222,10 +1222,10 @@
 
         <div id="goldRateForm" class="form" aria-hidden="true">
 
-          <label>Select Place 1</label>
+          <label>SELECT PLACE</label>
           <select id="goldPlace1"></select>
 
-          <label style="margin-top:12px;">Select Place 2</label>
+          <label style="margin-top:12px;">SELECT PLACE</label>
           <select id="goldPlace2"></select>
 
           <div id="goldStatus" style="margin-top:10px;font-weight:600;"></div>
@@ -1244,7 +1244,7 @@
       
       <div id="weatherForm" class="form" aria-hidden="true">
         
-        <label>Select Place</label>
+        <label>SELECT PLACE</label>
         <select id="weatherCity"></select>
       
         <div id="weatherStatus" style="margin-top:10px;font-weight:600;"></div>
@@ -3885,17 +3885,17 @@
                 <div style="border:1px solid #ddd;border-radius:10px;padding:12px;background:#fff;">
                   <h3 style="margin:0 0 8px 0">${city} — Hourly Forecast</h3>
             
-                  <h4 style="margin:8px 0 6px 0;font-size:14px">Today</h4>
+                  <h4 style="margin:8px 0 6px 0;font-size:14px">TODAY</h4>
                   <div style="overflow-x:auto">
                     <table style="width:100%;border-collapse:collapse;">
                       <tr style="background:#f3f3f3;font-weight:700">
-                        <td>Time</td><td style="text-align:center">Icon</td><td style="text-align:center">Temp</td><td style="text-align:center">Rain %</td><td style="text-align:center">Humidity</td>
+                        <td>Time</td><td style="text-align:center">Weather</td><td style="text-align:center">Temp</td><td style="text-align:center">Rain %</td><td style="text-align:center">Humidity</td>
                       </tr>
                       ${tableRows(w.todayHours)}
                     </table>
                   </div>
             
-                  <h4 style="margin:12px 0 6px 0;font-size:14px">Tomorrow</h4>
+                  <h4 style="margin:12px 0 6px 0;font-size:14px">TOMORROW</h4>
                   <div style="overflow-x:auto">
                     <table style="width:100%;border-collapse:collapse;">
                       <tr style="background:#f3f3f3;font-weight:700">
@@ -3960,7 +3960,7 @@
                 <tr style="background:#ddd; text-align:center;">
                   <th>From</th>
                   <th>To</th>
-                  <th>Rate ₹</th>
+                  <th>₹ Rate</th>
                 </tr>
               `;
             
@@ -3968,7 +3968,7 @@
                 const row = document.createElement("tr");
             
                 row.innerHTML = `
-                  <td style="text-align:center; padding:6px;">${s.from}</td>
+                  <td style="text-align:center; padding:8px;">${s.from}</td>
                   <td style="text-align:center; padding:6px;">${s.to === Infinity ? "∞" : s.to}</td>
                   <td style="text-align:center; padding:6px;">
                     <input type="number" 

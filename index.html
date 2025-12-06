@@ -2626,37 +2626,48 @@
               }
           }
 
-         if (appData.notifBudget) {
-          appData.budget.forEach(b => {
-        
-            // Calculate used amount
-            const used = b.expenses
-              ? b.expenses.reduce((sum, e) => sum + Number(e.amount), 0)
-              : 0;
-        
-            // Correct remaining
-            const remaining = Number(b.amount) - used;
-        
-            // Correct dynamic days left
-            const days = b.endDate ? daysLeft(b.endDate) : null;
-        
-            // Per-day calculation safely
-            const perDay = (days && days > 0)
-              ? (remaining / days).toFixed(2)
-              : remaining;
-        
-            // Notification text
-            const body = `
-              Total: ₹${b.amount}
-              Used: ₹${used}
-              Remaining: ₹${remaining}
-              Per Day: ₹${perDay}
-              Days Left: ${days !== null ? days : 'N/A'}
-            `;
-        
-            sendNotification("Budget Update", body.trim());
-          });
-        }
+         // ---------------- BUDGET NOTIFICATION FIX ----------------
+          if (appData.notifBudget && appData.budget.length) {
+            
+            appData.budget.forEach(async (b) => {
+          
+              const registration = await navigator.serviceWorker.getRegistration();
+              if (!registration) return;
+          
+              // Correct used amount
+              const used = b.expenses
+                ? b.expenses.reduce((sum, e) => sum + Number(e.amount), 0)
+                : 0;
+          
+              // Correct remaining amount
+              const remaining = Number(b.amount) - used;
+          
+              // Correct dynamic days left
+              const days = b.endDate ? daysLeft(b.endDate) : null;
+          
+              // Correct per-day calculation
+              const perDay = (days && days > 0)
+                  ? (remaining / days).toFixed(2)
+                  : remaining;
+          
+              // Build notification body
+              const body = 
+                `Budget: ${b.title}
+                Total: ₹${b.amount}
+                Used: ₹${used}
+                Remaining: ₹${remaining}
+                Per Day: ₹${perDay}
+                Days Left: ${days !== null ? days : "N/A"}`;
+          
+              // SHOW NOTIFICATION
+              registration.showNotification("💰 Budget Tracker Update", {
+                body: body,
+                icon: "assets/icon.png",
+                tag: "budget-tracker-update",
+              });
+          
+            });
+          }
           // NOTES Summary
           if (appData.notifNotes) {
               const notesSummary = buildNotesSummary();

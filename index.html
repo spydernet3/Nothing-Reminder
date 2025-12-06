@@ -510,9 +510,32 @@
     display: block;
     margin-bottom: 15px; /* controls spacing between each input */
     }
+    #installBtn {
+    position: fixed;
+    top: 10px;
+    right: 12px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(6px);
+    padding: 8px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 8px;
+    color: black;
+    font-weight: bold;
+    font-size: 14px;
+    z-index: 9999;
+    display: none;
+    cursor: pointer;
+  }
+  
+  #installBtn:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
     </style>
   </head>
   <body>
+    <button id="installBtn" onclick="installApp()">
+    INSTALL APP 🐒
+    </button>
     <div id="sidebar" class="sidebar">
       <div class="profile">
         <img
@@ -886,8 +909,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.6.3</p>
-          <p>Last Updated: 05-Dec-2025</p>
+          <p>Version 13.6.4</p>
+          <p>Last Updated: 06-Dec-2025</p>
           <p>Project Mode: Open source</p>
           <p>App Size    : 7.0KB </p>
         </ul>
@@ -1373,7 +1396,22 @@
             });
         });
       }
-
+    let deferredPrompt;
+    
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById("installBtn").style.display = "block";
+    });
+    
+    async function installApp() {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      document.getElementById("installBtn").style.display = "none";
+    }
+    
       (function () {
         // ---------- Helpers ----------
         function byId(id){ return document.getElementById(id); }

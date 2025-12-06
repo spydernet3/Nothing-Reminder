@@ -1,6 +1,14 @@
-self.addEventListener('install', event => {
-  console.log('[SW] Installed');
-  self.skipWaiting();
+self.addEventListener("install", event => {
+  event.waitUntil(
+    caches.open("app-cache").then(cache => {
+      return cache.addAll([
+        "./",
+        "./index.html",
+        "./manifest.json",
+        "./assets/icon.png"
+      ]);
+    })
+  );
 });
 
 self.addEventListener('activate', event => {

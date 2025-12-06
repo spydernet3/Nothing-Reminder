@@ -2652,13 +2652,7 @@
           
               // Build notification body
               const body = 
-                `Budget: ${b.title}
-                Total: ₹${b.amount}
-                Used: ₹${used}
-                Remaining: ₹${remaining}
-                Per Day: ₹${perDay}
-                Days Left: ${days !== null ? days : "N/A"}`;
-          
+              `Budget: ${b.title} | Remaining: ₹${remaining} | Per Day: ₹${perDay} |Days Left: ${days !== null ? days : "N/A"}`;
               // SHOW NOTIFICATION
               registration.showNotification("💰 Budget Tracker Update", {
                 body: body,

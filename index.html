@@ -185,7 +185,7 @@
       #showAddFormBtn, #homeRemindersToggle, #showAddNoteBtn, #viewNotesToggle, #homeNotesToggle,
       #homeBudgetsToggle, #homeCheckToggle, #showAddBudgetBtn,#viewbudgetToggle, #showAddCheckBtn,
       #viewCheckToggle, #homeOverviewToggle, #viewRemindersToggle,#moonPhaseToggle, #sunBtn,
-      #goldRateToggle, #weatherToggle, #monthlyCalendarToggle,#calculatorToggle, #viewHistoryToggle {
+      #goldRateToggle, #weatherToggle,#qrToggle , #monthlyCalendarToggle,#calculatorToggle, #viewHistoryToggle {
         position: relative;
         user-select: none;
         display: flex;
@@ -257,12 +257,7 @@
         padding: 8px;
         margin-top: 8px;
       }
-      /* Responsive full-height trash bin scroll list */
-      #trashList {
-        height: calc(100vh - 180px) !important;
-        max-height: calc(100vh - 180px) !important;
-        overflow-y: auto;
-      }
+
       /* Scrollbar styling */
       .scrollable-list::-webkit-scrollbar {
         width: 8px;
@@ -914,8 +909,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.6.5</p>
-          <p>Last Updated: 06-Dec-2025</p>
+          <p>Version 13.6.7</p>
+          <p>Last Updated: 09-Dec-2025</p>
           <p>Project Mode: Open source</p>
           <p>App Size    : 7.0KB </p>
         </ul>
@@ -1281,7 +1276,31 @@
         <button id="weatherRefreshBtn" class="secondary" style="width:100%;margin-top:12px;">Refresh</button>
       </div>
       </div>
-        <div class="add-area">
+      <!-- QR GENERATOR BUTTON -->
+      <div class="add-area">
+        <button id="qrToggle" class="add-btn" aria-expanded="false">
+          🔳 QR GENERATOR <span class="arrow">▼</span>
+        </button>
+        <div id="qrForm" class="form" aria-hidden="true">
+          <label>ENTER CONTENT</label>
+          <textarea id="qrInput" rows="3" placeholder="Type text or URL"></textarea>
+          <div style="display:flex; gap:20px; align-items:center; margin-top:10px;">
+          <div style="display:flex; flex-direction:column;">
+            <label>QR COLOR</label>
+            <input type="color" id="qrColor" value="#000000" 
+            style="width:60px;height:35px;margin-top:10px;margin-bottom:10px;">
+          </div>
+          <div style="display:flex; flex-direction:column;">
+            <label>BG COLOR</label>
+            <input type="color" id="qrBgColor" value="#ffffff" 
+            style="width:60px;height:35px;margin-top:10px;margin-bottom:10px;">
+          </div>
+        </div>
+            <button id="generateQRBtn" class="primary">GENERATE QR</button>
+            <div id="qrOutput" style="text-align:center;margin-top:3px;"></div>
+          </div>
+        </div>
+          <div class="add-area">
           <button id="viewHistoryToggle" class="add-btn" aria-expanded="false">
             ⏳ VIEW HISTORY <span class="arrow">▼</span>
           </button>
@@ -1889,7 +1908,7 @@
           const days = daysLeft(b.endDate);
           const remainingPerDay = days > 0 ? (remaining / days).toFixed(2) : remaining;
           const title = document.createElement('div');
-          title.textContent = `TITLE : ${b.title}`;
+          title.textContent = `Title: ${b.title}`;
           title.style.fontWeight = '600';
           title.style.fontSize = '15px';
 
@@ -1925,7 +1944,7 @@
               `
               )
               .join('')
-          : `<p style="opacity:0.6;">NO EXPENSES YET</p>`;
+          : `<p style="opacity:0.6;">No expenses yet</p>`;
 
             // --- EXPANDABLE FORM for adding expenses ---
             const expForm = document.createElement('div');
@@ -1946,7 +1965,7 @@
             right.style.flexDirection = 'column';
             right.style.justifyContent = 'center';
             right.style.alignItems = 'center';
-            right.style.gap = '12px';
+            right.style.gap = '10px';
             right.style.paddingTop = '6px';
             const addBtn = document.createElement('button');
             addBtn.textContent = '➕';
@@ -3652,13 +3671,7 @@
                 });
                 place2Sel.selectedIndex=1;
               })();
-            // --- START: restore last selected gold places (add these 6 lines) ---
-            const savedGold1 = localStorage.getItem('last_gold_place1');
-            const savedGold2 = localStorage.getItem('last_gold_place2');
-            if (savedGold1 && Array.from(place1Sel.options).some(o => o.value === savedGold1)) place1Sel.value = savedGold1;
-            if (savedGold2 && Array.from(place2Sel.options).some(o => o.value === savedGold2)) place2Sel.value = savedGold2;
-            // --- END: restore last selected gold places ---
-
+            
               /* ---------------- FETCH SPOT PRICE FROM GOOGLE FINANCE ---------------- */
             async function fetchSpotINR() {
             
@@ -3795,9 +3808,7 @@
             
                   const p1 = place1Sel.value;
                   const p2 = place2Sel.value;
-                  // persist the last selected places for next load:
-                  localStorage.setItem('last_gold_place1', p1);
-                  localStorage.setItem('last_gold_place2', p2);
+            
                   const r1 = purityRates(spot,p1);
                   const r2 = purityRates(spot,p2);
             
@@ -3845,60 +3856,38 @@
               const refreshBtn = $("weatherRefreshBtn");
             
               const CITIES = [
-                "Chennai", "Madurai", "Coimbatore", "Trichy", "Tirunelveli", "Salem",
-                "Erode", "Vellore", "Thanjavur", "Tanjore", "Tuticorin", "Tiruppur",
-                "Kanyakumari", "Dindigul", "Karur", "Namakkal", "Kanchipuram",
-                "Chengalpattu", "Cuddalore", "Villupuram", "Dharmapuri", "Krishnagiri",
-                "Nagapattinam", "Sivagangai", "Ramanathapuram", "Tiruvarur",
-                "Virudhunagar", "Nagercoil", "Perambalur", "Pudukkottai",
-              
-                // Newly added districts
-                "Ariyalur", "Tenkasi", "Mayiladuthurai", "Ranipet", "Tirupattur",
-              
-                // Major towns & cities
-                "Theni", "Udumalpet", "Pollachi", "Hosur", "Ambur", "Arakkonam",
-                "Avadi", "Tambaram", "Palani", "Kodaikanal", "Mettur", "Gudalur",
-                "Ooty", "Coonoor", "Sirkazhi", "Chidambaram", "Karaikal",
-                "Mannargudi", "Pattukkottai", "Paramakudi", "Kovilpatti",
-                "Sankarankovil", "Rajapalayam", "Srivilliputhur", "Arani",
-                "Tindivanam", "Kallakurichi", "Tiruvannamalai", "Tiruttani",
-                "Melur", "Usilampatti", "Vedaranyam", "Papanasam", "Keezhakarai",
-                "Bodinayakanur", "Manapparai", "Oddanchatram",
-              
-                // Additional towns
-                "Sivakasi", "Aruppukottai", "Natham", "Batlagundu", "Vandavasi",
-                "Cheyyar", "Walajapet", "Gudiyatham", "Vaniyambadi", "Pernambut",
-                "Dharmapuri", "Pennagaram", "Harur", "Palacode", "Anthiyur",
-                "Bhavani", "Sathyamangalam", "Gobichettipalayam", "Kodumudi",
-                "Perundurai", "Chennimalai", "Negamam", "Kinathukadavu", "Sulur",
-              
-                // More places
-                "Alangulam", "Ambasamudram", "Tenkasi", "Veerakeralampudur",
-                "Vallioor", "Cheranmahadevi", "Panagudi", "Nanguneri", "Alangudi",
-                "Kumbakonam", "Thirukattupalli", "Orathanadu", "Kudavasal",
-                "Needamangalam", "Valangaiman", "Thiruthuraipoondi", "Kodavasal",
-                "Porayar", "Thiruvidaimarudur",
-              
-                // Coastal towns
-                "Velankanni", "Nagore", "Muthupet", "Poombuhar", "Tranquebar",
-                "Marakkanam", "Mahabalipuram", "Kalpakkam",
-              
-                // Northern TN
-                "Red Hills", "Ponneri", "Gummidipoondi", "Thiruvallur",
-                "Poondi", "Poonamallee", "Sriperumbudur", "Padappai",
-                "Perungalathur", "Sholinganallur", "Kelambakkam",
-              
-                // Western TN
-                "Mettupalayam", "Karamadai", "Anaikatti", "Madukkarai", "Chinnampalayam",
-              
-                // Southern TN
-                "Shencottai", "Tiruchendur", "Ettayapuram", "Srivaikuntam",
-                "Sathankulam", "Nazareth", "Viralimalai", "Aranthangi",
-              
-                // Eastern TN
-                "Sethiathoppu", "Bhuvanagiri", "Panruti", "Neyveli", "Kurinjipadi",
-                "Ulundurpet", "Sankarapuram", "Tirukoilur"
+                "Chennai",
+                "Madurai",
+                "Coimbatore",
+                "Trichy",
+                "Tirunelveli",
+                "Salem",
+                "Erode",
+                "Vellore",
+                "Thanjavur",
+                "Tanjore",
+                "Tuticorin",
+                "Tiruppur",
+                "Kanyakumari",
+                "Dindigul",
+                "Karur",
+                "Namakkal",
+                "Kanchipuram",
+                "Chengalpattu",
+                "Cuddalore",
+                "Villupuram",
+                "Dharmapuri",
+                "Krishnagiri",
+                "Nagapattinam",
+                "Sivagangai",
+                "Ramanathapuram",
+                "Tiruvarur",
+                "Virudhunagar",
+                "Nagercoil",
+                "Perambalur",
+                "Pudukkottai",
               ];
+            
               // fill dropdown
               CITIES.forEach(c=>{
                 const o = document.createElement("option");
@@ -3906,13 +3895,7 @@
                 o.textContent = c;
                 citySel.appendChild(o);
               });
-            // --- START: restore last selected weather city (add these lines) ---
-            const savedWeatherCity = localStorage.getItem('last_weather_city');
-            if (savedWeatherCity && Array.from(citySel.options).some(o => o.value === savedWeatherCity)) {
-              citySel.value = savedWeatherCity;
-            }
-            // --- END: restore last selected weather city ---
-
+            
               function getIcon(desc){
                 const d = desc.toLowerCase();
                 if(d.includes("sun") || d.includes("clear")) return "☀️";
@@ -4264,7 +4247,14 @@
                   <div>${value}</div>
                   <small style="opacity:0.7;">${formattedDate}</small>
                 `;
-            
+                // SHOW QR IMAGE IF EXISTS
+                if (h.image) {
+                  left.innerHTML += `
+                    <img src="${h.image}" 
+                         width="120" 
+                         style="margin-top:6px;border-radius:6px;">
+                  `;
+                }
                 const right = document.createElement("div");
                 right.style.display = "flex";
                 right.style.alignItems = "center";
@@ -4301,8 +4291,96 @@
               const units = newR - oldR;
               byId("ebConsumedUnits").value = units > 0 ? units : 0;
             });
+            /* ==========================
+               QR GENERATOR MODULE
+              ========================== */
+              (function() {
+                const $ = id => document.getElementById(id);
+              
+                const toggleBtn = $("qrToggle");
+                const qrForm = $("qrForm");
+                const qrInput = $("qrInput");
+                const qrColor = $("qrColor");
+                const qrBgColor = $("qrBgColor");
+                const qrOutput = $("qrOutput");
+              
+                toggleBtn.addEventListener("click", () => {
+                  qrForm.classList.toggle("visible");
+                  toggleBtn.classList.toggle("open");
+                });
+              
+                $("generateQRBtn").addEventListener("click", generateQR);
+              
+                async function generateQR() {
+                  const text = qrInput.value.trim();
+                  if (!text) return alert("Enter content!");
+              
+                  qrOutput.innerHTML = "Generating...";
+              
+                  const canvas = document.createElement("canvas");
+                  const size = 300;
+              
+                  const qr = new QRious({
+                    element: canvas,
+                    value: text,
+                    size: size,
+                    foreground: qrColor.value,
+                    background: qrBgColor.value,
+                    level: 'H'
+                  });
+              
+                  // Draw logo in center
+                  const ctx = canvas.getContext("2d");
+                  const logo = new Image();
+                  logo.src = "assets/icon.png";
+              
+                  logo.onload = () => {
+                    const logoSize = size * 0.22;
+                    ctx.drawImage(logo, (size - logoSize) / 2, (size - logoSize) / 2, logoSize, logoSize);
+              
+                    const dataURL = canvas.toDataURL("image/png");
+              
+                    // Display QR + Download
+                    qrOutput.innerHTML = `
+                      <img src="${dataURL}" width="250" style="border-radius:8px;margin-bottom:10px;">
+                      <br>
+                      <a download="qr.png" href="${dataURL}" class="primary"
+                     style="padding:6px 12px;border-radius:6px;display:inline-block;text-decoration:none;">
+                    ⬇ DOWNLOAD
+                    </a>
+                    `;
+              
+                    // Save to history
+                    saveQRHistory(text, dataURL);
+                  };
+                }
+              
+                function saveQRHistory(text, image) {
+                  const item = {
+                    type: "QR Code",
+                    title: "QR Generated",
+                    content: text,
+                    image: image,
+                    createdAt: new Date().toLocaleString()
+                  };
+              
+                  // Push to calculationHistory list
+                  appData.calculationHistory.push({
+                    type: "QR Code",
+                    title: text,
+                    value: "[QR Image Saved]",
+                    image: image,
+                    timestamp: new Date().toISOString()
+                  });
+              
+                  saveAll();
+                  renderCalculationHistory();
+                }
+              
+              })();
               // ---------- End Initial Render Code ----------
               })();
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
   </body>
 </html>

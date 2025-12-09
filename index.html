@@ -257,7 +257,12 @@
         padding: 8px;
         margin-top: 8px;
       }
-
+      /* Responsive full-height trash bin scroll list */
+      #trashList {
+        height: calc(100vh - 180px) !important;
+        max-height: calc(100vh - 180px) !important;
+        overflow-y: auto;
+      }
       /* Scrollbar styling */
       .scrollable-list::-webkit-scrollbar {
         width: 8px;
@@ -909,8 +914,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.6.6</p>
-          <p>Last Updated: 09-Dec-2025</p>
+          <p>Version 13.6.5</p>
+          <p>Last Updated: 06-Dec-2025</p>
           <p>Project Mode: Open source</p>
           <p>App Size    : 7.0KB </p>
         </ul>

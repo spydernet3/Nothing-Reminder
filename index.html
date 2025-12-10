@@ -257,14 +257,14 @@
         padding: 8px;
         margin-top: 8px;
       }
-      
-      /* Responsive full-height trash bin scroll list */
+        
+     /* Responsive full-height trash bin scroll list */
       #trashList {
         height: calc(100vh - 180px) !important;
         max-height: calc(100vh - 180px) !important;
         overflow-y: auto;
       }
-      
+        
       /* Scrollbar styling */
       .scrollable-list::-webkit-scrollbar {
         width: 8px;
@@ -917,7 +917,7 @@
         <h3>Version Info!</h3>
         <ul>
           <p>Version 13.6.7</p>
-          <p>Last Updated: 09-Dec-2025</p>
+          <p>Last Updated: 10-Dec-2025</p>
           <p>Project Mode: Open source</p>
           <p>App Size    : 7.0KB </p>
         </ul>
@@ -1590,22 +1590,23 @@
               }
             }
           }
-
-        function daysLeft(endDateStr){
+          function daysLeft(endDateStr){
           if(!endDateStr) return null;
           const [y,m,d] = endDateStr.split('-').map(Number);
-          const end = new Date(y,m-1,d);
+          const end = new Date(y, m-1, d);
           const now = new Date();
-          const diffTime = end.setHours(0,0,0,0) - now.setHours(0,0,0,0);
-          return Math.floor(diffTime / (1000*60*60*24));
-        }
-
-        function formatDMY(dateStr){
-          if(!dateStr) return '';
-          const [y,m,d] = dateStr.split('-');
-          return `${d.toString().padStart(2,'0')}/${m.toString().padStart(2,'0')}/${y}`;
-        }
-
+          // normalize to midnight for whole-day calculation
+          end.setHours(0,0,0,0);
+          now.setHours(0,0,0,0);
+          const diffDays = Math.floor((end - now) / (1000 * 60 * 60 * 24));
+          // If end already passed, return 0 (no negative days)
+          return diffDays < 0 ? 0 : diffDays;
+          }
+          function formatDMY(dateStr){
+            if(!dateStr) return '';
+            const [y,m,d] = dateStr.split('-');
+            return `${d.toString().padStart(2,'0')}/${m.toString().padStart(2,'0')}/${y}`;
+          }
         // Format date as DD-MMM-YYYY with IST time (12-hour format)
         function formatDateDMYWithTime(date) {
           const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -2730,10 +2731,20 @@
                     details.style.fontSize = '13px';
                     details.style.opacity = '0.85';
                     details.textContent = `${item.result} | ${item.createdAt}`;
-
+                    const r = item.result || "";
+                    const t = item.createdAt || "";
+                    details.textContent = `${r} | ${t}`;
                     left.appendChild(title);
                     left.appendChild(details);
-
+                    if (item.qrImage) {
+                        const img = document.createElement("img");
+                        img.src = item.qrImage;
+                        img.style.width = "120px";
+                        img.style.border = "1px solid #ccc";
+                        img.style.borderRadius = "6px";
+                        img.style.marginTop = "6px";
+                        left.appendChild(img);
+                    }
                     const right = document.createElement('div');
                     right.style.display = 'flex';
                     right.style.alignItems = 'center';
@@ -2851,35 +2862,57 @@
 
                   saveHistory(`Age as of: ${age_years} years & ${age_months} months, & ${age_days} days.`, result);
                 }
-
                 // ---------- Date Difference Calculator Logic ----------
                 function calculateDateDifference() {
                   const startStr = byId('dateDiffStart').value;
                   const endStr = byId('dateDiffEnd').value;
                   const resultEl = byId('dateDiffResult');
-
+                
                   if (!startStr || !endStr) {
                     resultEl.textContent = 'Please enter both start and end dates.';
                     return;
                   }
-                   const start = new Date(startStr);
-               const end = new Date(endStr);
-              const diffTime = Math.abs(end - start);
-               const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)+1);
-
-              // Calculate months and remaining days
-              const totalMonths = Math.floor(diffDays / 30); // Approximate month as 30 days
-              const remainingDays = diffDays % 30;
-  
-              let result;
-              if (diffDays > 31) {
-                result = `${totalMonths} month(s) and ${remainingDays} day(s)`;
-              } else {
-                result = `${diffDays} day(s)`;
-              }
-  
-              saveHistory(`Date Difference: ${formatDMY(startStr)} to ${formatDMY(endStr)} = ${result}`, result);
+                
+                  let start = new Date(startStr);
+                  let end = new Date(endStr);
+                
+                  // Ensure start ≤ end
+                  if (end < start) [start, end] = [end, start];
+                
+                  // --- YEAR, MONTH, DAY LOGIC (Same as Age Calculator) ---
+                  let years = end.getFullYear() - start.getFullYear();
+                  let months = end.getMonth() - start.getMonth();
+                  let days = end.getDate() - start.getDate();
+                
+                  // Fix negative days
+                  if (days < 0) {
+                    months--;
+                    const prevMonthDays = new Date(end.getFullYear(), end.getMonth(), 0).getDate();
+                    days += prevMonthDays;
                   }
+                
+                  // Fix negative months
+                  if (months < 0) {
+                    years--;
+                    months += 12;
+                  }
+                
+                  // --- TODAY + TOMORROW = 2 DAYS RULE ---
+                  const rawDiff = Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1;
+                  if (rawDiff === 2 && years === 0 && months === 0 && days === 1) {
+                    days = 2; // force today→tomorrow = 2 days
+                  }
+                
+                  const result = `${years} year(s), ${months} month(s), ${days} day(s)`;
+                
+                  // Display result
+                  resultEl.textContent = result;
+                
+                  saveHistory(
+                    `Date Difference: ${formatDMY(startStr)} to ${formatDMY(endStr)} = ${result}`,
+                    result
+                  );
+                }
                 // ---------- BMI Calculator Logic ----------
                 function calculateBMI() {
                   const age = parseInt(byId('bmiAge').value);
@@ -3250,7 +3283,7 @@
                 }
                 // ---------------- TRASH BIN ----------------
                 function moveToTrash(type, item, index) {
-                  appData.trash.push({ type, item, deletedAt: new Date().toISOString() });
+                  appData.trash.push({ type, item, deletedAt: formatDateDMYWithTime(new Date()) });
                   appData[type].splice(index, 1);
                   saveAll();
                   renderTrash();
@@ -3677,11 +3710,16 @@
                   place1Sel.appendChild(o1); place2Sel.appendChild(o2);
                 });
                 place2Sel.selectedIndex=1;
-              })();
+                // --- START: restore last selected gold places (add these 6 lines) ---
+                const savedGold1 = localStorage.getItem('last_gold_place1');
+                const savedGold2 = localStorage.getItem('last_gold_place2');
+                if (savedGold1 && Array.from(place1Sel.options).some(o => o.value === savedGold1)) place1Sel.value = savedGold1;
+                if (savedGold2 && Array.from(place2Sel.options).some(o => o.value === savedGold2)) place2Sel.value = savedGold2;
+                // --- END: restore last selected gold places ---
+                })();
             
               /* ---------------- FETCH SPOT PRICE FROM GOOGLE FINANCE ---------------- */
-            async function fetchSpotINR() {
-            
+               async function fetchSpotINR() {
                 // 1) Fetch live gold per ounce in USD
                 const goldRes = await fetch("https://data-asg.goldprice.org/dbXRates/USD");
                 const goldData = await goldRes.json();
@@ -3815,7 +3853,9 @@
             
                   const p1 = place1Sel.value;
                   const p2 = place2Sel.value;
-            
+                  // persist the last selected places for next load:
+                  localStorage.setItem('last_gold_place1', p1);
+                  localStorage.setItem('last_gold_place2', p2);
                   const r1 = purityRates(spot,p1);
                   const r2 = purityRates(spot,p2);
             
@@ -3861,40 +3901,61 @@
               const statusEl = $("weatherStatus");
               const outEl = $("weatherOutput");
               const refreshBtn = $("weatherRefreshBtn");
-            
               const CITIES = [
-                "Chennai",
-                "Madurai",
-                "Coimbatore",
-                "Trichy",
-                "Tirunelveli",
-                "Salem",
-                "Erode",
-                "Vellore",
-                "Thanjavur",
-                "Tanjore",
-                "Tuticorin",
-                "Tiruppur",
-                "Kanyakumari",
-                "Dindigul",
-                "Karur",
-                "Namakkal",
-                "Kanchipuram",
-                "Chengalpattu",
-                "Cuddalore",
-                "Villupuram",
-                "Dharmapuri",
-                "Krishnagiri",
-                "Nagapattinam",
-                "Sivagangai",
-                "Ramanathapuram",
-                "Tiruvarur",
-                "Virudhunagar",
-                "Nagercoil",
-                "Perambalur",
-                "Pudukkottai",
+                "Chennai", "Madurai", "Coimbatore", "Trichy", "Tirunelveli", "Salem",
+                "Erode", "Vellore", "Thanjavur", "Tanjore", "Tuticorin", "Tiruppur",
+                "Kanyakumari", "Dindigul", "Karur", "Namakkal", "Kanchipuram",
+                "Chengalpattu", "Cuddalore", "Villupuram", "Dharmapuri", "Krishnagiri",
+                "Nagapattinam", "Sivagangai", "Ramanathapuram", "Tiruvarur",
+                "Virudhunagar", "Nagercoil", "Perambalur", "Pudukkottai",
+              
+                // Newly added districts
+                "Ariyalur", "Tenkasi", "Mayiladuthurai", "Ranipet", "Tirupattur",
+              
+                // Major towns & cities
+                "Theni", "Udumalpet", "Pollachi", "Hosur", "Ambur", "Arakkonam",
+                "Avadi", "Tambaram", "Palani", "Kodaikanal", "Mettur", "Gudalur",
+                "Ooty", "Coonoor", "Sirkazhi", "Chidambaram", "Karaikal",
+                "Mannargudi", "Pattukkottai", "Paramakudi", "Kovilpatti",
+                "Sankarankovil", "Rajapalayam", "Srivilliputhur", "Arani",
+                "Tindivanam", "Kallakurichi", "Tiruvannamalai", "Tiruttani",
+                "Melur", "Usilampatti", "Vedaranyam", "Papanasam", "Keezhakarai",
+                "Bodinayakanur", "Manapparai", "Oddanchatram",
+              
+                // Additional towns
+                "Sivakasi", "Aruppukottai", "Natham", "Batlagundu", "Vandavasi",
+                "Cheyyar", "Walajapet", "Gudiyatham", "Vaniyambadi", "Pernambut",
+                "Dharmapuri", "Pennagaram", "Harur", "Palacode", "Anthiyur",
+                "Bhavani", "Sathyamangalam", "Gobichettipalayam", "Kodumudi",
+                "Perundurai", "Chennimalai", "Negamam", "Kinathukadavu", "Sulur",
+              
+                // More places
+                "Alangulam", "Ambasamudram", "Tenkasi", "Veerakeralampudur",
+                "Vallioor", "Cheranmahadevi", "Panagudi", "Nanguneri", "Alangudi",
+                "Kumbakonam", "Thirukattupalli", "Orathanadu", "Kudavasal",
+                "Needamangalam", "Valangaiman", "Thiruthuraipoondi", "Kodavasal",
+                "Porayar", "Thiruvidaimarudur",
+              
+                // Coastal towns
+                "Velankanni", "Nagore", "Muthupet", "Poombuhar", "Tranquebar",
+                "Marakkanam", "Mahabalipuram", "Kalpakkam",
+              
+                // Northern TN
+                "Red Hills", "Ponneri", "Gummidipoondi", "Thiruvallur",
+                "Poondi", "Poonamallee", "Sriperumbudur", "Padappai",
+                "Perungalathur", "Sholinganallur", "Kelambakkam",
+              
+                // Western TN
+                "Mettupalayam", "Karamadai", "Anaikatti", "Madukkarai", "Chinnampalayam",
+              
+                // Southern TN
+                "Shencottai", "Tiruchendur", "Ettayapuram", "Srivaikuntam",
+                "Sathankulam", "Nazareth", "Viralimalai", "Aranthangi",
+              
+                // Eastern TN
+                "Sethiathoppu", "Bhuvanagiri", "Panruti", "Neyveli", "Kurinjipadi",
+                "Ulundurpet", "Sankarapuram", "Tirukoilur"
               ];
-            
               // fill dropdown
               CITIES.forEach(c=>{
                 const o = document.createElement("option");
@@ -3902,7 +3963,12 @@
                 o.textContent = c;
                 citySel.appendChild(o);
               });
-            
+              // --- START: restore last selected weather city (add these lines) ---
+              const savedWeatherCity = localStorage.getItem('last_weather_city');
+              if (savedWeatherCity && Array.from(citySel.options).some(o => o.value === savedWeatherCity)) {
+                citySel.value = savedWeatherCity;
+              }
+              // --- END: restore last selected weather city ---
               function getIcon(desc){
                 const d = desc.toLowerCase();
                 if(d.includes("sun") || d.includes("clear")) return "☀️";
@@ -4077,7 +4143,7 @@
                   <div style="overflow-x:auto">
                     <table style="width:100%;border-collapse:collapse;">
                       <tr style="background:#f3f3f3;font-weight:700">
-                        <td>Time</td><td style="text-align:center">Icon</td><td style="text-align:center">Temp</td><td style="text-align:center">Rain %</td><td style="text-align:center">Humidity</td>
+                        <td>Time</td><td style="text-align:center">Weather</td><td style="text-align:center">Temp</td><td style="text-align:center">Rain %</td><td style="text-align:center">Humidity</td>
                       </tr>
                       ${tableRows(w.tomorrowHours)}
                     </table>
@@ -4218,7 +4284,7 @@
                 type: name || "New Calculation",
                 title: `Old(${oldR}) - New(${newR}) = Units(${units})`,
                 value: `₹${amount}`,
-                timestamp: new Date().toISOString()
+                timestamp: formatDateDMYWithTime(new Date())
               });
             
               saveAll();
@@ -4235,16 +4301,23 @@
             
               appData.calculationHistory.forEach((h, index) => {
                 const li = document.createElement("li");
-            
+                li.style.display = "flex";
+                li.style.alignItems = "flex-start";
+                li.style.justifyContent = "space-between";
+                li.style.gap = "10px";
+
                 const type = h.type || "Calculation";        // fallback for old entries
                 const title = h.title || h.input || "—";     // fallback for old entries
                 const value = h.value || h.result || "—";    // fallback for old entries
                 const time = h.timestamp || h.createdAt || ""; 
             
-                const formattedDate = time 
-                    ? new Date(time).toLocaleString()
-                    : "";
-            
+                // keep stored 12-hr strings as-is; if old ISO timestamps exist convert them
+                const formattedDate = time
+                  ? (typeof time === 'string' && /[AP]M/.test(time) 
+                      ? time 
+                      : formatDateDMYWithTime(new Date(time)))
+                  : "";
+
                 const left = document.createElement("div");
                 left.className = "item-left";
             
@@ -4254,10 +4327,12 @@
                   <div>${value}</div>
                   <small style="opacity:0.7;">${formattedDate}</small>
                 `;
-                // SHOW QR IMAGE IF EXISTS
-                if (h.image) {
+               
+                // SHOW QR IMAGE IF EXISTS (supports both legacy 'image' and new 'qrImage')
+                const qrSrc = h.image || h.qrImage || "";
+                if (qrSrc) {
                   left.innerHTML += `
-                    <img src="${h.image}" 
+                    <img src="${qrSrc}" 
                          width="120" 
                          style="margin-top:6px;border-radius:6px;">
                   `;
@@ -4362,28 +4437,21 @@
                   };
                 }
               
-                function saveQRHistory(text, image) {
-                  const item = {
-                    type: "QR Code",
-                    title: "QR Generated",
-                    content: text,
-                    image: image,
-                    createdAt: new Date().toLocaleString()
-                  };
+                function saveQRHistory(text, dataURL) {
+                const item = {
+                  type: "QR Code",
+                  title: text,
+                  result: "QR Generated",
+                  qrImage: dataURL,                                  // <-- REQUIRED
+                  image: dataURL, 
+                  createdAt: formatDateDMYWithTime(new Date())       // <-- REQUIRED 12-hr FORMAT
+                };
               
-                  // Push to calculationHistory list
-                  appData.calculationHistory.push({
-                    type: "QR Code",
-                    title: text,
-                    value: "[QR Image Saved]",
-                    image: image,
-                    timestamp: new Date().toISOString()
-                  });
-              
-                  saveAll();
-                  renderCalculationHistory();
-                }
-              
+                appData.calculationHistory.push(item);
+                saveAll();
+                renderCalculationHistory();
+                renderHistory();
+              }
               })();
               // ---------- End Initial Render Code ----------
               })();

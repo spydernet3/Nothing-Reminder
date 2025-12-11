@@ -917,7 +917,7 @@
         <h3>Version Info!</h3>
         <ul>
           <p>Version 13.6.7</p>
-          <p>Last Updated: 10-Dec-2025</p>
+          <p>Last Updated: 11-Dec-2025</p>
           <p>Project Mode: Open source</p>
           <p>App Size    : 7.0KB </p>
         </ul>
@@ -3739,7 +3739,7 @@
                 const usdToInr = fxData.rates.INR;
             
             
-            function convertToIndianRetailPrice(base24_inr_per_gram) {
+              function convertToIndianRetailPrice(base24_inr_per_gram) {
             
                 let price = Number(base24_inr_per_gram);
             
@@ -4440,8 +4440,8 @@
                 function saveQRHistory(text, dataURL) {
                 const item = {
                   type: "QR Code",
-                  title: text,
-                  result: "QR Generated",
+                  title: "QR Generated",
+                  result: "successfully Stored 🐒",
                   qrImage: dataURL,                                  // <-- REQUIRED
                   image: dataURL, 
                   createdAt: formatDateDMYWithTime(new Date())       // <-- REQUIRED 12-hr FORMAT

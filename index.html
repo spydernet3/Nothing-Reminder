@@ -1675,7 +1675,7 @@
           now.setHours(0,0,0,0);
           const diffDays = Math.floor((end - now) / (1000 * 60 * 60 * 24));
           // If end already passed, return 0 (no negative days)
-          return diffDays < 0 ? 0 : diffDays;
+          return diffDays;
           }
           function formatDMY(dateStr){
             if(!dateStr) return '';
@@ -1757,8 +1757,7 @@
           // Filter reminders to show only today and 1 day left
           const filteredReminders = appData.reminders.filter(r => {
             const diff = daysLeft(r.endDate);
-            return diff === 0 || diff === 1 || diff < 0;
-
+            return diff <= 1;
           });
 
           if(filteredReminders.length === 0){

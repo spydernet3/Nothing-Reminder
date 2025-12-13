@@ -185,7 +185,7 @@
       #showAddFormBtn, #homeRemindersToggle, #showAddNoteBtn, #viewNotesToggle, #homeNotesToggle,
       #homeBudgetsToggle, #homeCheckToggle, #showAddBudgetBtn,#viewbudgetToggle, #showAddCheckBtn,
       #viewCheckToggle, #homeOverviewToggle, #viewRemindersToggle,#moonPhaseToggle, #sunBtn,
-      #goldRateToggle, #weatherToggle,#qrToggle , #priceTrackerToggle, #monthlyCalendarToggle,#calculatorToggle, #viewHistoryToggle {
+      #goldRateToggle, #weatherToggle,#qrToggle , #googleTrendsToggle, #priceTrackerToggle, #monthlyCalendarToggle,#calculatorToggle, #viewHistoryToggle {
         position: relative;
         user-select: none;
         display: flex;
@@ -916,8 +916,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.6.8</p>
-          <p>Last Updated: 12-Dec-2025</p>
+          <p>Version 13.6.9</p>
+          <p>Last Updated: 13-Dec-2025</p>
           <p>Project Mode: Open source</p>
           <p>App Size    : 7.0KB </p>
         </ul>
@@ -1311,11 +1311,11 @@
         <button id="priceTrackerToggle" class="add-btn" aria-expanded="false">
           🛒 PRICE TRACKER <span class="arrow">▼</span>
         </button>
-      
         <div id="priceTrackerForm" class="form" aria-hidden="true" >
-          
           <label>PRODUCT LINK</label>
-          <input id="trackUrl" type="text" placeholder="Paste AMAZON = Page link / FLIPKART = Product link">
+          <label>⚠ For Amazon =  Product Page 🌐 Link</label>
+          <label>⚠ For Flipkart = Product Share 🔗 Link</label>
+          <input id="trackUrl" type="text" placeholder="Paste Amazon Or Flipkart Link">
       
           <label>PRODUCT TITLE</label>
           <input id="trackTitle" type="text" placeholder="Enter a name">
@@ -1335,6 +1335,49 @@
           <ul id="priceTrackList" class="list scrollable-list"></ul>
         </div>
         </div>
+        <div class="add-area">
+          <button id="googleTrendsToggle" class="add-btn" aria-expanded="false">
+          📈 GOOOG TRENDS LIVE <span class="arrow">▼</span>
+        </button>
+        <div id="googleTrendsForm" class="form" aria-hidden="true">
+        <div id="trendsStatus" style="display:none;text-align:center;font-style:Italic;margin-bottom:100px;margin-top:100px;">
+        GOOOG TRENDS LIVE STOPPED NOW 🐒
+        </div>
+            <!-- Trends iFrame -->
+            <iframe 
+                id="googleTrendsFrame"
+                style="width:100%;height:350px;border:0;border-radius:10px;margin-bottom:12px;">
+            </iframe>
+            <!-- Controls BELOW (no overlapping) -->
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                <!-- CHECK NOW / STOP buttons -->
+                <div style="display:flex;gap:10px;">
+                    <button id="trendsCheckNow" class="secondary">CHECK NOW</button>
+                    <button id="trendsStop" class="secondary">STOP</button>
+                </div>
+                <!-- Region selection -->
+                <div>
+                    <label style="font-weight:600;">Region:</label>
+                    <select id="trendsRegion" style="padding:6px;border-radius:6px;width:100%;margin-top:5px;">
+                        <option value="p3" selected>🇮🇳 India</option>
+                        <option value="p1">🇺🇸 United States</option>
+                        <option value="p8">🇩🇪 Germany</option>
+                        <option value="p4">🇯🇵 Japan</option>
+                        <option value="p18">🇧🇷 Brazil</option>
+                    </select>
+                </div>
+                <!-- Frame size selection -->
+              
+                    <label style="font-weight:600;">Frame Size:</label>
+                    <select id="trendsSize" style="padding:6px;border-radius:6px;width:100%;margin-top:5px;">
+                        <option value="300">Small</option>
+                        <option value="350" selected>Medium</option>
+                        <option value="450">Large</option>
+                        <option value="600">Extra Large</option>
+                    </select>
+                </div>
+            </div>
+            </div>
           <div class="add-area">
           <button id="viewHistoryToggle" class="add-btn" aria-expanded="false">
             ⏳ VIEW HISTORY <span class="arrow">▼</span>
@@ -4826,28 +4869,12 @@
                   setTimeout(() => drawHistoryChart("priceChart", history), 50);
               
                   statusEl.innerHTML = "✔ Updated";
-              
-                  // Auto-save to list
-                  if(title){
-                    const exists = appData.priceTracker.some(x => x.url === url);
-                    if(!exists){
-                      appData.priceTracker.push({
-                        title,
-                        url,
-                        savedAt: formatDateDMYWithTime(new Date())
-                      });
-                      saveAll();
-                      renderPriceTrackerList();
-                    }
-                  }
-              
+
                 } catch(err){
                   statusEl.innerHTML = "❌ Error";
                   console.error(err);
                 }
-              }
-              
-              
+                }
                 trackBtn.addEventListener("click", trackPrice);
               // expose Price Tracker functions to global scope so other modules can call them
               window.renderPriceTrackerList = renderPriceTrackerList;
@@ -4872,9 +4899,89 @@
                 const y = d.toISOString().slice(0,10);
                 return appData.priceSnapshots[y]?.[urlKey]?.price || null;
               }
+              const TRENDS_REGION_KEY = "trends_region";
+                const TRENDS_SIZE_KEY = "trends_size";
+                const TRENDS_STOP_KEY = "trends_stop_state";
+                // OPEN / CLOSE TRENDS
+              document.getElementById("googleTrendsToggle").addEventListener("click", () => {
+                  const btn = document.getElementById("googleTrendsToggle");
+                  const box = document.getElementById("googleTrendsForm");
+              
+                  const expanded = btn.getAttribute("aria-expanded") === "true";
+                  btn.setAttribute("aria-expanded", String(!expanded));
+                  btn.classList.toggle("open");
+                  box.classList.toggle("visible");
+              });
+              
+              // REGION SELECT (Reload iframe)
+              document.getElementById("trendsRegion").addEventListener("change", (e) => {
+              const region = e.target.value;
+              const frame = document.getElementById("googleTrendsFrame");
+          
+              // Save region
+              localStorage.setItem(TRENDS_REGION_KEY, region);
+          
+              frame.src = `https://trends.google.com/trends/hottrends/visualize?nrow=5&ncol=5&pn=${region}`;
+              });
+              // FRAME SIZE SELECTOR
+              document.getElementById("trendsSize").addEventListener("change", (e) => {
+              const size = e.target.value;
+          
+              // Save size
+              localStorage.setItem(TRENDS_SIZE_KEY, size);
+          
+              document.getElementById("googleTrendsFrame").style.height = size + "px";
+               });
+              document.getElementById("trendsCheckNow").addEventListener("click", () => {
+              const region = document.getElementById("trendsRegion").value;
+              const frame = document.getElementById("googleTrendsFrame");
+              const status = document.getElementById("trendsStatus");
+            
+              localStorage.setItem(TRENDS_STOP_KEY, "false");
+            
+              status.style.display = "none";
+              frame.style.display = "block";
+            
+              frame.src =
+                `https://trends.google.com/trends/hottrends/visualize?nrow=5&ncol=5&pn=${region}&_=${Date.now()}`;
+             });
+              // STOP button (hide iframe content)
+              document.getElementById("trendsStop").addEventListener("click", () => {
+              localStorage.setItem(TRENDS_STOP_KEY, "true");
+            
+              const frame = document.getElementById("googleTrendsFrame");
+              const status = document.getElementById("trendsStatus");
+            
+              frame.style.display = "none";
+              frame.src = "";
+            
+              status.style.display = "block";
+              });
+               if (localStorage.getItem("trends_stop_state") === null) {
+              localStorage.setItem("trends_stop_state", "true");
+              }
+               window.addEventListener("DOMContentLoaded", () => {
+              const regionEl = document.getElementById("trendsRegion");
+              const sizeEl = document.getElementById("trendsSize");
+              const frame = document.getElementById("googleTrendsFrame");
+              const savedRegion = localStorage.getItem("trends_region") || "p3";
+              const savedSize = localStorage.getItem("trends_size") || "350";
+              const stopped = localStorage.getItem("trends_stop_state") === "true";
+
+              // restore UI values
+              regionEl.value = savedRegion;
+              sizeEl.value = savedSize;
+              frame.style.height = savedSize + "px";
+              const status = document.getElementById("trendsStatus");
+              if (stopped) {
+                frame.style.display = "none";
+                status.style.display = "block";
+              }
+              });
               // ---------- End Initial Render Code ----------
               })();
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
   </body>
 </html>

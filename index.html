@@ -216,26 +216,67 @@
       max-width: 520px;
     }
 
+    /* --- COMPREHENSIVE 75% DARK MODE FIX --- */
     .dark {
-      --bg: #121212;
-      --text: #f1f1f1;
+      --bg: #1a1a1a;
+      /* 75% deep grey background */
+      --sidebar-bg: #bcbcbc;
+      /* Darker sidebar for better depth */
+      --text: #e0e0e0;
+      /* Soft white text */
+      --card-bg: #262626;
+      /* Darker grey for cards/banners */
     }
 
+    /* Fix Global Background and Text */
+    .dark body,
     .dark .main {
-      background: #151515;
-      color: var(--text);
+      background: var(--bg) !important;
+      color: var(--text) !important;
     }
 
-    .dark .form {
-      background: #232323;
+    /* FIX FOR WEATHER, GOLD, SUN, AND MOON BANNERS */
+    .dark .form,
+    .dark #moonPhaseContainer,
+    .dark #sunBox,
+    .dark #weatherOutput>div,
+    .dark .gold-table-wrapper>div,
+    .dark #currentTamilMonthBox,
+    .dark #calendarDisplay {
+      background: var(--card-bg) !important;
+      color: var(--text) !important;
+      border: 1px solid #333 !important;
     }
 
-    .dark .menu-btn,
-    .dark .icon-btn {
-      background: #333;
-      color: var(--text);
+    /* Fix Table Headers (Price Tracker, EB, Gold tables) */
+    .dark tr[style*="background:#f3f3f3"],
+    .dark tr[style*="background: #f3f3f3"],
+    .dark th {
+      background: #333 !important;
+      color: #fff !important;
     }
 
+    /* Fix List Items (Reminders, Notes, Checklist) */
+    .dark .list li {
+      background: rgba(255, 255, 255, 0.05) !important;
+      color: var(--text) !important;
+    }
+
+    /* Fix Inputs and Select Boxes */
+    .dark input,
+    .dark select,
+    .dark textarea {
+      background: #333 !important;
+      color: #fff !important;
+      border: 1px solid #444 !important;
+    }
+
+    /* Fix specific badges (Days Count) */
+    .dark .badge {
+      background: #444 !important;
+      color: #4CAF50 !important;
+    }
+    
     /* Settings panel styles */
     .settings-panel {
       display: none;

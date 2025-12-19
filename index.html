@@ -1086,8 +1086,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.7</p>
-          <p>Last Updated: 15-Dec-2025</p>
+          <p>Version 13.7.1</p>
+          <p>Last Updated: 19-Dec-2025</p>
           <p>Project Mode: Open source</p>
           <p>App Size : 7.0KB </p>
         </ul>
@@ -2872,17 +2872,25 @@
               const perDay = (days && days > 0)
                   ? (remaining / days).toFixed(2)
                   : remaining;
-          
-              // Build notification body
-              const body = 
-              `Budget: ${b.title} | Remaining: ₹${remaining} | Per Day: ₹${perDay} |Days Left: ${days !== null ? days : "N/A"}`;
-              // SHOW NOTIFICATION
-              registration.showNotification("💰 Budget Tracker", {
-                body: body,
-                icon: "assets/icon.png",
-                tag: "budget-tracker-update",
+                  
+              let notificationBody = "";
+
+              if (days === 0) {
+                  // 1. Separate Logic for Finished Budgets
+                  notificationBody = `Budget: ${b.title} |🎉 CONGRATS YOU SAVED ₹${remaining}`;
+              } else {
+                  // 2. Separate Logic for Active Budgets
+                  notificationBody = `Budget: ${b.title} | Remaining: ₹${remaining} | Per Day: ₹${perDay} | Days Left: ${days !== null ? days : "N/A"}`;
+              }
+
+              // 3. SHOW NOTIFICATION (Triggers separately for each item in the list)
+              registration.showNotification("Nothing Reminder - 💰 Budget Tracker", {
+                  body: notificationBody,
+                  icon: "assets/icon.png",
+                  // Unique tag ensures separate notification for every budget item
+                  tag: `budget-item-${b.title}`,
+                  badge: "assets/icon.png"
               });
-          
             });
           }
           // NOTES Summary
@@ -3670,7 +3678,7 @@
                     }
                     else if (phase === "amavasai") {
                         registration.showNotification("🌑 Amavasai Today!", {
-                            body: "New Moon (Amavasai) is today.",
+                            body: "New Moon (Amavasai) Is Happening.",
                             icon: "assets/icon.png",
                             requireInteraction: true,
                             tag: "moon-phase"

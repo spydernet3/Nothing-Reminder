@@ -1127,8 +1127,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.7.1</p>
-          <p>Last Updated: 19-Dec-2025</p>
+          <p>Version 13.7.2</p>
+          <p>Last Updated: 26-Dec-2025</p>
           <p>Project Mode: Open source</p>
           <p>App Size : 7.0KB </p>
         </ul>
@@ -1270,6 +1270,41 @@
             <h3 style="text-align:center;margin:0 0 8px 0;">இன்றைய தமிழ் மாதம்</h3>
             <p id="currentTamilMonthText" style="font-weight:600;text-align:center;"></p>
           </div>
+          <!-- Numeric Jothidam (Alphabet–Number) : Framed like Tamil Month -->
+        <div style="
+          border:1px solid #ccc;
+          border-radius:10px;
+          padding:15px;
+        ">
+
+          <div style="font-weight:600;margin-bottom:9px;">
+            🔢 Numeric Jothidam
+          </div>
+
+          <!-- PART 1 : A–M -->
+          <table style="width:100%;border-collapse:collapse;margin-bottom:9px;">
+            <tr style="text-align:center;font-weight:600;">
+              <td>A</td><td>B</td><td>C</td><td>D</td><td>E</td><td>F</td><td>G</td>
+              <td>H</td><td>I</td><td>J</td><td>K</td><td>L</td><td>M</td>
+            </tr>
+            <tr style="text-align:center;">
+              <td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>8</td><td>3</td>
+              <td>5</td><td>1</td><td>1</td><td>2</td><td>3</td><td>4</td>
+            </tr>
+          </table>
+
+          <!-- PART 2 : N–Z -->
+          <table style="width:100%;border-collapse:collapse;margin-bottom:9px;">
+            <tr style="text-align:center;font-weight:600;">
+              <td>N</td><td>O</td><td>P</td><td>Q</td><td>R</td><td>S</td><td>T</td>
+              <td>U</td><td>V</td><td>W</td><td>X</td><td>Y</td><td>Z</td>
+            </tr>
+            <tr style="text-align:center;">
+              <td>5</td><td>7</td><td>8</td><td>1</td><td>2</td><td>3</td><td>4</td>
+              <td>6</td><td>6</td><td>6</td><td>5</td><td>1</td><td>7</td>
+            </tr>
+          </table>
+        </div>
         </div>
       </div>
       <div class="add-area">
@@ -1943,6 +1978,34 @@
           });
           container.appendChild(frag);
         }
+// 🔐 SAFE table renderer (XSS-proof)
+function renderSafeTableFromText(tableText) {
+  const table = document.createElement('table');
+  table.style.borderCollapse = 'collapse';
+  table.style.width = '100%';
+
+  const lines = tableText.split('\n').filter(l => l.includes('|'));
+
+  lines.forEach((line, index) => {
+    if (line.includes('---')) return;
+
+    const tr = document.createElement('tr');
+    const cells = line.split('|').filter(c => c.trim());
+
+    cells.forEach(cell => {
+      const el = index === 0 ? document.createElement('th') : document.createElement('td');
+      el.textContent = cell.trim();   // ✅ SAFE
+      el.style.border = '1px solid #ddd';
+      el.style.padding = '6px';
+      el.style.textAlign = 'center';
+      tr.appendChild(el);
+    });
+
+    table.appendChild(tr);
+  });
+
+  return table;
+}
 
         // Update renderHomeNotes function to handle table formatting
         function renderHomeNotes(){
@@ -1991,7 +2054,7 @@
               });
 
               tableHTML += '</tr></table>';
-              text.innerHTML = tableHTML;
+              text.appendChild(renderSafeTableFromText(n.text));
             } else {
               text.innerHTML = `<b>${(n.text || '').substring(0, 50)}...</b><br><small style=\"opacity:0.7\">${n.createdAt || ''}</small>`;
             }
@@ -2056,10 +2119,19 @@
               });
 
               tableHTML += '</tr></table>';
-              text.innerHTML = tableHTML;
+              text.appendChild(renderSafeTableFromText(note.text));
+
             } else {
-              text.innerHTML=`<b>${note.text||''}</b><br>
-                <small style=\"opacity:0.7\">${note.createdAt||''}</small>`;
+              const strong = document.createElement('b');
+              strong.textContent = note.text || '';
+
+              const small = document.createElement('small');
+              small.style.opacity = '0.7';
+              small.textContent = note.createdAt || '';
+
+              text.appendChild(strong);
+              text.appendChild(document.createElement('br'));
+              text.appendChild(small);
             }
             left.appendChild(text);
 
@@ -2135,7 +2207,7 @@
           renderHomeBudgets();
           return;
         }
-
+        
         const frag = document.createDocumentFragment();
 
         appData.budget.forEach((b, i) => {
@@ -2180,8 +2252,8 @@
         
                 <!-- RIGHT SIDE: EDIT + DELETE -->
                 <div style="display:flex;flex-direction:column;gap:4px;">
-                  <button class="icon-small" onclick="editExpense(${i},${idx})">✏️</button>
-                  <button class="icon-small" onclick="deleteExpense(${i},${idx})">🗑️</button>
+                  <button class="icon-small edit-expense" data-b="${i}" data-e="${idx}">✏️</button>
+                  <button class="icon-small delete-expense" data-b="${i}" data-e="${idx}">🗑️</button>
                 </div>
         
               </div>
@@ -2250,11 +2322,19 @@
             li.append(left, right);
             frag.appendChild(li);
           });
-
+          
           list.appendChild(frag);
-          renderHomeBudgets();
-        }
 
+          document.querySelectorAll('.edit-expense').forEach(btn => {
+          btn.onclick = () => editExpense(btn.dataset.b, btn.dataset.e);
+          });
+
+          document.querySelectorAll('.delete-expense').forEach(btn => {
+          btn.onclick = () => deleteExpense(btn.dataset.b, btn.dataset.e);
+          });
+          renderHomeBudgets();
+         }
+         
         function renderHomeBudgets() {
           const container = byId('homeBudgetsContainer');
           container.innerHTML = '';
@@ -2290,11 +2370,19 @@
             const li = document.createElement('li');
             li.style.fontSize = '14px';
             li.style.marginBottom = '5px';
-            li.innerHTML = `
-              <strong>"${b.title}"</strong><br>
-              💰 Total: ₹${b.amount} &nbsp; | &nbsp; 💸 Used: ₹${used} &nbsp; | &nbsp; 🏦 Remaining: ₹${remaining}<br>
-              🕒 ${days} days remaining &nbsp; | &nbsp; Cost: ₹${costPerDay}/day
-            `;
+            const title = document.createElement('strong');
+            title.textContent = `"${b.title}"`;
+
+            const line1 = document.createElement('div');
+            line1.textContent = `💰 Total: ₹${b.amount} | 💸 Used: ₹${used} | 🏦 Remaining: ₹${remaining}`;
+
+            const line2 = document.createElement('div');
+            line2.textContent = `🕒 ${days} days remaining | Cost: ₹${costPerDay}/day`;
+
+            li.appendChild(title);
+            li.appendChild(document.createElement('br'));
+            li.appendChild(line1);
+            li.appendChild(line2);
             frag.appendChild(li);
           });
 
@@ -2342,8 +2430,7 @@
         }
       
         saveAll();
-        renderBudgets();
-        renderHomeBudgets();
+        rerenderBudget();
         hideForm(byId("budgetFormContainer"));
         clearBudgetForm();
        }
@@ -2531,7 +2618,7 @@
 
           if(appData.checklists.length === 0){
             const li = document.createElement('li');
-            li.textContent = 'No checklists yet.';
+            li.textContent = 'No Checklists Yet.';
             li.style.opacity = '0.7';
             container.appendChild(li);
             return;
@@ -2592,7 +2679,8 @@
                 itemsText = 'No items in list.';
             }
 
-            itemsPreview.innerHTML = itemsText;
+            itemsPreview.textContent = itemsText.replace(/<br>/g, '\n');
+
             // END OF MODIFICATION
 
             const statusInfo=document.createElement('div');
@@ -2657,7 +2745,16 @@
               const li = document.createElement('li');
               const left = document.createElement('div');
               left.className = 'item-left';
-              left.innerHTML = `<b>${t.type.toUpperCase()}</b><br>${(t.item.title||t.item.text||'Untitled')}<br><small>Deleted: ${new Date(t.deletedAt).toLocaleString()}</small>`;
+              const title = document.createElement('b');
+              title.textContent = t.type.toUpperCase();
+
+              const body = document.createElement('div');
+              body.textContent = t.item.title || t.item.text || 'Untitled';
+
+              const time = document.createElement('small');
+              time.textContent = 'Deleted: ' + new Date(t.deletedAt).toLocaleString();
+
+              left.append(title, document.createElement('br'), body, document.createElement('br'), time);
               const right = document.createElement('div');
               right.style.display = 'flex';
               const restoreBtn = document.createElement('button');
@@ -2875,7 +2972,7 @@
               const reminderSummary = buildReminderSummary();
               if (reminderSummary !== "No reminders due today/tomorrow.") {
                   registration.showNotification("Nothing Reminder - ⚠️ Reminders", {
-                      body: reminderSummary, icon: 'assets/icon.png', requireInteraction: true, tag: 'reminders'
+                      body: reminderSummary, icon: 'assets/icon.png', requireInteraction: true, tag: 'reminders-summary'
                   });
               }
           }
@@ -2884,8 +2981,8 @@
           if (appData.notifChecklist) {
               const checklistSummary = buildChecklistSummary();
               if (checklistSummary !== "No open checklists.") {
-                   registration.showNotification("Nothing Reminder - ✒ Checklists", {
-                      body: checklistSummary, icon: 'assets/icon.png', requireInteraction: true, tag: 'checklists'
+                   registration.showNotification("Nothing Reminder - ✒ Checklist", {
+                      body: checklistSummary, icon: 'assets/icon.png', requireInteraction: true, tag: 'checklists-summary'
                   });
               }
           }
@@ -2939,7 +3036,7 @@
               const notesSummary = buildNotesSummary();
               if (notesSummary !== "No notes added yet.") {
                   registration.showNotification("Nothing Reminder - 📝 Notes", {
-                      body: notesSummary, icon: 'assets/icon.png', requireInteraction: true, tag: 'notes'
+                      body: notesSummary, icon: 'assets/icon.png', requireInteraction: true, tag: 'notes-summary'
                   });
               }
           }
@@ -2969,8 +3066,13 @@
                    renderCalculationHistory();
                   }
                 }
-
-
+                // ✅ SAFE math-only evaluator (replaces eval)
+                function safeEvaluate(expression) {
+                  if (!/^[0-9+\-*/().\s]+$/.test(expression)) {
+                    throw new Error("Invalid characters in expression");
+                  }
+                  return Function('"use strict"; return (' + expression + ')')();
+                }
                 // ---------- Normal Calculator Logic ----------
                 let currentExpression = '0';
                 const normalDisplay = byId('normalDisplay');
@@ -2982,9 +3084,7 @@
                     currentExpression = currentExpression.length > 1 ? currentExpression.slice(0, -1) : '0';
                   } else if (value === 'equals') {
                     try {
-                      // Safely evaluate the expression
-                      // eslint-disable-next-line no-eval
-                      const result = eval(currentExpression);
+                      const result = safeEvaluate(currentExpression);
                       saveHistory(`${currentExpression} = ${result}`);
                       currentExpression = String(result);
                     } catch (e) {
@@ -3036,7 +3136,7 @@
                   const result = `Age as of ${formatDMY(asOfStr)}: ${age_years} years, ${age_months} months, and ${age_days} days.`;
                   resultEl.textContent = result;
 
-                  saveHistory(`Age as of: ${age_years} years & ${age_months} months, & ${age_days} days.`, result);
+                  saveHistory(`Age as of: ${age_years} years & ${age_months} months & ${age_days} days.`, result);
                 }
                 // ---------- Date Difference Calculator Logic ----------
                 function calculateDateDifference() {
@@ -3218,8 +3318,10 @@
                   const month = now.getMonth();
                   const daysInMonth = new Date(year, month + 1, 0).getDate();
                 
-                  moonContainer.innerHTML = `<h3>🌙 ${now.toLocaleString('default', { month: 'long' })} ${year} – Moon Phases</h3>`;
-                
+                 const h3 = document.createElement('h3');
+                  h3.textContent = `🌙 ${now.toLocaleString('default',{month:'long'})} ${year} – Moon Phases`;
+                  moonContainer.appendChild(h3);
+
                   for (let d = 1; d <= daysInMonth; d++) {
                     const phaseName = getMoonPhase(year, month, d);
                     const tamilName = tamilPhase(phaseName);
@@ -3533,9 +3635,8 @@
                   };
                 
                   saveAll();
-                  renderBudgets();
-                  renderHomeBudgets();
-                };
+                  rerenderBudget();
+                  };
                 
                 window.deleteExpense = function(bIndex, expIndex) {
                   const b = appData.budget[bIndex];
@@ -3544,9 +3645,8 @@
                   }
                   b.expenses.splice(expIndex, 1);
                   saveAll();
-                  renderBudgets();
-                  renderHomeBudgets();
-                };
+                  rerenderBudget();
+                 };
                 
                 // event delegation for expense edit/delete
                 document.querySelectorAll('.edit-exp').forEach(btn => {
@@ -3561,10 +3661,12 @@
                     deleteExpense(b, e);
                   });
                 });
-                function deleteCheck(i){ moveToTrash('checklists', appData.checklists[i], i); renderChecklists(); renderHomeCheck(); }
+                function deleteCheck(i){ moveToTrash('checklists', appData.checklists[i], i); renderChecklists(); renderHomeOverview(); }
                 function deleteHistory(i){moveToTrash('calculationHistory', appData.calculationHistory[i], i); renderCalculationHistory();}
+                function rerenderBudget() { renderBudgets(); renderHomeBudgets(); }
+
                                 // ---------- Event Listeners ----------
-                // Utilities Listeners
+
                 byId('monthlyCalendarToggle').addEventListener('click', function() {
                   toggleCollapse(byId('monthlyCalendarContainer'), byId('monthlyCalendarToggle'));
                   renderCalendar(currentMonth, currentYear); // Render on opening
@@ -3583,6 +3685,7 @@
                 byId('viewHistoryToggle').addEventListener('click', function() {
                   toggleCollapse(byId('calculationHistoryList'), byId('viewHistoryToggle'));
                 });
+
                 // ... all other listeners ...
 
                 // Notification Page Listener
@@ -3698,6 +3801,7 @@
                 renderBudgets();
                 renderChecklists();
                 renderCalculationHistory()
+
                 // NEW: Initialize calculator mode
                 switchCalculatorMode();
                 async function showMoonPhaseNotification() {
@@ -4470,8 +4574,8 @@
             `;
               // -------------- SAVE TO HISTORY --------------
               appData.calculationHistory.push({
-                type: name || "New Calculation",
-                title: `Old(${oldR}) - New(${newR}) = Units(${units})`,
+                title: name || "New Calculation",
+                type: `Old(${oldR}) - New(${newR}) = Units(${units})`,
                 value: `₹${amount}`,
                 timestamp: formatDateDMYWithTime(new Date())
               });
@@ -4511,8 +4615,8 @@
                 left.className = "item-left";
             
                 left.innerHTML = `
-                  <div><b>${type}</b></div>
-                  <div>${title}</div>
+                  <div><b>${title}</b></div>
+                  <div>${type}</div>
                   <div>${value}</div>
                   <small style="opacity:0.7;">${formattedDate}</small>
                 `;
@@ -4629,7 +4733,7 @@
                 function saveQRHistory(text, dataURL) {
                 const item = {
                   type: "QR Code",
-                  title: "QR Generated",
+                  title: "New QR",
                   result: "successfully Stored 🐒",
                   qrImage: dataURL,                                  // <-- REQUIRED
                   image: dataURL, 
@@ -5066,6 +5170,7 @@
                 /* RUN ON LOAD */
                 renderPriceTrackerList();
               })();
+
               // ---------------- PRICE SNAPSHOT HELPERS ----------------
               function savePriceSnapshot(urlKey, price){
                 // ensure structure exists
@@ -5082,7 +5187,45 @@
                 const y = d.toISOString().slice(0,10);
                 return appData.priceSnapshots[y]?.[urlKey]?.price || null;
               }
-              const TRENDS_REGION_KEY = "trends_region";
+
+              function showPriceSelection(prices) {
+              statusEl.innerHTML = "⚠️ Multiple prices detected. Please select the correct product price:";
+
+              outputEl.innerHTML = `
+                <div style="margin-top:10px;">
+                  ${prices.map(p => `
+                    <button
+                      style="display:block;width:100%;margin:6px 0;padding:8px;border-radius:6px;"
+                      onclick="confirmSelectedPrice(${p})">
+                      ₹${p.toLocaleString("en-IN")}
+                    </button>
+                  `).join("")}
+                </div>
+              `;
+            }
+            // Your existing JavaScript code that uses $
+            function confirmSelectedPrice(price) {
+            outputEl.innerHTML = `
+              <div style="padding:10px;border:1px solid #ccc;border-radius:6px;">
+                <b>Selected Price:</b> ₹${price.toLocaleString("en-IN")}
+              </div>
+            `;
+
+            statusEl.innerHTML = "✔ Price confirmed and saved";
+
+            // 🔐 Save as today's snapshot
+            // Original: const url = $("trackUrl").value.trim();
+            const url = document.getElementById("trackUrl").value.trim(); // Changed line
+            const key = btoa(url);
+            savePriceSnapshot(key, price);
+            }
+            // ===== GLOBAL PRICE TRACKER ELEMENTS =====
+            const statusEl = document.getElementById("trackStatus");
+            const outputEl = document.getElementById("trackOutput");
+            window.confirmSelectedPrice = confirmSelectedPrice;
+
+            // ========= GOOGLE TRENDS ================
+            const TRENDS_REGION_KEY = "trends_region";
                 const TRENDS_SIZE_KEY = "trends_size";
                 const TRENDS_STOP_KEY = "trends_stop_state";
                 // OPEN / CLOSE TRENDS
@@ -5161,46 +5304,10 @@
                 status.style.display = "block";
               }
               });
-              function showPriceSelection(prices) {
-              statusEl.innerHTML = "⚠️ Multiple prices detected. Please select the correct product price:";
-
-              outputEl.innerHTML = `
-                <div style="margin-top:10px;">
-                  ${prices.map(p => `
-                    <button
-                      style="display:block;width:100%;margin:6px 0;padding:8px;border-radius:6px;"
-                      onclick="confirmSelectedPrice(${p})">
-                      ₹${p.toLocaleString("en-IN")}
-                    </button>
-                  `).join("")}
-                </div>
-              `;
-            }
-            function confirmSelectedPrice(price) {
-              outputEl.innerHTML = `
-                <div style="padding:10px;border:1px solid #ccc;border-radius:6px;">
-                  <b>Selected Price:</b> ₹${price.toLocaleString("en-IN")}
-                </div>
-              `;
-
-              statusEl.innerHTML = "✔ Price confirmed and saved";
-
-              // 🔐 Save as today's snapshot
-              const url = $("trackUrl").value.trim();
-              const key = btoa(url);
-              savePriceSnapshot(key, price);
-            }
-            // ===== GLOBAL PRICE TRACKER ELEMENTS =====
-            const statusEl = document.getElementById("trackStatus");
-            const outputEl = document.getElementById("trackOutput");
-            window.confirmSelectedPrice = confirmSelectedPrice;
-            window.showPriceSelection = showPriceSelection;
               // ---------- End Initial Render Code ----------
               })();
   </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js">
-    <script>
-  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 </body>
-
 </html>

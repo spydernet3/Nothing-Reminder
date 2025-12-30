@@ -1898,6 +1898,8 @@
             if (req.result) {
               appData = { ...defaultData, ...req.result };
             }
+            profileName.textContent = appData.profileName;
+            profilePhoto.src = appData.profilePhoto;
             rerenderFor('reminders');
             rerenderFor('notes');
             rerenderFor('budget');

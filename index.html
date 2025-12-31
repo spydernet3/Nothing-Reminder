@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -275,7 +276,7 @@
       background: #444 !important;
       color: #4CAF50 !important;
     }
-
+    
     /* Settings panel styles */
     .settings-panel {
       display: none;
@@ -1126,8 +1127,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.7.3</p>
-          <p>Last Updated: 30-Dec-2025</p>
+          <p>Version 13.7.2</p>
+          <p>Last Updated: 26-Dec-2025</p>
           <p>Project Mode: Open source</p>
           <p>App Size : 7.0KB </p>
         </ul>
@@ -1270,84 +1271,40 @@
             <p id="currentTamilMonthText" style="font-weight:600;text-align:center;"></p>
           </div>
           <!-- Numeric Jothidam (Alphabet–Number) : Framed like Tamil Month -->
-          <div style="
+        <div style="
           border:1px solid #ccc;
           border-radius:10px;
           padding:15px;
         ">
 
-            <div style="font-weight:600;margin-bottom:9px;">
-              🔢 Numeric Jothidam
-            </div>
-
-            <!-- PART 1 : A–M -->
-            <table style="width:100%;border-collapse:collapse;margin-bottom:9px;">
-              <tr style="text-align:center;font-weight:600;">
-                <td>A</td>
-                <td>B</td>
-                <td>C</td>
-                <td>D</td>
-                <td>E</td>
-                <td>F</td>
-                <td>G</td>
-                <td>H</td>
-                <td>I</td>
-                <td>J</td>
-                <td>K</td>
-                <td>L</td>
-                <td>M</td>
-              </tr>
-              <tr style="text-align:center;">
-                <td>1</td>
-                <td>2</td>
-                <td>3</td>
-                <td>4</td>
-                <td>5</td>
-                <td>8</td>
-                <td>3</td>
-                <td>5</td>
-                <td>1</td>
-                <td>1</td>
-                <td>2</td>
-                <td>3</td>
-                <td>4</td>
-              </tr>
-            </table>
-
-            <!-- PART 2 : N–Z -->
-            <table style="width:100%;border-collapse:collapse;margin-bottom:9px;">
-              <tr style="text-align:center;font-weight:600;">
-                <td>N</td>
-                <td>O</td>
-                <td>P</td>
-                <td>Q</td>
-                <td>R</td>
-                <td>S</td>
-                <td>T</td>
-                <td>U</td>
-                <td>V</td>
-                <td>W</td>
-                <td>X</td>
-                <td>Y</td>
-                <td>Z</td>
-              </tr>
-              <tr style="text-align:center;">
-                <td>5</td>
-                <td>7</td>
-                <td>8</td>
-                <td>1</td>
-                <td>2</td>
-                <td>3</td>
-                <td>4</td>
-                <td>6</td>
-                <td>6</td>
-                <td>6</td>
-                <td>5</td>
-                <td>1</td>
-                <td>7</td>
-              </tr>
-            </table>
+          <div style="font-weight:600;margin-bottom:9px;">
+            🔢 Numeric Jothidam
           </div>
+
+          <!-- PART 1 : A–M -->
+          <table style="width:100%;border-collapse:collapse;margin-bottom:9px;">
+            <tr style="text-align:center;font-weight:600;">
+              <td>A</td><td>B</td><td>C</td><td>D</td><td>E</td><td>F</td><td>G</td>
+              <td>H</td><td>I</td><td>J</td><td>K</td><td>L</td><td>M</td>
+            </tr>
+            <tr style="text-align:center;">
+              <td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>8</td><td>3</td>
+              <td>5</td><td>1</td><td>1</td><td>2</td><td>3</td><td>4</td>
+            </tr>
+          </table>
+
+          <!-- PART 2 : N–Z -->
+          <table style="width:100%;border-collapse:collapse;margin-bottom:9px;">
+            <tr style="text-align:center;font-weight:600;">
+              <td>N</td><td>O</td><td>P</td><td>Q</td><td>R</td><td>S</td><td>T</td>
+              <td>U</td><td>V</td><td>W</td><td>X</td><td>Y</td><td>Z</td>
+            </tr>
+            <tr style="text-align:center;">
+              <td>5</td><td>7</td><td>8</td><td>1</td><td>2</td><td>3</td><td>4</td>
+              <td>6</td><td>6</td><td>6</td><td>5</td><td>1</td><td>7</td>
+            </tr>
+          </table>
+        </div>
         </div>
       </div>
       <div class="add-area">
@@ -1725,27 +1682,6 @@
     </div>
   </div>
   <script>
-    // ================= INDEXEDDB SETUP =================
-    const DB_NAME = "NothingReminderDB";
-    const DB_VERSION = 1;
-    const STORE_NAME = "appData";
-
-    function openDB() {
-      return new Promise((resolve, reject) => {
-        const req = indexedDB.open(DB_NAME, DB_VERSION);
-
-        req.onupgradeneeded = e => {
-          const db = e.target.result;
-          if (!db.objectStoreNames.contains(STORE_NAME)) {
-            db.createObjectStore(STORE_NAME);
-          }
-        };
-
-        req.onsuccess = e => resolve(e.target.result);
-        req.onerror = e => reject(e.target.error);
-      });
-    }
-
     // <!-- NOTIFICATION FIX 1: Cleaned up Service Worker Registration -->
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -1866,6 +1802,9 @@
 
         // ---------- Storage ----------
 
+        // Enhanced storage with quota handling
+        const STORAGE_KEY = 'smart_reminder_app_v1';
+
         const defaultData = {
           reminders: [],
           notes: [],
@@ -1887,26 +1826,9 @@
           priceSnapshots: {}
         };
 
-       let appData = structuredClone(defaultData);
-        (async () => {
-          const db = await openDB();
-          const tx = db.transaction(STORE_NAME, "readonly");
-          const store = tx.objectStore(STORE_NAME);
-
-          const req = store.get("main");
-          req.onsuccess = () => {
-            if (req.result) {
-              appData = { ...defaultData, ...req.result };
-            }
-            profileName.textContent = appData.profileName;
-            profilePhoto.src = appData.profilePhoto;
-            rerenderFor('reminders');
-            rerenderFor('notes');
-            rerenderFor('budget');
-            rerenderFor('checklists');
-          };
-        })();
-
+        let appData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultData;
+        // Merge with defaults to ensure new notif keys are present on load
+        appData = { ...defaultData, ...appData };
         // Ensure new property is initialized if old data exists
         if (!appData.calculationHistory) appData.calculationHistory = [];
 
@@ -1921,23 +1843,24 @@
         // <!-- NOTIFICATION FIX 3: Modified saveAll to be async and call checkNotifications -->
         // Modified save function to use localStorage only
         async function saveAll() {
-        const db = await openDB();
-        const tx = db.transaction(STORE_NAME, "readwrite");
-        const store = tx.objectStore(STORE_NAME);
-
-        store.put(structuredClone(appData), "main");
-
-        tx.oncomplete = async () => {
-          if (typeof updateStorageUsage === "function") updateStorageUsage();
-          await checkNotifications();
-          console.log("Saved to IndexedDB ✔");
-        };
-
-        tx.onerror = e => {
-          console.error("IndexedDB save failed:", e.target.error);
-        };
-      }
-
+          try {
+            const dataStr = JSON.stringify(appData);
+            localStorage.setItem(STORAGE_KEY, dataStr);
+            console.log("Data saved successfully to localStorage.");
+            if (typeof updateStorageUsage === "function") updateStorageUsage();
+            // Re-render the notification page whenever data changes (if the page is active)
+            if (byId('notifications') && !byId('notifications').classList.contains('hidden')) {
+               renderNotificationPage();
+            }
+            // NOTIFICATION CHANGE: Trigger notification check on every data save.
+            await checkNotifications(); // Correctly awaiting the async function
+            } catch (err) {
+              console.error("Save failed:", err);
+              if (err.name === 'QuotaExceededError') {
+                console.error("Storage is full. Please delete some data to make space.");
+              }
+            }
+          }
           function daysLeft(endDateStr){
           if(!endDateStr) return null;
           const [y,m,d] = endDateStr.split('-').map(Number);
@@ -2055,35 +1978,34 @@
           });
           container.appendChild(frag);
         }
+// 🔐 SAFE table renderer (XSS-proof)
+function renderSafeTableFromText(tableText) {
+  const table = document.createElement('table');
+  table.style.borderCollapse = 'collapse';
+  table.style.width = '100%';
 
-        // 🔐 SAFE table renderer (XSS-proof)
-        function renderSafeTableFromText(tableText) {
-          const table = document.createElement('table');
-          table.style.borderCollapse = 'collapse';
-          table.style.width = '100%';
+  const lines = tableText.split('\n').filter(l => l.includes('|'));
 
-          const lines = tableText.split('\n').filter(l => l.includes('|'));
+  lines.forEach((line, index) => {
+    if (line.includes('---')) return;
 
-          lines.forEach((line, index) => {
-            if (line.includes('---')) return;
+    const tr = document.createElement('tr');
+    const cells = line.split('|').filter(c => c.trim());
 
-            const tr = document.createElement('tr');
-            const cells = line.split('|').filter(c => c.trim());
+    cells.forEach(cell => {
+      const el = index === 0 ? document.createElement('th') : document.createElement('td');
+      el.textContent = cell.trim();   // ✅ SAFE
+      el.style.border = '1px solid #ddd';
+      el.style.padding = '6px';
+      el.style.textAlign = 'center';
+      tr.appendChild(el);
+    });
 
-            cells.forEach(cell => {
-              const el = index === 0 ? document.createElement('th') : document.createElement('td');
-              el.textContent = cell.trim();   // ✅ SAFE
-              el.style.border = '1px solid #ddd';
-              el.style.padding = '6px';
-              el.style.textAlign = 'center';
-              tr.appendChild(el);
-            });
+    table.appendChild(tr);
+  });
 
-            table.appendChild(tr);
-          });
-
-          return table;
-        }
+  return table;
+}
 
         // Update renderHomeNotes function to handle table formatting
         function renderHomeNotes(){
@@ -2271,26 +2193,26 @@
           list.appendChild(frag);
         }
 
-          // ---------- Budget Functions ----------
-          function renderBudgets() {
-          const list = byId('budgetList');
-          list.innerHTML = '';
-          if (!appData.budget || !Array.isArray(appData.budget)) appData.budget = [];
+        // ---------- Budget Functions ----------
+        function renderBudgets() {
+        const list = byId('budgetList');
+        list.innerHTML = '';
+        if (!appData.budget || !Array.isArray(appData.budget)) appData.budget = [];
 
-          if (appData.budget.length === 0) {
-            const li = document.createElement('li');
-            li.textContent = 'No budgets yet.';
-            li.style.opacity = '0.7';
-            list.appendChild(li);
-            renderHomeBudgets();
-            return;
-          }
-          
-          const frag = document.createDocumentFragment();
-
-          appData.budget.forEach((b, i) => {
+        if (appData.budget.length === 0) {
           const li = document.createElement('li');
-          const left = document.createElement('div');
+          li.textContent = 'No budgets yet.';
+          li.style.opacity = '0.7';
+          list.appendChild(li);
+          renderHomeBudgets();
+          return;
+        }
+        
+        const frag = document.createDocumentFragment();
+
+        appData.budget.forEach((b, i) => {
+        const li = document.createElement('li');
+        const left = document.createElement('div');
          left.className = 'item-left';
 
           const used = b.expenses ? b.expenses.reduce((sum, e) => sum + e.amount, 0) : 0;
@@ -3919,7 +3841,6 @@
                 renderTrash();
                 byId('emptyTrashBtn')?.addEventListener('click', emptyTrashAll);
               });
-
               // Ensure only Home is visible and sidebar is hidden on initial page load
               window.addEventListener('load', () => {
                 const sidebar = document.getElementById('sidebar');
@@ -3940,7 +3861,6 @@
                 // Ensure Trash (and other widgets) render after load too
                 if (typeof renderTrash === 'function') renderTrash();
               });
-
               // ---------- Storage Usage Feature (500 MB quota; clean display) ----------
               const viewStorageBtn = document.getElementById('viewStorageBtn');
               const storageBar = document.getElementById('storageBar');
@@ -3952,29 +3872,29 @@
               viewStorageBtn.addEventListener('click', () => updateStorageUsage());
               window.addEventListener('load', () => setTimeout(updateStorageUsage, 80));
             
-              async function updateStorageUsage() {
-              let totalBytes = 0;
-
-              // IndexedDB size estimation (correct way)
-              if (navigator.storage && navigator.storage.estimate) {
-                const estimate = await navigator.storage.estimate();
-                totalBytes = estimate.usage || 0;
+              function updateStorageUsage() {
+                const usedBytes = getLocalStorageSize();
+                const maxBytes = 500 * 1024 * 1024; // 500 MB quota
+                const percent = Math.min((usedBytes / maxBytes) * 100, 100);
+            
+                // fill bar & color
+                storageBar.style.width = percent.toFixed(1) + '%';
+                if (percent < 80) storageBar.style.background = 'linear-gradient(90deg,#4caf50,#8bc34a)';
+                else if (percent < 95) storageBar.style.background = 'linear-gradient(90deg,#ffb74d,#ff7043)';
+                else storageBar.style.background = 'linear-gradient(90deg,#ff7043,#f44336)';
+            
+                // move 🙈
+                const cw = barContainer.clientWidth;
+                const ew = 18;
+                let left = (percent / 100) * cw - ew / 2;
+                left = Math.max(0, Math.min(cw - ew, left));
+                storageEmoji.style.left = left + 'px';
+            
+                // show only “X MB of 500 MB used”
+                const usedMB = (usedBytes / 1024 / 1024).toFixed(2);
+                storageText.textContent = `${usedMB} MB of 500 MB used`;
               }
-
-              const usedMB = (totalBytes / (1024 * 1024)).toFixed(2); // ✅ CORRECT
-              const maxMB = 500;
-
-              const percent = Math.min((usedMB / maxMB) * 100, 100);
-
-              const bar = document.getElementById("storageBar");
-              const text = document.getElementById("storageText");
-              const emoji = document.getElementById("storageEmoji");
-
-              if (bar) bar.style.width = percent + "%";
-              if (emoji) emoji.style.left = `calc(${percent}% - 10px)`;
-              if (text) text.textContent = `${usedMB} MB / ${maxMB} MB`;
-            }
-
+            
               function getLocalStorageSize() {
                 let total = 0;
                 for (let i = 0; i < localStorage.length; i++) {
@@ -4825,7 +4745,6 @@
                 renderCalculationHistory();
               }
               })();
-
               /* =====================================================
                  PRICE TRACKER — FINAL VERSION
                  Supports:

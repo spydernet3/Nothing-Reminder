@@ -29,3 +29,16 @@ self.addEventListener('notificationclick', event => {
     })
   );
 });
+
+// ✅ SHOW NOTIFICATION FROM SERVICE WORKER
+self.addEventListener("message", event => {
+  if (event.data?.type === "SHOW_NOTIFICATION") {
+    self.registration.showNotification(event.data.title, {
+      body: event.data.body,
+      icon: "./assets/icon.png",
+      badge: "./assets/icon.png",
+      tag: event.data.tag,            // IMPORTANT
+      requireInteraction: true        // IMPORTANT (keeps it open)
+    });
+  }
+});

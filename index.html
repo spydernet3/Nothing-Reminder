@@ -1129,7 +1129,7 @@
         <h3>Version Info!</h3>
         <ul>
           <p>Version 13.7.2</p>
-          <p>Last Updated: 01-Jan-2025</p>
+          <p>Last Updated: 03-Jan-2025</p>
           <p>Project Mode: Open source</p>
           <p>App Size : 7.0KB </p>
         </ul>
@@ -1907,6 +1907,7 @@
             } else {
               document.documentElement.classList.remove('dark');
             }
+            checkNotifications(true);
             profileName.textContent = appData.profileName || "👤 User";
             profilePhoto.src = appData.profilePhoto;
             rerenderFor('reminders');
@@ -2772,7 +2773,6 @@
             const statusInfo=document.createElement('div');
             statusInfo.style.fontSize='13px';
             statusInfo.style.opacity='0.85';
-            statusInfo.textContent=`Status: ${check.status} | Total Items: ${check.items.length}`;
 
             const time=document.createElement('div');
             time.style.fontSize='12px';
@@ -2814,6 +2814,7 @@
           list.appendChild(frag);
           renderHomeCheck();renderHomeOverview();
           }
+          
           // ---------- Trash Bin ----------
           function renderTrash(){
             const list = byId('trashList');

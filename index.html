@@ -786,6 +786,7 @@
     <button class="menu-btn" data-page="utilities">🛠️ Utilities</button>
     <button class="menu-btn" data-page="trash">🗑️ Trash Bin</button>
     <button class="menu-btn" data-page="other">🎲 More Apps</button>
+    <button class="menu-btn" data-page="updateLog">🔄 Update Blog</button>
 
     <div id="settingsContainer" style="margin-top:auto;">
       <button id="settingsBtn" class="icon-btn" aria-expanded="false">
@@ -1128,8 +1129,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.7.2</p>
-          <p>Last Updated: 03-Jan-2025</p>
+          <p>Version 13.7.4 (stable)</p>
+          <p>Last Updated: 09-Jan-2025</p>
           <p>Project Mode: Open source</p>
           <p>App Size : 7.0KB </p>
         </ul>
@@ -1722,6 +1723,19 @@
           style="text-decoration: none; color: inherit;">
           <button class="menu-btn" style="width: 180px;">Meta Card</button>
         </a>
+      </div>
+      </div>
+      <div id="updateLog" class="page hidden">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h2>🔄 Update Blog</h2>
+      </div>
+      <div style="width: 100%; height: calc(100vh - 120px); border-radius: 8px; overflow: hidden; border: 1px solid #ccc; background: #fff;">
+        <iframe 
+          id="blogFrame" 
+          src="https://spydernet3.github.io/Nothing-Reminder-Blog/" 
+          style="width: 100%; height: 100%; border: none;"
+          loading="lazy">
+        </iframe>
       </div>
     </div>
   </div>

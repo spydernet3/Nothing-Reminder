@@ -33,20 +33,6 @@
       color: var(--text);
     }
 
-    .sidebar {
-      width: 220px;
-      background: #666;
-      color: #fff;
-      position: fixed;
-      height: 100%;
-      left: 0;
-      display: flex;
-      flex-direction: column;
-      padding: 12px;
-      gap: 8px;
-      transition: left 0s;
-    }
-
     .profile {
       display: flex;
       align-items: center;
@@ -1129,8 +1115,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.7.4 (stable)</p>
-          <p>Last Updated: 09-Jan-2025</p>
+          <p>Version 13.7.5 Stable</p>
+          <p>Last Updated: 22-Jan-2026</p>
           <p>Project Mode: Open source</p>
           <p>App Size : 7.0KB </p>
         </ul>
@@ -1594,8 +1580,7 @@
         </button>
         <div id="priceTrackerForm" class="form">
           <label>PRODUCT LINK</label>
-          <label>⚠ For Amazon =  Product Page 🌐 Link</label>
-          <label>⚠ For Flipkart = Product Share 🔗 Link</label>
+          <label>⚠ Track Amazon Product=  Either Product Page 🌐 Link Or Share Link</label>
           <input id="trackUrl" type="text" placeholder="Paste Amazon Or Flipkart Link">
 
           <label>PRODUCT TITLE</label>
@@ -1724,12 +1709,12 @@
           <button class="menu-btn" style="width: 180px;">Meta Card</button>
         </a>
       </div>
-      </div>
-      <div id="updateLog" class="page hidden">
+    </div>
+    <div id="updateLog" class="page hidden">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <h2>🔄 Update Blog</h2>
       </div>
-      <div style="width: 100%; height: calc(100vh - 120px); border-radius: 8px; overflow: hidden; border: 1px solid #ccc; background: #fff;">
+      <div style="width: 100%; height: calc(100vh - 120px); border-radius: 8px; overflow: hidden; border: 1px solid #ccc; background:#fff;">
         <iframe 
           id="blogFrame" 
           src="https://spydernet3.github.io/Nothing-Reminder-Blog/" 
@@ -1811,6 +1796,31 @@
           break;
               }
             }
+
+            // ---------- Notification helpers (ADD HERE) ----------
+            function restoreNotifications() {
+              checkNotifications(true);
+            }
+
+            function triggerNotifications() {
+              checkNotifications(false);
+            }
+            function checkNotifications(force = false) {
+              // SAFETY: do nothing if notifications are not available
+              if (!("Notification" in window)) return;
+              if (Notification.permission !== "granted") return;
+              // STOP if user turned OFF everything
+              if (
+                !appData.notifReminders &&
+                !appData.notifNotes &&
+                !appData.notifChecklist &&
+                !appData.notifBudget &&
+                !appData.notifMoonPhase
+              ) {
+                return;
+              }
+            }
+
         // ---------- NEW: Notification Settings Logic ----------
         function updateBrowserPermissionUI() {
             const status = Notification.permission;
@@ -1875,7 +1885,7 @@
             appData[category] = event.target.checked;
             saveAll();
             // Re-check notifications immediately if a new category is toggled on
-            if (event.target.checked) checkNotifications();
+            if (event.target.checked) triggerNotifications();
         }
         byId('toggleMoonPhase')?.addEventListener('change', (e) =>
          handleCustomNotifToggle('notifMoonPhase', e)
@@ -1915,24 +1925,37 @@
             if (req.result) {
               appData = { ...defaultData, ...req.result };
             }
+             if (!appData.calculationHistory) {
+            appData.calculationHistory = [];
+            }
+            // FIX for old users: ensure notification toggles exist
+            if (appData.notifReminders === undefined) appData.notifReminders = true;
+            if (appData.notifNotes === undefined) appData.notifNotes = true;
+            if (appData.notifChecklist === undefined) appData.notifChecklist = true;
+            if (appData.notifBudget === undefined) appData.notifBudget = true;
+            if (appData.notifMoonPhase === undefined) appData.notifMoonPhase = true;
+
             // ✅ APPLY DARK MODE ON PAGE LOAD
             if (appData.darkMode === '1') {
               document.documentElement.classList.add('dark');
             } else {
               document.documentElement.classList.remove('dark');
             }
-            checkNotifications(true);
+            restoreNotifications();
             profileName.textContent = appData.profileName || "👤 User";
             profilePhoto.src = appData.profilePhoto;
+            
             rerenderFor('reminders');
             rerenderFor('notes');
             rerenderFor('budget');
             rerenderFor('checklists');
-          };
-        })();
+            // ✅ ADD THESE
+if (typeof window.renderPriceTrackerList === "function") {
+  window.renderPriceTrackerList();
+}
 
-        // Ensure new property is initialized if old data exists
-        if (!appData.calculationHistory) appData.calculationHistory = [];
+          };
+         })();
 
         let editingIndex = null;
         let editingBudgetIndex = null;
@@ -1953,7 +1976,7 @@
 
         tx.oncomplete = async () => {
           if (typeof updateStorageUsage === "function") updateStorageUsage();
-          await checkNotifications();
+          triggerNotifications();
           console.log("Saved to IndexedDB ✔");
         };
 
@@ -2897,22 +2920,22 @@
           renderTrash();
           showPage('trash');
           alert("Trash cleared successfully.");
-        }
-        // ---------- Form Show/Hide ----------
-        function showForm(el){ el.classList.add('visible'); }
-        function hideForm(el){ el.classList.remove('visible'); }
+          }
+          // ---------- Form Show/Hide ----------
+          function showForm(el){ el.classList.add('visible'); }
+          function hideForm(el){ el.classList.remove('visible'); }
 
-        // ---------- Page Navigation ----------
-        const sidebar = byId('sidebar');
-        const main = byId('main');
-        const toggleBtn = byId('toggleBtn');
+          // ---------- Page Navigation ----------
+          const sidebar = byId('sidebar');
+          const main = byId('main');
+          const toggleBtn = byId('toggleBtn');
 
-        function showPage(pageId){
-          document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
-          const targetPage = byId(pageId);
-          targetPage.classList.remove('hidden');
-        if (pageId === 'utilities') {
-        renderCalculationHistory();
+          function showPage(pageId){
+            document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
+            const targetPage = byId(pageId);
+            targetPage.classList.remove('hidden');
+          if (pageId === 'utilities') {
+          renderCalculationHistory();
             }
 
 
@@ -4852,483 +4875,304 @@
               }
               })();
 
-              /* =====================================================
-                 PRICE TRACKER — FINAL VERSION
-                 Supports:
-                 • Amazon short links (amzn.in/d/*)
-                 • Mobile Amazon page extraction
-                 • Flipkart mobile page extraction
-                 • Save items → appData.priceTracker
-                 • Delete → Global Trash Bin
-              ===================================================== */
-              
-              (function(){
-                const $ = id => document.getElementById(id);
-              
-                const toggleBtn = $("priceTrackerToggle");
-                const formDiv = $("priceTrackerForm");
-                const urlInput = $("trackUrl");
-                const titleInput = $("trackTitle");
-                const saveBtn = $("saveTrackItem");
-                const trackBtn = $("trackNowBtn");
-
-              
-                /* ---------------------- UI Toggle ---------------------- */
-                toggleBtn.addEventListener("click", () => {
-                  formDiv.classList.toggle("visible");
-                  toggleBtn.classList.toggle("open");
-                });
-              
-                /* =====================================================
-                      1) EXPAND AMAZON SHORT LINKS
-                ===================================================== */
-                async function expandAmazonUrl(url){
-                  if (!url.includes("amzn.in")) return url;
-              
-                  try {
-                    // Attempt to get redirected full URL
-                    const res = await fetch(url, { method: "HEAD", redirect: "manual" });
-                    const loc = res.headers.get("location");
-                    if (loc) return loc;
-                  } catch(e){}
-              
-                  // Fallback: Jina text extractor
-                  try {
-                    const proxyUrl = "https://r.jina.ai/" + url.replace(/^https?:\/\//,'');
-                    const txt = await fetch(proxyUrl).then(r => r.text());
-              
-                    let m = txt.match(/https?:\/\/www\.amazon\.in\/[^\s"]+/i);
-                    if (m) return m[0];
-              
-                    m = txt.match(/\/dp\/[A-Z0-9]{8,12}/i);
-                    if (m) return "https://www.amazon.in" + m[0];
-                  } catch(e){}
-              
-                  return url;
-                }
-              
-                /* =====================================================
-                      2) CONVERT AMAZON / FLIPKART → MOBILE PAGES
-                ===================================================== */
-                function convertAmazonToMobile(url){
-                  const m = url.match(/\/dp\/([A-Z0-9]{8,12})/i);
-                  if (!m) return url;
-                  return `https://www.amazon.in/gp/aw/d/${m[1]}`;
-                }
-              
-                function convertFlipkart(url){
-                  const m = url.match(/pid=([A-Z0-9]+)/i);
-                  if (!m) return url;
-                  return `https://www.flipkart.com/m/item?pid=${m[1]}`;
-                }
-              
-                /* =====================================================
-                      3) FETCH PAGE USING RELIABLE PROXY
-                ===================================================== */
-                async function proxyFetch(url){
-                  const fetchUrl = "https://r.jina.ai/" + url.replace(/^https?:\/\//,'');
-                  const res = await fetch(fetchUrl, { cache: "no-store" });
-                  return await res.text();
-                }
-              try {
-                const jsonld = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/i);
-                if(jsonld && jsonld[1]){
-                  const j = JSON.parse(jsonld[1]);
-                  const offers = j.offers || (Array.isArray(j) && j.find(x=>x.offers)?.offers);
-                  if (offers && (offers.price || (offers.priceSpecification && offers.priceSpecification.price))) {
-                    const p = offers.price || offers.priceSpecification.price;
-                    return Number(String(p).replace(/[^0-9.]/g,''));
-                  }
-                }
-              } catch(e){}
-              
-              /* =====================================================
-                      4) PRICE EXTRACTION
-                ===================================================== */
-                  function extractPrice(html) {
-                    try {
-                      const scripts = html.match(
-                        /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi
-                      );
-                      if (scripts) {
-                        for (const s of scripts) {
-                          const json = JSON.parse(s.replace(/<[^>]+>/g, ""));
-                          const items = Array.isArray(json) ? json : [json];
-
-                          for (const item of items) {
-                            if (
-                              item &&
-                              item['@type'] === 'Product' &&
-                              item.offers &&
-                              item.offers.price
-                            ) {
-                              return Number(String(item.offers.price).replace(/,/g, ""));
-                            }
-                          }
-                        }
-                      }
-                    } catch {}
-
-                    // 2️⃣ Amazon "priceToPay" block (very strong signal)
-                    const amazonPrice = html.match(
-                      /id=["']priceToPay["'][\s\S]*?a-price-whole[^>]*>([\d,]+)/i
-                    );
-                    if (amazonPrice) {
-                      return Number(amazonPrice[1].replace(/,/g, ""));
-                    }
-
-                    /* =========================
-                      FLIPKART — VERIFIED SOURCE
-                      ========================= */
-
-                    // 3️⃣ Flipkart highlighted selling price ONLY
-                    const flipkartPrice = html.match(
-                      /_30jeq3\s+_16Jk6d[^>]*>\s*₹?\s*([\d,]+)/i
-                    );
-                    if (flipkartPrice) {
-                      return Number(flipkartPrice[1].replace(/,/g, ""));
-                    }
-
-                    /* =========================
-                      NO VERIFIED PRICE FOUND
-                      ========================= */
-
-                    // ❌ DO NOT GUESS
-                    // ❌ DO NOT FALLBACK
-                    return null;
-                  }
-
-                  function extractAllCandidatePrices(html) {
-                    const rawMatches = [...html.matchAll(/₹\s*([\d,]+)/g)];
-
-                    const prices = rawMatches
-                      .map(m => Number(m[1].replace(/,/g, "")))
-                      .filter(p =>
-                        p > 1000 &&          // remove EMI / discounts
-                        p < 1000000          // sanity upper limit
-                      );
-
-                    // Remove duplicates & sort ascending
-                    return [...new Set(prices)].sort((a, b) => a - b);
-                  }
-
-                /* =====================================================
-                      5) SAVE PRODUCT ENTRY
-                ===================================================== */
-                saveBtn.addEventListener("click", async () => {
-                const rawUrl = urlInput.value.trim();
-                const title = titleInput.value.trim();
-                if (!rawUrl || !title) return alert("Enter title and URL");
-              
-                // normalize and compute key (use expand/convert helpers used in trackPrice)
-                let normalizedUrl = await expandAmazonUrl(rawUrl);
-                if (normalizedUrl.includes("amazon")) normalizedUrl = convertAmazonToMobile(normalizedUrl);
-                if (normalizedUrl.includes("flipkart")) normalizedUrl = convertFlipkart(normalizedUrl);
-                const key = btoa(normalizedUrl);
-              
-                appData.priceTracker.push({
-                  title,
-                  url: normalizedUrl,
-                  key,
-                  savedAt: formatDateDMYWithTime(new Date())
-                });
-              
-                saveAll();
-                renderPriceTrackerList();
+             /* =====================================================
+               PRICE TRACKER — FINAL CLEAN VERSION
+               Amazon: Today vs Yesterday + Chart
+               Flipkart: Today only (no fake history)
+            ===================================================== */
+            
+            (function () {
+              const $ = id => document.getElementById(id);
+            
+              const toggleBtn = $("priceTrackerToggle");
+              const formDiv = $("priceTrackerForm");
+              const urlInput = $("trackUrl");
+              const titleInput = $("trackTitle");
+              const saveBtn = $("saveTrackItem");
+              const trackBtn = $("trackNowBtn");
+              const statusEl = $("trackStatus");
+              const outputEl = $("trackOutput");
+            
+              /* ---------------- UI TOGGLE ---------------- */
+              toggleBtn.addEventListener("click", () => {
+                formDiv.classList.toggle("visible");
+                toggleBtn.classList.toggle("open");
               });
-              
-                /* =====================================================
-                      6) RENDER SAVED PRODUCT LIST
-                ===================================================== */
-                function renderPriceTrackerList(){
-                  const list = $("priceTrackList");
-                  list.innerHTML = "";
-              
-                  if (!appData.priceTracker.length){
-                    list.innerHTML = `<li style="opacity:0.7;">No saved products</li>`;
-                    return;
-                  }
-              
-                  appData.priceTracker.forEach((item, i) => {
-                    const li = document.createElement("li");
-              
-                    li.innerHTML = `
-                      <div class="item-left">
-                        <a href="#" class="trackLink">${item.title}</a>
-                        <br><small>${item.savedAt}</small>
-                      </div>
-                      <button class="icon-small deleteBtn">🗑️</button>
-                    `;
-              
-                    // CLICK TITLE → track price
-                    li.querySelector(".trackLink").addEventListener("click", async () => {
-                      urlInput.value = item.url;
-                      titleInput.value = item.title;
-                      await trackPrice();
-                    });
-              
-                    // DELETE → moveToTrash()
-                    li.querySelector(".deleteBtn").addEventListener("click", () => {
-                      moveToTrash("priceTracker", item, i);
-                      renderPriceTrackerList();
-                    });
-              
-                    list.appendChild(li);
-                  });
-                }
-              /* -------------------------------------------------
-                 GET LAST 7 DAYS HISTORY FOR ONE PRODUCT
-              ------------------------------------------------- */
-              function getLast7DaysHistory(urlKey){
-                if(!appData.priceSnapshots) return [];
-              
-                const history = [];
-                const today = new Date();
-              
-                for(let i=0; i<7; i++){
-                  const d = new Date(today);
-                  d.setDate(today.getDate() - i);
-                  const key = d.toISOString().slice(0,10);
-              
-                  if(appData.priceSnapshots[key] && appData.priceSnapshots[key][urlKey]){
-                    history.push({
-                      date: key,
-                      price: appData.priceSnapshots[key][urlKey].price
-                    });
-                  }
-                }
-              
-                return history.reverse(); // oldest → newest
+            
+              /* =====================================================
+                 AMAZON SHORT LINK EXPANSION
+              ===================================================== */
+              async function expandAmazonUrl(url) {
+                if (!url.includes("amzn.in")) return url;
+                try {
+                  const res = await fetch(url, { method: "HEAD", redirect: "manual" });
+                  const loc = res.headers.get("location");
+                  if (loc) return loc;
+                } catch {}
+                return url;
               }
-              /* -------------------------------------------------
-                 BUILD 7-DAY HISTORY TABLE (HTML)
-              ------------------------------------------------- */
-              function buildHistoryTable(history){
-                if(!history.length) return "<p>No history available.</p>";
-              
-                let rows = history.map(h => `
-                  <tr>
-                    <td>${h.date}</td>
-                    <td>₹${h.price.toLocaleString("en-IN")}</td>
-                  </tr>
-                `).join("");
-              
-                return `
-                  <table style="width:100%;border-collapse:collapse;margin-top:10px;">
-                    <tr style="background:#f3f3f3;font-weight:bold;">
-                      <td>Date</td><td>Price</td>
-                    </tr>
-                    ${rows}
-                  </table>
-                `;
+            
+              /* =====================================================
+                 MOBILE PAGE NORMALIZATION
+              ===================================================== */
+              function convertAmazonToMobile(url) {
+                const m = url.match(/\/dp\/([A-Z0-9]{8,12})/i);
+                return m ? `https://www.amazon.in/gp/aw/d/${m[1]}` : url;
               }
-              /* -------------------------------------------------
-                 DRAW SIMPLE LINE CHART FOR PRICE HISTORY
-              ------------------------------------------------- */
-              function drawHistoryChart(canvasId, history){
-                const canvas = document.getElementById(canvasId);
-                const ctx = canvas.getContext("2d");
-                canvas.width = canvas.offsetWidth;
-                canvas.height = 180;
+            
+              function convertFlipkart(url) {
+                const m = url.match(/pid=([A-Z0-9]+)/i);
+                return m ? `https://www.flipkart.com/m/item?pid=${m[1]}` : url;
+              }
+            
+              /* =====================================================
+                 PROXY FETCH (TEXT-ONLY)
+              ===================================================== */
+              async function proxyFetch(url) {
+              // Try Jina first
+              try {
+                const jina = await fetch(
+                  "https://r.jina.ai/" + url.replace(/^https?:\/\//, ""),
+                  { cache: "no-store" }
+                ).then(r => r.text());
+            
+                // If price keywords missing → fallback
+                if (/₹|price|a-price/i.test(jina)) return jina;
+              } catch {}
+            
+              // Fallback: textise.org (Amazon works well)
+              try {
+                const textise = await fetch(
+                  "https://textise.net/showtext.aspx?strURL=" + encodeURIComponent(url),
+                  { cache: "no-store" }
+                ).then(r => r.text());
+                return textise;
+              } catch {}
+            
+              return "";
+            }
+            
+              /* =====================================================
+                 VERIFIED PRICE EXTRACTION
+              ===================================================== */
+                function extractPrice(html) {
+                if (!html) return null;
               
-                ctx.clearRect(0,0,canvas.width,canvas.height);
+                // Normalize
+                html = html.replace(/\s+/g, " ");
               
-                if(history.length < 2){
-                  ctx.fillText("Not enough data for chart", 10, 20);
-                  return;
-                }
+                /* ================= AMAZON (TEXT MODE) ================= */
               
-                // Extract values
-                const prices = history.map(h => h.price);
+                // Common Amazon text patterns
+                let m =
+                  html.match(/price\s*[:\-]?\s*₹\s*([\d,]+)/i) ||
+                  html.match(/₹\s*([\d,]{3,})\s*(?:only|inclusive|free delivery)/i);
+              
+                if (m) return Number(m[1].replace(/,/g, ""));
+              
+                /* ================= FLIPKART (TEXT MODE) ================= */
+              
+                // Flipkart main selling price text
+                m =
+                  html.match(/selling price\s*[:\-]?\s*₹\s*([\d,]+)/i) ||
+                  html.match(/₹\s*([\d,]{4,})\s*(?:off|₹)/i);
+              
+                if (m) return Number(m[1].replace(/,/g, ""));
+              
+                /* ================= FALLBACK (SAFE) ================= */
+              
+                // Pick FIRST reasonable ₹ value (not EMI / delivery)
+                const all = [...html.matchAll(/₹\s*([\d,]{3,})/g)]
+                  .map(m => Number(m[1].replace(/,/g, "")))
+                  .filter(v => v > 500 && v < 500000);
+              
+                return all.length ? all[0] : null;
+              }
+
+              /* =====================================================
+                 DAILY SNAPSHOT STORAGE
+              ===================================================== */
+              function saveSnapshot(key, price) {
+                const today = new Date().toISOString().slice(0, 10);
+                appData.priceSnapshots ??= {};
+                appData.priceSnapshots[today] ??= {};
+                appData.priceSnapshots[today][key] = {
+                  price,
+                  time: Date.now()
+                };
+                saveAll();
+              }
+            
+              function getSnapshot(key, offsetDays = 0) {
+                const d = new Date();
+                d.setDate(d.getDate() - offsetDays);
+                const k = d.toISOString().slice(0, 10);
+                return appData.priceSnapshots?.[k]?.[key]?.price ?? null;
+              }
+            
+              /* =====================================================
+                 SIMPLE PRICE CHART
+              ===================================================== */
+              function drawChart(canvasId, prices) {
+                const c = document.getElementById(canvasId);
+                const ctx = c.getContext("2d");
+                c.width = c.offsetWidth;
+                c.height = 160;
+            
+                ctx.clearRect(0, 0, c.width, c.height);
+                if (prices.length < 2) return;
+            
                 const min = Math.min(...prices);
                 const max = Math.max(...prices);
-              
-                const stepX = canvas.width / (history.length - 1);
-              
-                ctx.strokeStyle = "#007bff";
-                ctx.lineWidth = 2;
+                const stepX = c.width / (prices.length - 1);
+            
                 ctx.beginPath();
-              
-                history.forEach((h, i) => {
+                ctx.strokeStyle = "#4caf50";
+                ctx.lineWidth = 2;
+            
+                prices.forEach((p, i) => {
                   const x = i * stepX;
-                  const y = canvas.height - ((h.price - min) / (max - min)) * (canvas.height - 20) - 10;
-              
-                  if(i === 0) ctx.moveTo(x, y);
-                  else ctx.lineTo(x, y);
+                  const y = c.height - ((p - min) / (max - min || 1)) * (c.height - 20) - 10;
+                  i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
                 });
-              
+            
                 ctx.stroke();
-              
-                // Plot points
-                ctx.fillStyle = "#ff0000";
-                history.forEach((h, i) => {
-                  const x = i * stepX;
-                  const y = canvas.height - ((h.price - min) / (max - min)) * (canvas.height - 20) - 10;
-                  ctx.beginPath();
-                  ctx.arc(x, y, 4, 0, Math.PI * 2);
-                  ctx.fill();
-                });
               }
-              /* -------------------------------------------------
-                 AUTO ALERT WHEN PRICE DROPS
-              ------------------------------------------------- */
-              function checkPriceDrop(todayPrice, yesterdayPrice, title){
-                if(yesterdayPrice == null) return;
-              
-                if(todayPrice < yesterdayPrice){
-                  alert(`🔻 Price Drop Alert!\n${title}\nYesterday: ₹${yesterdayPrice.toLocaleString("en-IN")}\nToday: ₹${todayPrice.toLocaleString("en-IN")}`);
-                }
-              }
-                /* =====================================================
-                      7) PRICE TRACKING FUNCTION
-                ===================================================== */
+            
+              /* =====================================================
+                 TRACK PRICE (CORE)
+              ===================================================== */
               async function trackPrice() {
-                let url = $("trackUrl").value.trim();
-                const title = $("trackTitle").value.trim();
-
-                if (!url) {
-                  alert("Enter URL");
-                  return;
-                }
-
+                let url = urlInput.value.trim();
+                const title = titleInput.value.trim();
+            
+                if (!url) return alert("Enter product URL");
+            
                 try {
-                  statusEl.innerHTML = "⏳ Processing…";
+                  statusEl.textContent = "⏳ Fetching price…";
                   outputEl.innerHTML = "";
-
-                  // Expand + normalize URL
+            
                   url = await expandAmazonUrl(url);
                   if (url.includes("amazon")) url = convertAmazonToMobile(url);
                   if (url.includes("flipkart")) url = convertFlipkart(url);
-
-                  statusEl.innerHTML = "⏳ Fetching page…";
-
+            
+                  const key = btoa(url);
                   const html = await proxyFetch(url);
-
-                  // 1️⃣ Try confident auto extraction
                   const price = extractPrice(html);
-
-                  // 2️⃣ If auto extraction FAILED → show selection UI
+            
                   if (!price) {
-                    const candidates = extractAllCandidatePrices(html);
-
-                    if (!candidates || !candidates.length) {
-                      statusEl.innerHTML = "❌ Unable to detect product price reliably";
-                      return;
-                    }
-
-                    // Let user choose – DO NOT continue further
-                    showPriceSelection(candidates);
+                    statusEl.textContent = "❌ Price not detected";
                     return;
                   }
-
-                  // 3️⃣ From here → price is CONFIRMED
-                  const key = btoa(url);
-
-                  // Save today snapshot
-                  savePriceSnapshot(key, price);
-
-                  // Yesterday comparison
-                  const yesterdayPrice = getYesterdayPrice(key);
-
-                  // Price drop alert
-                  checkPriceDrop(price, yesterdayPrice, title);
-
-                  // History
-                  const history = getLast7DaysHistory(key);
-                  const tableHTML = buildHistoryTable(history);
-
-                  // UI render
+            
+                  saveSnapshot(key, price);
+            
+                  const yesterday = getSnapshot(key, 1);
+                  const diff =
+                    yesterday != null ? price - yesterday : null;
+            
                   outputEl.innerHTML = `
-                    <div style="border:1px solid #ddd;padding:12px;background:white;border-radius:8px;">
-                      <h3>${title || "Product Price"}</h3>
+                    <div style="border:1px solid #ddd;padding:12px;border-radius:8px;">
+                      <h3>${title || "Product"}</h3>
                       <p><b>Today:</b> ₹${price.toLocaleString("en-IN")}</p>
-                      <p><b>Yesterday:</b> ${
-                        yesterdayPrice ? "₹" + yesterdayPrice.toLocaleString("en-IN") : "—"
-                      }</p>
+                      ${
+                        yesterday != null
+                          ? `<p><b>Yesterday:</b> ₹${yesterday.toLocaleString("en-IN")}</p>
+                             <p><b>Change:</b> 
+                               <span style="color:${diff < 0 ? 'green' : 'red'}">
+                                 ${diff < 0 ? "▼" : "▲"} ₹${Math.abs(diff)}
+                               </span>
+                             </p>`
+                          : `<p><i>No yesterday data</i></p>`
+                      }
+                      <canvas id="priceChart"></canvas>
                     </div>
-
-                    <h3>7-Day Price History</h3>
-                    ${tableHTML}
-
-                    <h3>Price Chart</h3>
-                    <canvas id="priceChart"
-                      style="width:100%;height:180px;border:1px solid #ccc;border-radius:6px;">
-                    </canvas>
                   `;
-
-                  // Draw chart after DOM update
-                  if (history && history.length > 1) {
-                    setTimeout(() => drawHistoryChart("priceChart", history), 50);
-                  }
-
-                  statusEl.innerHTML = "✔ Updated";
-
-                } catch (err) {
-                  console.error(err);
-                  statusEl.innerHTML = "❌ Error: " + (err.message || "Something went wrong");
+            
+                  const history = [yesterday, price].filter(Boolean);
+                  drawChart("priceChart", history);
+            
+                  statusEl.textContent = "✔ Updated";
+            
+                } catch (e) {
+                  console.error(e);
+                  statusEl.textContent = "❌ Error occurred";
                 }
               }
-                trackBtn.addEventListener("click", trackPrice);
-              // expose Price Tracker functions to global scope so other modules can call them
-              window.renderPriceTrackerList = renderPriceTrackerList;
-              window.trackPrice = trackPrice;
+            
+              /* =====================================================
+                 SAVE PRODUCT
+              ===================================================== */
+              saveBtn.addEventListener("click", async () => {
+                const rawUrl = urlInput.value.trim();
+                const title = titleInput.value.trim();
+                if (!rawUrl || !title) return alert("Enter title & URL");
+            
+                let url = await expandAmazonUrl(rawUrl);
+                if (url.includes("amazon")) url = convertAmazonToMobile(url);
+                if (url.includes("flipkart")) url = convertFlipkart(url);
+            
+                const key = btoa(url);
+                
+                if (appData.priceTracker.some(p => p.key === key)) {
+                  alert("Product already saved");
+                  return;
+                }
+                
+                appData.priceTracker.push({
+                  title,
+                  url,
+                  key,
+                  savedAt: formatDateDMYWithTime(new Date())
+                });
+            
+                saveAll();
+                renderPriceTrackerList();
+              });
+            
+              /* =====================================================
+                 RENDER SAVED LIST
+              ===================================================== */
+              function renderPriceTrackerList() {
+                const list = $("priceTrackList");
+                list.innerHTML = "";
+            
+                if (!appData.priceTracker.length) {
+                  list.innerHTML = `<li style="opacity:.7">No saved products</li>`;
+                  return;
+                }
+            
+                appData.priceTracker.forEach((it, i) => {
+                  const li = document.createElement("li");
+                  li.innerHTML = `
+                    <div class="item-left">
+                      <a href="#">${it.title}</a><br>
+                      <small>${it.savedAt}</small>
+                    </div>
+                    <button class="icon-small">🗑️</button>
+                  `;
+            
+                  li.querySelector("a").onclick = async e => {
+                    e.preventDefault();
+                    urlInput.value = it.url;
+                    titleInput.value = it.title;
+                    await trackPrice();
+                  };
+                  
+                  li.querySelector("button").onclick = () => {
+                    moveToTrash("priceTracker", it, i);
+                    renderPriceTrackerList();
+                  };
+            
+                  list.appendChild(li);
+                });
+              }
               
-                /* RUN ON LOAD */
+              window.renderPriceTrackerList = renderPriceTrackerList; 
+                trackBtn.addEventListener("click", trackPrice);
+                window.trackPrice = trackPrice;
                 renderPriceTrackerList();
               })();
-
-              // ---------------- PRICE SNAPSHOT HELPERS ----------------
-              function savePriceSnapshot(urlKey, price){
-                // ensure structure exists
-                if(!appData.priceSnapshots) appData.priceSnapshots = {};
-                const today = new Date().toISOString().slice(0,10); // YYYY-MM-DD
-                if(!appData.priceSnapshots[today]) appData.priceSnapshots[today] = {};
-                appData.priceSnapshots[today][urlKey] = { price, time: new Date().getTime() };
-                saveAll(); // persist with existing app save (keeps behavior consistent). :contentReference[oaicite:3]{index=3}
-              }
-              
-              function getYesterdayPrice(urlKey){
-                if(!appData.priceSnapshots) return null;
-                const d = new Date(); d.setDate(d.getDate()-1);
-                const y = d.toISOString().slice(0,10);
-                return appData.priceSnapshots[y]?.[urlKey]?.price || null;
-              }
-
-              function showPriceSelection(prices) {
-              statusEl.innerHTML = "⚠️ Multiple prices detected. Please select the correct product price:";
-
-              outputEl.innerHTML = `
-                <div style="margin-top:10px;">
-                  ${prices.map(p => `
-                    <button
-                      style="display:block;width:100%;margin:6px 0;padding:8px;border-radius:6px;"
-                      onclick="confirmSelectedPrice(${p})">
-                      ₹${p.toLocaleString("en-IN")}
-                    </button>
-                  `).join("")}
-                </div>
-              `;
-            }
-            // Your existing JavaScript code that uses $
-            function confirmSelectedPrice(price) {
-            outputEl.innerHTML = `
-              <div style="padding:10px;border:1px solid #ccc;border-radius:6px;">
-                <b>Selected Price:</b> ₹${price.toLocaleString("en-IN")}
-              </div>
-            `;
-
-            statusEl.innerHTML = "✔ Price confirmed and saved";
-
-            // 🔐 Save as today's snapshot
-            // Original: const url = $("trackUrl").value.trim();
-            const url = document.getElementById("trackUrl").value.trim(); // Changed line
-            const key = btoa(url);
-            savePriceSnapshot(key, price);
-            }
-            // ===== GLOBAL PRICE TRACKER ELEMENTS =====
-            const statusEl = document.getElementById("trackStatus");
-            const outputEl = document.getElementById("trackOutput");
-            window.confirmSelectedPrice = confirmSelectedPrice;
 
             // ========= GOOGLE TRENDS ================
             const TRENDS_REGION_KEY = "trends_region";

@@ -1115,8 +1115,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.7.5 Stable</p>
-          <p>Last Updated: 22-Jan-2026</p>
+          <p>Version 13.7.6 </p>
+          <p>Last Updated: 26-Jan-2026</p>
           <p>Project Mode: Open source</p>
           <p>App Size : 7.0KB </p>
         </ul>
@@ -1950,10 +1950,9 @@
             rerenderFor('budget');
             rerenderFor('checklists');
             // ✅ ADD THESE
-if (typeof window.renderPriceTrackerList === "function") {
-  window.renderPriceTrackerList();
-}
-
+            if (typeof window.renderPriceTrackerList === "function") {
+              window.renderPriceTrackerList();
+            }
           };
          })();
 
@@ -2427,8 +2426,14 @@ if (typeof window.renderPriceTrackerList === "function") {
             delBtn.className = 'icon-small';
             delBtn.title = 'Delete';
             delBtn.addEventListener('click', () => deleteBudget(i));
+            
+            const pdfBtn = document.createElement('button');
+            pdfBtn.textContent = '📄';
+            pdfBtn.className = 'icon-small';
+            pdfBtn.title = 'Export Budget as PDF';
+            pdfBtn.addEventListener('click', () => exportBudgetPDF(i));
 
-            right.append(addBtn, editBtn, delBtn);
+            right.append(addBtn, editBtn, delBtn, pdfBtn);
 
             // --- Expense add button logic ---
             expForm.querySelector('.add-exp-confirm').addEventListener('click', () => {
@@ -2460,6 +2465,140 @@ if (typeof window.renderPriceTrackerList === "function") {
           renderHomeBudgets();
          }
          
+         function exportBudgetPDF(index) {
+          if (!appData || !appData.budget || !appData.budget[index]) return;
+        
+          const budget = appData.budget[index];
+          const expenses = Array.isArray(budget.expenses) ? budget.expenses : [];
+        
+          let expenseRows = '';
+          expenses.forEach((e, i) => {
+            expenseRows += `
+              <tr>
+                <td>${i + 1}</td>
+                <td>${e.title || '-'}</td>
+                <td>₹${e.amount || 0}</td>
+                <td>${e.date || '-'}</td>
+              </tr>
+            `;
+          });
+        
+          if (!expenseRows) {
+            expenseRows = `
+              <tr>
+                <td colspan="4" style="text-align:center;">No expenses added</td>
+              </tr>
+            `;
+          }
+        
+          const win = window.open('', '', 'width=900,height=700');
+          if (!win) return;
+          const totalBudget = Number(budget.amount) || 0;
+
+          const totalExpenses = expenses.reduce((sum, e) => {
+            return sum + (Number(e.amount) || 0);
+          }, 0);
+
+          const remainingAmount = totalBudget - totalExpenses;
+
+          win.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Budget PDF</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              padding: 20px;
+              color: #000;
+            }
+            .header {
+              display: flex;
+              align-items: center;
+              gap: 15px;
+              border-bottom: 2px solid #4CAF50;
+              padding-bottom: 10px;
+              margin-bottom: 20px;
+            }
+            .header img {
+              width: 50px;
+              height: 50px;
+            }
+            .app-name {
+              font-size: 22px;
+              font-weight: bold;
+            }
+            .budget-info p {
+              margin: 4px 0;
+              font-weight: 600;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 15px;
+            }
+            th, td {
+              border: 1px solid #000;
+              padding: 8px;
+              text-align: center;
+            }
+            th {
+              background: #f3f3f3;
+            }
+            .footer {
+              margin-top: 30px;
+              font-size: 12px;
+              text-align: center;
+              opacity: 0.7;
+            }
+          </style>
+        </head>
+        <body>
+        
+          <div class="header">
+            <img src="assets/icon.png" alt="App Logo">
+            <div class="app-name">Nothing Reminder</div>
+          </div>
+        
+          <div class="budget-info">
+          <p>Budget Title : ${budget.title || '-'}</p>
+          <p>Total Amount : ₹${totalBudget}</p>
+          <p>Total Expenses : ₹${totalExpenses}</p>
+          <p>Remaining Balance : ₹${remainingAmount < 0 ? 0 : remainingAmount}</p>
+          <p>Period : ${budget.startDate || '-'} → ${budget.endDate || '-'}</p>
+        </div>
+          <table>
+            <thead>
+              <tr>
+                <th>S.NO</th>
+                <th>Expense</th>
+                <th>Amount</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${expenseRows}
+            </tbody>
+          </table>
+        
+          <div class="footer">
+            Generated from Nothing Reminder App
+          </div>
+        
+          <script>
+            window.onload = () => {
+              window.print();
+              window.onafterprint = () => window.close();
+            };
+          <\/script>
+        
+        </body>
+        </html>
+          `);
+        
+          win.document.close();
+        }
+
         function renderHomeBudgets() {
           const container = byId('homeBudgetsContainer');
           container.innerHTML = '';
@@ -2559,6 +2698,7 @@ if (typeof window.renderPriceTrackerList === "function") {
         hideForm(byId("budgetFormContainer"));
         clearBudgetForm();
        }
+       
         function clearBudgetForm(){
           byId('budgetTitle').value='';
           byId('budgetAmount').value='';
@@ -2591,7 +2731,6 @@ if (typeof window.renderPriceTrackerList === "function") {
           byId('startDate').value='';
           byId('endDate').value='';
         }
-
 
         // Updated editNote
         function editNote(index){

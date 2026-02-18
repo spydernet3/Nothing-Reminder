@@ -1115,8 +1115,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.7.6 </p>
-          <p>Last Updated: 26-Jan-2026</p>
+          <p>Version 13.7.7 </p>
+          <p>Last Updated: 18-Feb-2026</p>
           <p>Project Mode: Open source</p>
           <p>App Size : 7.0KB </p>
         </ul>
@@ -2043,7 +2043,17 @@
             renderHomeReminders(); renderHomeNotes(); renderHomeCheck();renderHomeOverview(); return;
           }
           const frag = document.createDocumentFragment();
-          appData.reminders.forEach((r,i)=>{
+          const sortedReminders = [...appData.reminders].sort((a, b) => {
+            const da = daysLeft(a.endDate);
+            const db = daysLeft(b.endDate);
+            // null (no date) goes to end
+            if (da === null && db === null) return 0;
+            if (da === null) return 1;
+            if (db === null) return -1;
+            return da - db;
+          });
+          sortedReminders.forEach((r,i)=>{
+            const origIndex = appData.reminders.indexOf(r);
             const li=document.createElement('li');
             const left=document.createElement('div'); left.className='item-left';
             const title=document.createElement('div'); title.textContent=r.title; title.style.fontWeight='600';
@@ -2058,9 +2068,9 @@
             else if(diff === 0){ badge.textContent='Today'; }
             else{ badge.textContent=`${diff} days left`; }
 
-            const editBtn=document.createElement('button'); editBtn.className='icon-small'; editBtn.textContent='✏️'; editBtn.title='Edit'; editBtn.addEventListener('click',()=>editReminder(i));
-            const delBtn=document.createElement('button'); delBtn.className='icon-small'; delBtn.textContent='🗑️'; delBtn.title='Delete'; delBtn.addEventListener('click',()=>deleteReminder(i));
-
+            const editBtn=document.createElement('button'); editBtn.className='icon-small'; editBtn.textContent='✏️'; editBtn.title='Edit'; editBtn.addEventListener('click',()=>editReminder(origIndex));
+            const delBtn=document.createElement('button'); delBtn.className='icon-small'; delBtn.textContent='🗑️'; delBtn.title='Delete'; delBtn.addEventListener('click',()=>deleteReminder(origIndex));
+           
             right.appendChild(badge);
             right.appendChild(editBtn);
             right.appendChild(delBtn);

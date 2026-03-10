@@ -8,7 +8,7 @@ A lightweight, web-based Reminder and Notes application with dark mode support, 
 
 !> Users Data's are stored only local storage avoid data losses before format or erase all ...
 ---
-REMINDER APP [ https://spydernet3.github.io/Nothing-Reminder/]
+REMINDER APP [ https://nothing-reminder.localplayer.dev ]
 ---
 | Category                  | Rating | Remarks                                       |
 | ------------------------- | ------ | --------------------------------------------- |
@@ -93,12 +93,6 @@ REMINDER APP [ https://spydernet3.github.io/Nothing-Reminder/]
 | ⚡ **Fast Load**      | Cache-first strategy                            | 🕒 **First Load Requires Internet** | Offline only after first successful load                  |
 | 🧩 **Cross-Platform** | Works on Android, iOS & Desktop                 | 🧩 **Storage Quota**                | Browser limits offline storage                            |
 | 🔐 **Secure (HTTPS)** | GitHub Pages provides free SSL                  | 🌗 **Dynamic Theme Requires JS**    | `--bg` value must be updated manually for dark/light mode |
-                                                                          
-                                                                          
-
-
-
-
 
 
 

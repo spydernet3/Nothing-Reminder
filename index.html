@@ -1115,8 +1115,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.7.7 </p>
-          <p>Last Updated: 18-Feb-2026</p>
+          <p>Version 13.7.8 </p>
+          <p>Last Updated: 12-May-2026</p>
           <p>Project Mode: Open source</p>
           <p>App Size : 7.0KB </p>
         </ul>
@@ -1714,17 +1714,15 @@
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <h2>🔄 Update Blog</h2>
       </div>
-      <div style="width: 100%; height: calc(100vh - 120px); border-radius: 8px; overflow: hidden; border: 1px solid #ccc; background:#fff;">
-        <iframe 
-          id="blogFrame" 
-          src="https://spydernet3.github.io/Nothing-Reminder-Blog/" 
-          style="width: 100%; height: 100%; border: none;"
-          loading="lazy">
+      <div
+        style="width: 100%; height: calc(100vh - 120px); border-radius: 8px; overflow: hidden; border: 1px solid #ccc; background:#fff;">
+        <iframe id="blogFrame" src="https://spydernet3.github.io/Nothing-Reminder-Blog/"
+          style="width: 100%; height: 100%; border: none;" loading="lazy">
         </iframe>
       </div>
     </div>
   </div>
-  
+
   <script>
     // ================= INDEXEDDB SETUP =================
     const DB_NAME = "NothingReminderDB";
@@ -1796,7 +1794,6 @@
           break;
               }
             }
-
             // ---------- Notification helpers (ADD HERE) ----------
             function restoreNotifications() {
               checkNotifications(true);
@@ -1849,17 +1846,20 @@
         }
 
         function requestNotificationPermission() {
-          if (!("Notification" in window)) {
-              console.error("This browser does not support desktop notification");
-              return;
+          if (!('Notification' in window)) return;
+          if (Notification.permission === 'granted') {
+            updateBrowserPermissionUI();
+            return;
           }
-          if (Notification.permission === 'granted' || Notification.permission === 'denied') {
-             updateBrowserPermissionUI();
-             return;
+          if (Notification.permission === 'denied') {
+            updateBrowserPermissionUI();
+            return;
           }
-
-          Notification.requestPermission().then(function(permission) {
-              updateBrowserPermissionUI();
+          Notification.requestPermission().then(permission => {
+            updateBrowserPermissionUI();
+            if (permission === 'granted') {
+            updateBrowserPermissionUI();
+          }
           });
         }
 
@@ -2371,31 +2371,50 @@
           expList.style.marginTop = '6px';
           expList.style.fontSize = '13px';
           
-         expList.innerHTML = (b.expenses && b.expenses.length)
-          ? b.expenses
-              .map(
-                (e, idx) => `
-              <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px dashed #333;padding:6px 0;">
-        
-                <!-- LEFT SIDE: DATE | TITLE | AMOUNT -->
-                <div style="display:flex;gap:18px;align-items:center;font-size:14px;">
-                  <span>📅 ${e.date}</span>
-                  <span>💸 ${e.title}</span>
-                  <span>₹${e.amount}</span>
-                </div>
-        
-                <!-- RIGHT SIDE: EDIT + DELETE -->
-                <div style="display:flex;flex-direction:column;gap:4px;">
-                  <button class="icon-small edit-expense" data-b="${i}" data-e="${idx}">✏️</button>
-                  <button class="icon-small delete-expense" data-b="${i}" data-e="${idx}">🗑️</button>
-                </div>
-        
-              </div>
-              `
-              )
-              .join('')
-          : `<p style="opacity:0.6;">No expenses yet</p>`;
-
+         // REPLACE the expList.innerHTML block with this safe DOM builder:
+            expList.innerHTML = '';
+            if (b.expenses && b.expenses.length) {
+              b.expenses.forEach((e, idx) => {
+                const row = document.createElement('div');
+                row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;border-bottom:1px dashed #333;padding:6px 0;';
+                
+                const left = document.createElement('div');
+                left.style.cssText = 'display:flex;gap:18px;align-items:center;font-size:14px;';
+                
+                const dateSpan = document.createElement('span');
+                dateSpan.textContent = '📅 ' + e.date;        // textContent = safe
+                const titleSpan = document.createElement('span');
+                titleSpan.textContent = '💸 ' + e.title;
+                const amtSpan = document.createElement('span');
+                amtSpan.textContent = '₹' + e.amount;
+                
+                left.append(dateSpan, titleSpan, amtSpan);
+                
+                const right = document.createElement('div');
+                right.style.cssText = 'display:flex;flex-direction:column;gap:4px;';
+                
+                const editExpBtn = document.createElement('button');
+                editExpBtn.className = 'icon-small edit-expense';
+                editExpBtn.dataset.b = i;
+                editExpBtn.dataset.e = idx;
+                editExpBtn.textContent = '✏️';
+                
+                const delExpBtn = document.createElement('button');
+                delExpBtn.className = 'icon-small delete-expense';
+                delExpBtn.dataset.b = i;
+                delExpBtn.dataset.e = idx;
+                delExpBtn.textContent = '🗑️';
+                
+                right.append(editExpBtn, delExpBtn);
+                row.append(left, right);
+                expList.appendChild(row);
+              });
+            } else {
+              const p = document.createElement('p');
+              p.style.opacity = '0.6';
+              p.textContent = 'No expenses yet';
+              expList.appendChild(p);
+            }
             // --- EXPANDABLE FORM for adding expenses ---
             const expForm = document.createElement('div');
             expForm.className = 'expense-form';
@@ -3585,6 +3604,7 @@
                 });
                 
                 function renderMoonPhases() {
+                moonContainer.innerHTML = '';
                   const now = new Date();
                   const year = now.getFullYear();
                   const month = now.getMonth();
@@ -5403,10 +5423,134 @@
                 status.style.display = "block";
               }
               });
-              // ---------- End Initial Render Code ----------
+          // ---------- End Initial Render Code ----------
+
+              // Handle page navigation triggered by notification click
+              navigator.serviceWorker.addEventListener('message', event => {
+                if (event.data?.type === 'NAVIGATE' && event.data.page) {
+                  showPage(event.data.page);
+                }
+              });
+
               })();
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script type="module">
+    import {
+              initializeApp
+            } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+
+            import {
+              getMessaging,
+              getToken
+            } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-messaging.js";
+
+            const firebaseConfig = {
+
+              apiKey:
+              "AIzaSyCnyA68mu1E5moiv09wwW-kNBFqE0K2tW8",
+
+              authDomain:
+              "nothing-reminder-push.firebaseapp.com",
+
+              projectId:
+              "nothing-reminder-push",
+
+              storageBucket:
+              "nothing-reminder-push.firebasestorage.app",
+
+              messagingSenderId:
+              "158222414455",
+
+              appId:
+              "1:158222414455:web:92bf9df29028216fed0c72"
+            };
+
+            const app =
+              initializeApp(firebaseConfig);
+
+            const messaging =
+              getMessaging(app);
+
+            window.fcmToken = null;
+
+            async function initFCM() {
+
+              try {
+
+                const permission =
+                  await Notification.requestPermission();
+
+                console.log(
+                  'NOTIFICATION PERMISSION:',
+                  permission
+                );
+
+                if (permission !== 'granted') {
+
+                  console.log(
+                    'Notification permission denied'
+                  );
+
+                  return;
+                }
+
+                const registration =
+              await navigator.serviceWorker.register(
+
+                '/Nothing-Reminder/firebase-messaging-sw.js'
+              );
+
+            const token =
+              await getToken(messaging, {
+
+                vapidKey:
+                'BNY4juw2qYL4xNdTUHyUv3ZltbQkBupxLzqFAvS3nw5h5dyMPTIN1DgRSz8AAftiImKuqTxJwqKaz6TCeh6J3r8',
+
+                serviceWorkerRegistration:
+                registration
+              });
+            if (!token) {
+              console.error('NO FCM TOKEN RECEIVED');
+              return;
+            }
+              console.log(
+              'FCM TOKEN GENERATED'
+            );
+
+            await fetch(
+              'https://nothing-reminder-push.mersalmgblog.workers.dev/save-token',
+              {
+                method: 'POST',
+
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+
+                body: JSON.stringify({
+                  token
+                })
+              }
+            );
+
+            console.log(
+              'FCM TOKEN SAVED'
+            );
+
+              } catch (e) {
+
+                console.error(
+                  'FCM ERROR:',
+                  e
+                );
+              }
+            }
+
+            initFCM();
+
+</script>
+
 </body>
+
 </html>

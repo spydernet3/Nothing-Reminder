@@ -748,7 +748,7 @@
     <div class="profile">
       <img
           id="profilePhoto"
-          src="/default-avatar.png"
+          src="/assets/default-avatar.png"
           alt="Profile"
           width="45"
           height="45"
@@ -1943,7 +1943,7 @@
             }
             restoreNotifications();
             profileName.textContent = appData.profileName || "👤 User";
-           profilePhoto.src = appData.profilePhoto || '/default-avatar.png';
+           profilePhoto.src = appData.profilePhoto || '/assets/default-avatar.png';
             
             rerenderFor('reminders');
             rerenderFor('notes');

@@ -261,10 +261,9 @@ if (
     if (   data.notifChecklist &&   Array.isArray(data.checklists) &&   data.checklists.length ) {
       const open = data.checklists.filter(c => c.status === 'open');
       if (open.length) {
-        const lines = open.slice(0, 5).map(c =>
+        const lines = open.map(c =>
           `${c.title} — ${c.items ? c.items.length : 0} items pending`
         );
-        if (open.length > 5) lines.push(`...and ${open.length - 5} more`);
 
         await self.registration.showNotification('✒️ Pending Checklists', {
           body: lines.join('\n'),

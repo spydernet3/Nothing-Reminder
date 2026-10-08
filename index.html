@@ -737,6 +737,106 @@
     #installBtn:hover {
       background: rgba(255, 255, 255, 0.25);
     }
+  
+    /* ===== 50 YEARS CALENDAR (scoped) ===== */
+    #cal50Toggle{position:relative;user-select:none;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:15px;cursor:pointer;padding:10px;border:none;background:#888;color:#fff;border-radius:6px;text-align:left}
+    #cal50Toggle:hover{background:#aaa}
+    #cal50Toggle.open .arrow{transform:rotate(180deg)}
+    #cal50{--panel:#ffffff;--bg:#eeeeee;--ink:#111;--mute:#6b6b6b;--line:#cfcfcf;--accent:#c62828;--sel:#888888;--selink:#ffffff;color:var(--ink);outline:none}
+    .dark #cal50{--panel:#2e2e2e;--bg:#202020;--ink:#e0e0e0;--mute:#a0a0a0;--line:#444;--accent:#ff7a6e;--sel:#6a6a6a;--selink:#fff}
+    #cal50 .c50main{display:grid;grid-template-columns:1fr;gap:12px}
+    #cal50 .card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px;margin-bottom:2px;color:var(--ink)}
+    #cal50 .pill{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:6px 10px;cursor:pointer;font:inherit;font-size:.8rem}
+    @keyframes c50flip{from{transform:perspective(700px) rotateX(-16deg);opacity:.15}to{transform:none;opacity:1}}
+#cal50 svg{width:100%;height:auto;touch-action:none;cursor:grab;user-select:none;display:block}
+#cal50 #c50ring{transition:transform .4s cubic-bezier(.3,1.2,.5,1);transform-origin:200px 200px}
+#cal50 #c50ring.drag{transition:none}
+#cal50 .sec{fill:var(--bg);stroke:var(--line);stroke-width:1;cursor:pointer}
+#cal50 .sec.act{fill:var(--sel)}
+#cal50 .lbl{font-size:15px;font-weight:600;fill:var(--ink);text-anchor:middle;pointer-events:none;letter-spacing:.04em}
+#cal50 .lbl.act{fill:var(--selink)}
+#cal50 .lbl.red{fill:var(--accent)}
+#cal50 .hub{fill:var(--panel);stroke:var(--line)}
+#cal50 .yr{font-size:40px;font-weight:700;fill:var(--ink);text-anchor:middle;pointer-events:none}
+#cal50 .small{font-size:8.5px;fill:var(--mute);text-anchor:middle;letter-spacing:.12em;pointer-events:none}
+#cal50 .arr{fill:var(--ink);opacity:.7;font-size:20px;text-anchor:middle;pointer-events:none}
+#cal50 .hit{fill:transparent;cursor:pointer}
+#cal50 .hit:hover+.arr{opacity:1}
+#cal50 .ctrl{display:flex;gap:8px;margin-top:8px}
+#cal50 .ctrl button,#cal50 .btn{flex:1;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:10px;cursor:pointer;font:inherit}
+#cal50 .ctrl button:active,#cal50 .btn:active{background:var(--sel);color:var(--selink)}
+#cal50 .lab{font-size:.72rem;letter-spacing:.12em;color:var(--mute);text-transform:uppercase;margin:0 0 8px}
+#cal50 .years{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
+#cal50 .years button{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:7px 0;font:inherit;font-size:.7rem;cursor:pointer}
+#cal50 .years button.lp{color:var(--accent)}
+#cal50 .years button.on{background:var(--sel);color:var(--selink);border-color:var(--sel)}
+#cal50 .title{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;flex-wrap:wrap}
+#cal50 .title b{font-size:1.5rem}
+#cal50 .title span{color:var(--mute);font-size:.85rem}
+#cal50 .leap{color:var(--accent);font-weight:600}
+#cal50 .strip{display:grid;grid-template-columns:repeat(7,1fr);border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg)}
+#cal50 .strip .h{padding:8px 0;text-align:center;font-weight:700;background:var(--sel);color:var(--selink)}
+#cal50 .strip .h.sun{color:#ff8a80}
+#cal50 .strip .c{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;border-left:1px solid var(--line)}
+#cal50 .strip .c:first-child{border-left:0}
+#cal50 .strip .c span{padding:1px 6px;border-radius:6px}
+#cal50 .strip .c span.today{background:var(--accent);color:#fff}
+#cal50 .note{font-size:.78rem;color:var(--mute);margin:6px 2px 12px}
+#cal50 .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+#cal50 .grid .d{font-size:.75rem;color:var(--mute);padding:4px}
+#cal50 .n{position:relative;padding:12px 0;border-radius:8px;background:var(--bg);cursor:pointer;border:2px solid transparent}
+#cal50 .n:hover{border-color:var(--line)}
+#cal50 .n.sun{color:var(--accent)}
+#cal50 .n.today{background:var(--accent);color:#fff}
+#cal50 .n.sel{border-color:var(--ink)}
+#cal50 .n.e{background:none;cursor:default;border:0}
+#cal50 .n.hol::before{content:"★";position:absolute;top:1px;left:4px;font-size:.6rem;color:var(--accent)}
+#cal50 .n.today.hol::before{color:#fff}
+#cal50 .n.hasn::after{content:"";position:absolute;bottom:3px;left:50%;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--ink)}
+#cal50 .n .m{position:absolute;top:0;right:3px;font-size:.6rem}
+#cal50 .detail{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start}
+#cal50 .moonbig{font-size:3.4rem;line-height:1;text-align:center}
+#cal50 .moonbig small{display:block;font-size:.7rem;color:var(--mute);margin-top:4px}
+#cal50 .detail h3{margin:0 0 6px;font-size:1.1rem}
+#cal50 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+#cal50 .chip{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:3px 10px;font-size:.78rem}
+#cal50 textarea,#cal50 input[type=date]{width:100%;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px;font:inherit}
+#cal50 textarea{resize:vertical;min-height:54px;margin-top:6px}
+#cal50 .tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px}
+#cal50 .tabs button{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:20px;padding:6px 12px;cursor:pointer;font:inherit;font-size:.82rem}
+#cal50 .tabs button.on{background:var(--sel);color:var(--selink)}
+#cal50 .panel{display:none}
+#cal50 .panel.on{display:block}
+#cal50 .row{display:flex;gap:10px;flex-wrap:wrap}
+#cal50 .row>div{flex:1;min-width:140px}
+#cal50 .res{margin-top:10px;background:var(--bg);border-radius:10px;padding:12px;line-height:1.55}
+#cal50 .res b{color:var(--accent)}
+#cal50 .hint{max-width:1000px;font-size:.8rem;color:var(--mute);text-align:center}
+#cal50 [hidden]{display:none!important}
+#cal50 .bar{height:8px;border-radius:6px;background:var(--bg);overflow:hidden;margin:8px 0 2px}
+#cal50 .bar i{display:block;height:100%;background:var(--accent)}
+#cal50 .cd{margin-top:8px;font-variant-numeric:tabular-nums;background:var(--bg);border-radius:10px;padding:8px 12px;font-size:.95rem}
+#cal50 .yv{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+#cal50 .mm{background:var(--bg);border:2px solid transparent;border-radius:10px;padding:8px;cursor:pointer}
+#cal50 .mm:hover,#cal50 .mm.cur{border-color:var(--ink)}
+#cal50 .mm b{font-size:.8rem}
+#cal50 .mm.lpm b{color:var(--accent)}
+#cal50 .mg{display:grid;grid-template-columns:repeat(7,1fr);font-size:.6rem;text-align:center;margin-top:4px;gap:1px}
+#cal50 .mg i{font-style:normal;padding:1px 0}
+#cal50 .mg .mh{color:var(--mute)}
+#cal50 .mg .tt{background:var(--accent);color:#fff;border-radius:3px}
+#cal50 .mg .hh{color:var(--accent);font-weight:700}
+#cal50 .title{gap:8px}
+#cal50 .title .pill{font-size:.75rem;padding:4px 10px}
+#cal50 .flip{animation:c50flip .45s ease-out;transform-origin:top}
+#cal50 .years button.same{outline:2px solid var(--ink);outline-offset:-2px}
+#cal50 .qd{font-size:1.9rem;font-weight:700;margin:8px 0 14px}
+#cal50 .qb{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+#cal50 .qb button{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:14px 0;cursor:pointer;font:inherit;font-weight:600}
+#cal50 .qb button:hover{border-color:var(--ink)}
+#cal50 .qb .ok{background:#2e7d32;color:#fff;border-color:#2e7d32}
+#cal50 .qb .no{background:var(--accent);color:#fff;border-color:var(--accent)}
+#cal50 .qr{margin:12px 0;background:var(--bg);border-radius:10px;padding:12px}
   </style>
 </head>
 
@@ -1115,8 +1215,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.7.8 </p>
-          <p>Last Updated: 12-May-2026</p>
+          <p>Version 13.7.9 </p>
+          <p>Last Updated: 08-Oct-2026</p>
           <p>Project Mode: Open source</p>
           <p>App Size : 7.0KB </p>
         </ul>
@@ -1339,6 +1439,186 @@
           </div>
         </div>
       </div>
+      <div class="add-area">
+        <button id="cal50Toggle" class="add-btn" aria-expanded="false">
+          📅 50 YEARS CALENDAR <span class="arrow">▼</span>
+        </button>
+        <div id="cal50Container" class="form">
+          <div id="cal50" tabindex="0">
+
+<div class="c50main">
+  <div>
+    <section class="card">
+      <svg id="c50dial" viewBox="0 0 400 400" aria-label="Month dial">
+        <circle cx="200" cy="200" r="192" fill="none" stroke="var(--line)" stroke-width="2"/>
+        <g id="c50ring"></g>
+        <polygon points="190,2 210,2 200,22" fill="var(--accent)"/>
+        <circle class="hub" cx="200" cy="200" r="104"/>
+        <circle cx="200" cy="200" r="94" fill="none" stroke="var(--line)" stroke-dasharray="2 4"/>
+        <text class="small" x="200" y="136">SCROLL OVER CENTER FOR YEAR</text>
+        <text class="yr" id="c50yrTxt" x="200" y="214">2026</text>
+        <text class="small" x="200" y="238">FOR 50 YRS CALENDAR</text>
+        <text class="small" id="c50leapTxt" x="200" y="258" style="fill:var(--accent)"></text>
+        <circle class="hit" id="c50hL" cx="128" cy="205" r="20"/><text class="arr" x="128" y="212">◀</text>
+        <circle class="hit" id="c50hR" cx="272" cy="205" r="20"/><text class="arr" x="272" y="212">▶</text>
+      </svg>
+      <div class="ctrl"><button id="c50mPrev">◀ Month</button><button id="c50today">Today</button><button id="c50mNext">Month ▶</button></div>
+      <div class="ctrl"><button id="c50rnd">🎲 Random date</button><button id="c50nHol">★ Next holiday</button></div><div class="ctrl"><button id="c50snd">🔊 Clicks</button></div><div class="ctrl"><button id="c50nFull">🌕 Next full moon</button><button id="c50nNew">🌑 Next new moon</button></div>
+    </section>
+    <section class="card">
+      <p class="lab">Pick a year <span style="text-transform:none;letter-spacing:0">(red = leap)</span></p>
+      <div class="years" id="c50years"></div><p class="note" id="c50sameTxt"></p>
+    </section>
+  </div>
+  <div>
+    <section class="card">
+      <div class="title"><b id="c50ttl"></b><span id="c50sub"></span><button class="pill" id="c50yv">▦ Year view</button><button class="pill" id="c50qz">🎯 Day quiz</button></div>
+      <div class="chips" id="c50stats"></div><div id="c50monthview"><div class="strip" id="c50strip"></div>
+      <p class="note">Weekday row slides to line up with the 1st · ★ holiday · 🌕/🌑 moon · 👻 Friday 13th</p>
+      <div class="grid" id="c50grid"></div></div><div class="yv" id="c50yearview" hidden></div><div id="c50quiz" hidden></div>
+    </section>
+    <section class="card" id="c50detail"></section>
+  </div>
+</div>
+<p class="hint">Tap the grey bar to open/close · click or drag the ring · wheel over the ring = months, over the center = years · click a date for details</p>
+          </div>
+        </div>
+      </div>
+      <script>
+(function(){
+const MN=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+const MF=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const WF=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const WD=['S','M','Tu','W','Th','F','S'];
+const HOL={'0-1':"New Year's Day",'0-26':'Republic Day (India)','1-14':"Valentine's Day",'7-15':'Independence Day (India)','9-2':'Gandhi Jayanti','10-14':"Children's Day (India)",'11-25':'Christmas','11-31':"New Year's Eve"};
+const MOONS=['🌑','🌒','🌓','🌔','🌕','🌖','🌗','🌘'],MOONN=['New Moon','Waxing Crescent','First Quarter','Waxing Gibbous','Full Moon','Waning Gibbous','Last Quarter','Waning Crescent'];
+const MIN=2007,MAX=2056,NOW=new Date();
+const root=document.getElementById('cal50');
+const $=id=>root.querySelector('#c50'+id);
+const TODAY=Date.UTC(NOW.getFullYear(),NOW.getMonth(),NOW.getDate());
+let year=Math.min(MAX,Math.max(MIN,NOW.getFullYear())),month=NOW.getMonth(),rot=-month*30,selD=null,lastVk=-1,lastTick='',sound=true,yearMode=false,quizMode=false;
+const key=(y,m,d)=>`${y}-${m+1}-${d}`;
+const leap=y=>(y%4===0&&y%100!==0)||y%400===0;
+const dim=(y,m)=>new Date(y,m+1,0).getDate();
+const utc=(y,m,d)=>Date.UTC(y,m,d);
+const pt=(r,a)=>{a=a*Math.PI/180;return[200+r*Math.sin(a),200-r*Math.cos(a)]};
+function moon(y,m,d){const days=(utc(y,m,d)+12*36e5-Date.UTC(2000,0,6,18,14))/864e5;const p=((days/29.530588853)%1+1)%1;return{p,i:Math.round(p*8)%8,ill:Math.round((1-Math.cos(2*Math.PI*p))/2*100)}}
+function isoWeek(y,m,d){const t=new Date(Date.UTC(y,m,d)),n=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-n);return Math.ceil(((t-Date.UTC(t.getUTCFullYear(),0,1))/864e5+1)/7)}
+function span(a,b){let y=b.getFullYear()-a.getFullYear(),m=b.getMonth()-a.getMonth(),d=b.getDate()-a.getDate();if(d<0){m--;d+=dim(b.getFullYear(),b.getMonth()-1<0?11:b.getMonth()-1)}if(m<0){y--;m+=12}return`${y} yr ${m} mo ${d} d`}
+// sound
+let ac;function tick(){if(!sound)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.type='square';o.frequency.value=1400;g.gain.setValueAtTime(.05,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.04);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+.05)}catch(e){}}
+// dial build
+const ring=$('ring'),NS='http://www.w3.org/2000/svg';
+for(let i=0;i<12;i++){
+  const a0=i*30-15,a1=i*30+15,[x1,y1]=pt(184,a0),[x2,y2]=pt(184,a1),[x3,y3]=pt(112,a1),[x4,y4]=pt(112,a0);
+  const p=document.createElementNS(NS,'path');p.setAttribute('d',`M${x1} ${y1}A184 184 0 0 1 ${x2} ${y2}L${x3} ${y3}A112 112 0 0 0 ${x4} ${y4}Z`);
+  p.setAttribute('class','sec');p.dataset.i=i;ring.appendChild(p);
+  const t=document.createElementNS(NS,'text');t.setAttribute('x',200);t.setAttribute('y',57);t.setAttribute('transform',`rotate(${i*30} 200 200)`);
+  t.setAttribute('class','lbl');t.textContent=MN[i];t.id='c50l'+i;ring.appendChild(t);
+}
+const yb=$('years');
+for(let y=MIN;y<=MAX;y++){const b=document.createElement('button');b.textContent=y;b.dataset.y=y;if(leap(y))b.className='lp';b.onclick=()=>setYear(y);yb.appendChild(b)}
+function snap(m){rot+=((-m*30-rot)%360+540)%360-180}
+function setMonth(m){month=((m%12)+12)%12;snap(month);render()}
+function setYear(y){year=Math.min(MAX,Math.max(MIN,y));render()}
+function step(dm){let idx=Math.max(MIN*12,Math.min(MAX*12+11,year*12+month+dm));year=Math.floor(idx/12);month=idx%12;snap(month);render()}
+function jump(y,m,d){yearMode=quizMode=false;year=y;month=m;snap(m);render();selD=d;render()}
+function render(){
+  ring.style.transform=`rotate(${rot}deg)`;
+  const vk=year*12+month,chg=vk!==lastVk;if(chg){selD=null;lastVk=vk;quizMode=false}
+  if(String(vk)!==lastTick){if(lastTick!=='')tick();lastTick=String(vk)}
+  const lp=leap(year);
+  for(let i=0;i<12;i++){ring.children[i*2].classList.toggle('act',i===month);const l=$('l'+i);l.classList.toggle('act',i===month);l.classList.toggle('red',lp&&i<2)}
+  $('yrTxt').textContent=year;$('leapTxt').textContent=lp?'LEAP YEAR':'';
+  const y0=new Date(year,0,1).getDay(),same=[];
+  [...yb.children].forEach(b=>{const yy=+b.dataset.y,m=yy!==year&&leap(yy)===lp&&new Date(yy,0,1).getDay()===y0;if(m)same.push(yy);b.classList.toggle('on',yy===year);b.classList.toggle('same',m)});
+  $('sameTxt').innerHTML=same.length?`♻ <b>${year}</b> has the <b>same calendar</b> as: ${same.join(', ')}`:`${year} has no twin year in 2007–2056`;
+  $('ttl').textContent=MF[month]+' '+year;
+  const first=new Date(year,month,1).getDay(),days=dim(year,month);
+  $('sub').innerHTML=`${days} days · starts on ${WF[first]}`+(lp&&month<2?' · <span class="leap">leap-year month</span>':'');
+  let sun=0,sat=0,hl=0;for(let d=1;d<=days;d++){const w=(first+d-1)%7;if(w===0)sun++;else if(w===6)sat++;if(HOL[month+'-'+d])hl++}
+  $('stats').innerHTML=`<span class="chip">💼 ${days-sun-sat} working days</span><span class="chip">🛋 ${sun+sat} weekend days</span>${hl?`<span class="chip">★ ${hl} holiday${hl>1?'s':''}</span>`:''}${sun===5?'<span class="chip">🎉 5 Sundays</span>':''}${new Date(year,month,13).getDay()===5?'<span class="chip" style="color:var(--accent)">👻 Friday the 13th!</span>':''}`;
+  const isT=d=>utc(year,month,d)===TODAY;
+  let h='';
+  for(let c=0;c<7;c++){const w=(first+c)%7;h+=`<div class="h${w===0?' sun':''}">${WD[w]}</div>`}
+  for(let c=0;c<7;c++){let s='';for(let d=c+1;d<=days;d+=7)s+=`<span class="${isT(d)?'today':''}">${d}</span>`;h+=`<div class="c">${s}</div>`}
+  $('strip').innerHTML=h;
+  let g=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div class="d">${d}</div>`).join('');
+  for(let i=0;i<first;i++)g+='<div class="n e"></div>';
+  for(let d=1;d<=days;d++){
+    const mo=moon(year,month,d);let mk='';if(Math.abs(mo.p-.5)<.0169)mk='🌕';else if(mo.p<.0169||mo.p>.983)mk='🌑';if(d===13&&(first+12)%7===5)mk='👻';
+    g+=`<div class="n${(first+d-1)%7===0?' sun':''}${isT(d)?' today':''}${selD===d?' sel':''}${HOL[month+'-'+d]?' hol':''}" data-d="${d}" title="${HOL[month+'-'+d]||''}">${d}<span class="m">${mk}</span></div>`}
+  $('grid').innerHTML=g;
+  if(chg){const mv=$('monthview');mv.classList.remove('flip');void mv.offsetWidth;mv.classList.add('flip')}
+  detail();yearView();
+}
+const SG=['Capricorn','Aquarius','Pisces','Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn'],SY=['♑','♒','♓','♈','♉','♊','♋','♌','♍','♎','♏','♐','♑'],CUT=[20,19,21,20,21,21,23,23,23,23,22,22];
+function rel(n){if(n===0)return'📍 Today';if(n===1)return'Tomorrow';if(n===-1)return'Yesterday';const a=Math.abs(n),w=Math.floor(a/7),r=a%7,x=a>=7?` (${w} wk${r?' '+r+' d':''})`:'';return n>0?`${a} days from today${x}`:`${a} days ago${x}`}
+function detail(){
+  const el=$('detail');
+  if(!selD){el.innerHTML='<p class="lab">Date details</p><p style="margin:0">👆 Tap any date to see its weekday, moon phase, zodiac sign, live countdown and more.</p>';return}
+  const wk=`<p class="lab" style="margin:12px 0 4px">${selD} ${MF[month]} falls on</p><div class="chips">${[0,1,2,3,4,5].map(i=>year+i).filter(y=>y<=MAX&&selD<=dim(y,month)).map(y=>`<span class="chip">${y}: ${WF[new Date(y,month,selD).getDay()].slice(0,3)}</span>`).join('')}</div>`;
+  const doy=Math.round((utc(year,month,selD)-utc(year,0,0))/864e5),tot=leap(year)?366:365,diff=Math.round((utc(year,month,selD)-TODAY)/864e5),mo=moon(year,month,selD),hol=HOL[month+'-'+selD],z=selD<CUT[month]?month:month+1,pct=Math.round(doy/tot*100);
+  el.innerHTML=`<div class="detail"><div class="moonbig">${MOONS[mo.i]}<small>${MOONN[mo.i]}<br>${mo.ill}% lit</small></div>
+  <div><h3>${WF[new Date(year,month,selD).getDay()]}, ${selD} ${MF[month]} ${year}</h3>
+  <div class="chips"><span class="chip">${rel(diff)}</span><span class="chip">Week ${isoWeek(year,month,selD)}</span><span class="chip">${SY[z]} ${SG[z]}</span>${hol?`<span class="chip" style="color:var(--accent)">★ ${hol}</span>`:''}</div>
+  <div class="bar"><i style="width:${pct}%"></i></div><small style="color:var(--mute)">Day ${doy} of ${tot} · ${pct}% of ${year} done</small>
+  ${wk}</div></div>`;
+}
+$('grid').addEventListener('click',e=>{const c=e.target.closest('[data-d]');if(!c)return;selD=+c.dataset.d;tick();render()});
+// year view & jumps
+function yearView(){
+  $('monthview').hidden=yearMode||quizMode;$('yearview').hidden=!yearMode;$('quiz').hidden=!quizMode;$('yv').textContent=yearMode?'📅 Month view':'▦ Year view';$('qz').textContent=quizMode?'📅 Back to calendar':'🎯 Day quiz';
+  if(!yearMode)return;let h='';
+  for(let m=0;m<12;m++){const f=new Date(year,m,1).getDay(),n=dim(year,m);let c=['S','M','T','W','T','F','S'].map(x=>`<i class="mh">${x}</i>`).join('');
+    for(let i=0;i<f;i++)c+='<i></i>';
+    for(let d=1;d<=n;d++)c+=`<i class="${utc(year,m,d)===TODAY?'tt':''}${HOL[m+'-'+d]?' hh':''}">${d}</i>`;
+    h+=`<div class="mm${m===month?' cur':''}${leap(year)&&m<2?' lpm':''}" data-m="${m}"><b>${MF[m]}</b><div class="mg">${c}</div></div>`}
+  $('yearview').innerHTML=h}
+$('yearview').addEventListener('click',e=>{const c=e.target.closest('[data-m]');if(!c)return;yearMode=false;setMonth(+c.dataset.m)});
+$('yv').onclick=()=>{yearMode=!yearMode;quizMode=false;render()};
+let Q=null,score=0,streak=0,best=0,asked=0;
+function newQ(){const y=MIN+Math.floor(Math.random()*(MAX-MIN+1)),m=Math.floor(Math.random()*12),d=1+Math.floor(Math.random()*dim(y,m));Q={y,m,d,ans:new Date(y,m,d).getDay(),done:false,pick:-1};drawQ()}
+function drawQ(){const ok=Q.pick===Q.ans;
+  $('quiz').innerHTML=`<p class="lab">Guess the weekday · ${score}/${asked} correct · 🔥 streak ${streak} · best ${best}</p><div class="qd">${Q.d} ${MF[Q.m]} ${Q.y}</div>
+  <div class="qb">${WF.map((w,i)=>`<button data-w="${i}" class="${Q.done?(i===Q.ans?'ok':i===Q.pick?'no':''):''}">${w.slice(0,3)}</button>`).join('')}</div>
+  <div class="qr">${Q.done?(ok?'✅ Correct!':'❌ It was <b>'+WF[Q.ans]+'</b>')+(leap(Q.y)?' · '+Q.y+' is a leap year':''):'Tap the weekday you think it falls on.'}</div>
+  ${Q.done?'<div class="ctrl"><button data-a="show">Open on calendar</button><button data-a="next">Next date ▶</button></div>':''}`}
+$('quiz').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.a==='next')return newQ();
+  if(b.dataset.a==='show'){jump(Q.y,Q.m,Q.d);return}
+  if(b.dataset.w===undefined||Q.done)return;Q.pick=+b.dataset.w;Q.done=true;asked++;
+  if(Q.pick===Q.ans){score++;streak++;best=Math.max(best,streak)}else streak=0;tick();drawQ()});
+$('qz').onclick=()=>{quizMode=!quizMode;if(quizMode){yearMode=false;if(!Q)newQ();else drawQ()}render()};
+function scan(test){let d=selD?new Date(year,month,selD):new Date(year,month,1);
+  for(let i=0;i<400;i++){d=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1);if(d.getFullYear()>MAX)break;
+    const y=d.getFullYear(),m=d.getMonth(),dd=d.getDate();if(y>=MIN&&test(y,m,dd)){yearMode=false;jump(y,m,dd);return}}}
+$('nFull').onclick=()=>scan((y,m,d)=>Math.abs(moon(y,m,d).p-.5)<.0169);
+$('nNew').onclick=()=>scan((y,m,d)=>{const p=moon(y,m,d).p;return p<.0169||p>.983});
+$('nHol').onclick=()=>scan((y,m,d)=>!!HOL[m+'-'+d]);
+// dial interaction
+const svg=$('dial');let drag=null;
+const ang=e=>{const r=svg.getBoundingClientRect();return Math.atan2(e.clientX-(r.left+r.width/2),-(e.clientY-(r.top+r.height/2)))*180/Math.PI};
+const radius=e=>{const r=svg.getBoundingClientRect();return Math.hypot(e.clientX-(r.left+r.width/2),e.clientY-(r.top+r.height/2))/(r.width/400)};
+svg.addEventListener('pointerdown',e=>{const rad=radius(e);if(rad<112||rad>192)return;drag={last:ang(e),acc:0,r0:rot,idx0:year*12+month,moved:false,i:e.target.dataset.i};svg.setPointerCapture(e.pointerId)});
+svg.addEventListener('pointermove',e=>{if(!drag)return;const a=ang(e);let d=a-drag.last;if(d>180)d-=360;if(d<-180)d+=360;drag.last=a;drag.acc+=d;
+  if(Math.abs(drag.acc)>4){drag.moved=true;ring.classList.add('drag')}if(!drag.moved)return;
+  rot=drag.r0+drag.acc;ring.style.transform=`rotate(${rot}deg)`;
+  const idx=Math.max(MIN*12,Math.min(MAX*12+11,drag.idx0+Math.round(-drag.acc/30))),y=Math.floor(idx/12),m=idx%12;
+  if(y!==year||m!==month){year=y;month=m;const keep=rot;render();rot=keep;ring.style.transform=`rotate(${rot}deg)`}});
+svg.addEventListener('pointerup',()=>{if(!drag)return;const d=drag;drag=null;ring.classList.remove('drag');if(d.moved)setMonth(month);else if(d.i!==undefined)setMonth(+d.i)});
+svg.addEventListener('wheel',e=>{e.preventDefault();const dir=e.deltaY>0?1:-1;if(radius(e)<104)setYear(year+dir);else step(dir)},{passive:false});
+$('hL').onclick=()=>setYear(year-1);$('hR').onclick=()=>setYear(year+1);
+$('mPrev').onclick=()=>step(-1);$('mNext').onclick=()=>step(1);
+$('today').onclick=()=>{year=Math.min(MAX,Math.max(MIN,NOW.getFullYear()));setMonth(NOW.getMonth());selD=NOW.getDate();render()};
+$('rnd').onclick=()=>{year=MIN+Math.floor(Math.random()*(MAX-MIN+1));month=Math.floor(Math.random()*12);snap(month);rot+=720;ring.style.transitionDuration='1.3s';render();selD=1+Math.floor(Math.random()*dim(year,month));render();setTimeout(()=>ring.style.transitionDuration='',1400)};
+$('snd').onclick=()=>{sound=!sound;$('snd').textContent=sound?'🔊 Clicks':'🔇 Clicks'};
+root.addEventListener('keydown',e=>{if(/TEXTAREA|INPUT/.test(e.target.tagName))return;if(e.key==='ArrowLeft')step(-1);else if(e.key==='ArrowRight')step(1);else if(e.key==='ArrowUp'){setYear(year+1);e.preventDefault()}else if(e.key==='ArrowDown'){setYear(year-1);e.preventDefault()}});
+const tgl=document.getElementById('cal50Toggle'),box=document.getElementById('cal50Container');
+tgl.addEventListener('click',()=>{const o=box.classList.toggle('visible');tgl.classList.toggle('open',o);tgl.setAttribute('aria-expanded',o)});
+render();
+})();
+      </script>
       <div class="add-area">
         <button id="calculatorToggle" class="add-btn" aria-expanded="false">
             🧮 CALCULATOR <span class="arrow">▼</span>

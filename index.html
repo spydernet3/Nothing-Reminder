@@ -1216,7 +1216,7 @@
         <h3>Version Info!</h3>
         <ul>
           <p>Version 13.7.9 </p>
-          <p>Last Updated: 08-Oct-2026</p>
+          <p>Last Updated: 12-May-2026</p>
           <p>Project Mode: Open source</p>
           <p>App Size : 7.0KB </p>
         </ul>
@@ -1556,7 +1556,7 @@ const SG=['Capricorn','Aquarius','Pisces','Aries','Taurus','Gemini','Cancer','Le
 function rel(n){if(n===0)return'📍 Today';if(n===1)return'Tomorrow';if(n===-1)return'Yesterday';const a=Math.abs(n),w=Math.floor(a/7),r=a%7,x=a>=7?` (${w} wk${r?' '+r+' d':''})`:'';return n>0?`${a} days from today${x}`:`${a} days ago${x}`}
 function detail(){
   const el=$('detail');
-  if(!selD){el.innerHTML='<p class="lab">Date details</p><p style="margin:0">👆 Tap any date to see its weekday, moon phase, zodiac sign, live countdown and more.</p>';return}
+  if(!selD){el.innerHTML='<p class="lab">Date details</p><p style="margin:0">👆 Tap any date to see its weekday, moon phase, zodiac sign, year progress and more.</p>';return}
   const wk=`<p class="lab" style="margin:12px 0 4px">${selD} ${MF[month]} falls on</p><div class="chips">${[0,1,2,3,4,5].map(i=>year+i).filter(y=>y<=MAX&&selD<=dim(y,month)).map(y=>`<span class="chip">${y}: ${WF[new Date(y,month,selD).getDay()].slice(0,3)}</span>`).join('')}</div>`;
   const doy=Math.round((utc(year,month,selD)-utc(year,0,0))/864e5),tot=leap(year)?366:365,diff=Math.round((utc(year,month,selD)-TODAY)/864e5),mo=moon(year,month,selD),hol=HOL[month+'-'+selD],z=selD<CUT[month]?month:month+1,pct=Math.round(doy/tot*100);
   el.innerHTML=`<div class="detail"><div class="moonbig">${MOONS[mo.i]}<small>${MOONN[mo.i]}<br>${mo.ill}% lit</small></div>
@@ -3460,7 +3460,7 @@ render();
         function buildNotesSummary() {
             let summary = [];
             if (appData.notes.length === 0) return "No notes added yet.";
-            const recentNotes = appData.notes.slice(-3).reverse();
+            const recentNotes = appData.notes.slice().reverse();
             recentNotes.forEach(n => {
                 let notePreview = n.text;
                 if (n.isTable) notePreview = "[Table Note]";
@@ -3470,7 +3470,6 @@ render();
                 const datePart = n.createdAt ? n.createdAt.split(' ')[0] : '';
                 summary.push(`- ${notePreview} (${datePart})`);
             });
-            if (appData.notes.length > 3) summary.push(`... and ${appData.notes.length - 3} older notes.`);
             return summary.join('\n');
         }
 
@@ -3498,10 +3497,9 @@ render();
             let summary = [];
             const openChecks = appData.checklists.filter(c => c.status === 'open');
             if (openChecks.length === 0) return "No open checklists.";
-            openChecks.slice(0, 3).forEach(c => {
+            openChecks.forEach(c => {
                 summary.push(`- ${c.title} (${c.items.length} items)`); // Use items.length
             });
-            if (openChecks.length > 3) summary.push(`... and ${openChecks.length - 3} more open lists.`);
             return summary.join('\n');
         }
 

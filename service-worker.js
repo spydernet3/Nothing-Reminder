@@ -47,7 +47,11 @@ self.addEventListener('activate', event => {
 async function showOnce(title, options) {
   try {
     const active = await self.registration.getNotifications({ tag: options.tag });
-    if (active && active.length) return;   // already visible -> do nothing
+    if (active && active.length) {
+      // same content already visible -> do nothing; changed content -> update it
+      if (active.some(n => n.title === title && n.body === options.body)) return;
+      options = Object.assign({}, options, { renotify: true });
+    }
   } catch (e) { /* if the check fails, fall through and show it */ }
   return self.registration.showNotification(title, options);
 }

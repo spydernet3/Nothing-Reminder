@@ -3612,7 +3612,12 @@ render();
         async function showOnceSW(registration, title, options) {
           try {
             const active = await registration.getNotifications({ tag: options.tag });
-            if (active && active.length) return;
+            if (active && active.length) {
+              // Same content still on screen -> do nothing (no repeat)
+              if (active.some(n => n.title === title && n.body === options.body)) return;
+              // Content changed -> update the existing notification
+              options = Object.assign({}, options, { renotify: true });
+            }
           } catch (e) {}
           return registration.showNotification(title, options);
         }
@@ -4517,6 +4522,19 @@ render();
                 if ("Notification" in window) {
                     updateBrowserPermissionUI();
                     checkNotifications(); // Check once on page load
+
+                    // AUTO TRIGGER: re-check while the app is open / when you return to it.
+                    // showOnceSW() skips any notification that is still on screen, so nothing is repeated;
+                    // a notification you cleared comes back on the next auto check.
+                    let lastAutoCheck = Date.now();
+                    const autoCheck = (minGapMs) => {
+                      if (document.visibilityState !== 'visible') return;
+                      if (Date.now() - lastAutoCheck < minGapMs) return;
+                      lastAutoCheck = Date.now();
+                      checkNotifications();
+                    };
+                    setInterval(() => autoCheck(25 * 60 * 1000), 30 * 60 * 1000);
+                    document.addEventListener('visibilitychange', () => autoCheck(10 * 60 * 1000));
                 }
               window.addEventListener('load', () => {
                 if (!appData.trash) appData.trash = [];

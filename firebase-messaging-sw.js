@@ -6,6 +6,12 @@ importScripts(
   'https://www.gstatic.com/firebasejs/12.13.0/firebase-messaging-compat.js'
 );
 
+// App notification logic (reads the app data and shows Reminders, Checklist,
+// Notes, Budget, Gold and Moon Phase notifications on every push).
+// Loading it here means the push is handled no matter which of the two
+// service workers is the active one.
+importScripts('service-worker.js');
+
 firebase.initializeApp({
 
   apiKey:
@@ -30,28 +36,10 @@ firebase.initializeApp({
 const messaging =
   firebase.messaging();
 
-// FCM BACKGROUND WAKE
+// FCM background message: the notification itself is shown by the
+// 'push' handler imported from service-worker.js above.
 messaging.onBackgroundMessage(
-  async (payload) => {
-
-    console.log(
-      'FCM WAKE:',
-      payload
-    );
-
-    // Trigger push event manually
-    self.dispatchEvent(
-      new PushEvent(
-        'push',
-        {
-          data: {
-            json: () => ({
-              type:
-              'CHECK_LOCAL_DATA'
-            })
-          }
-        }
-      )
-    );
+  (payload) => {
+    console.log('FCM WAKE:', payload);
   }
 );

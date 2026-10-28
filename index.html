@@ -299,7 +299,10 @@
     #priceTrackerToggle,
     #monthlyCalendarToggle,
     #calculatorToggle,
-    #viewHistoryToggle {
+    #viewHistoryToggle,
+    #homePriorityToggle,
+    #showAddPriorityBtn,
+    #viewPriorityToggle {
       position: relative;
       user-select: none;
       display: flex;
@@ -328,7 +331,10 @@
     #viewbudgetToggle:hover,
     #showAddCheckBtn:hover,
     #viewCheckToggle:hover,
-    #viewRemindersToggle:hover {
+    #viewRemindersToggle:hover,
+    #homePriorityToggle:hover,
+    #showAddPriorityBtn:hover,
+    #viewPriorityToggle:hover {
       background: #aaa;
     }
 
@@ -344,7 +350,10 @@
     #viewbudgetToggle.open .arrow,
     #showAddCheckBtn.open .arrow,
     #viewCheckToggle.open .arrow,
-    #viewRemindersToggle.open .arrow {
+    #viewRemindersToggle.open .arrow,
+    #homePriorityToggle.open .arrow,
+    #showAddPriorityBtn.open .arrow,
+    #viewPriorityToggle.open .arrow {
       transform: rotate(180deg);
       transition: left 0s;
     }
@@ -402,6 +411,7 @@
       border-radius: 6px;
       padding: 8px;
       margin-top: 8px;
+      list-style: none;
     }
 
     /* ===== TRASH BIN (expanded by default, scrolls, expand option for many items) ===== */
@@ -446,6 +456,63 @@
     .dark .list li.check-divider { background: transparent !important; }
     .dark .check-divider hr { border-top-color: #666; }
 
+    /* ===== PRIORITY QUEUE ===== */
+    .pq-day, .pq-day-home { 
+      margin-bottom: 12px;
+      display: block !important;
+      background: transparent !important;
+      padding: 0 !important;
+      border: none !important;
+    }
+    .pq-day h4, .pq-day-home h4 {
+      margin: 2px 0 2px 0;
+    }
+    
+    .pq-day h4 {
+      margin: 12px 0 4px 0;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .pq-day:first-child h4 { margin-top: 2px; }
+    .pq-day hr, .pq-day-home hr {
+      margin: 4px 0 10px 0;
+      height: 1px;
+    }
+    
+    .pq-day hr { margin: 0 0 8px 0; border: 0; border-top: 1px solid #bbb; width: 100%; }
+    .dark .pq-day hr { border-top-color: #666; }
+    .pq-meta { font-size: 12px; font-weight: 400; opacity: 0.75; white-space: nowrap; }
+    .pq-today-badge {
+      font-size: 11px; font-weight: 600; padding: 2px 8px; margin-left: 6px;
+      border-radius: 12px; background: var(--accent); color: #fff;
+    }
+    .pq-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+    .pq-body { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-width: 0; }
+    .pq-text { word-break: break-word; }
+    .pq-text.done { text-decoration: line-through; opacity: 0.55; }
+    .pq-tag {
+      font-size: 11px; padding: 2px 8px; border-radius: 12px; white-space: nowrap;
+      background: #ffe0b2; color: #8a4b00;
+    }
+    .dark .pq-tag { background: #4a3418 !important; color: #ffb74d !important; }
+    .pq-right { display: flex; align-items: center; flex-shrink: 0; }
+    .pq-check {
+      -webkit-appearance: none; appearance: none;
+      width: 20px; height: 20px; min-width: 20px; margin: 0;
+      border: 2px solid #888; border-radius: 6px; background: #fff;
+      cursor: pointer; display: inline-grid; place-content: center;
+    }
+    .pq-check:checked { background: var(--accent); border-color: var(--accent); }
+    .pq-check:checked::after { content: "\2713"; color: #fff; font-size: 14px; line-height: 1; font-weight: 700; }
+    .pq-check:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .dark .pq-check { background: #333 !important; border: 2px solid #777 !important; }
+    .dark .pq-check:checked { background: var(--accent) !important; border-color: var(--accent) !important; }
+    .pq-empty { opacity: 0.7; font-size: 14px; }
+    #homePriorityToggle small { font-weight: 400; opacity: 0.9; margin-left: 6px; }
+
     /* ===== UPDATE LOG (works in dark mode) ===== */
     .blog-wrap {
       width: 100%;
@@ -454,6 +521,14 @@
       overflow: hidden;
       border: 1px solid #ccc;
       background: #fff;
+    }
+    .pq-rolled {
+      opacity: 0.5;
+      background-color: rgba(128, 128, 128, 0.1);
+    }
+    .dark .pq-rolled {
+      opacity: 0.4;
+      background-color: rgba(200, 200, 200, 0.1);
     }
     .blog-wrap iframe { width: 100%; height: 100%; border: none; background: #fff; }
     .dark .blog-wrap { background: var(--bg, #1a1a1a) !important; border-color: #333 !important; }
@@ -919,6 +994,7 @@
     <button class="menu-btn" data-page="notes">📝 Notes</button>
     <button class="menu-btn" data-page="budget">💰 Budget Tracker</button>
     <button class="menu-btn" data-page="Check">✒ Check List</button>
+    <button class="menu-btn" data-page="priority">🎯 Priority Queue</button>
     <button class="menu-btn" data-page="utilities">🛠️ Utilities</button>
     <button class="menu-btn" data-page="trash">🗑️ Trash Bin</button>
     <button class="menu-btn" data-page="other">🎲 More Apps</button>
@@ -991,6 +1067,12 @@
             ✒ CHECK LIST <span class="arrow">▼</span>
           </button>
         <div id="homeCheckContainer" class="form"></div>
+      </div>
+      <div class="add-area">
+        <button id="homePriorityToggle" class="add-btn" aria-expanded="false">
+            🎯 PRIORITY QUEUE <span class="arrow">▼</span>
+          </button>
+        <div id="homePriorityContainer" class="form"></div>
       </div>
       <div class="add-area">
         <button id="homeOverviewToggle" class="add-btn open" aria-expanded="true">
@@ -1213,6 +1295,14 @@
       </div>
 
       <div class="notif-setting-item">
+        <span>🎯 Priority Queue Alerts</span>
+        <label class="toggle-switch">
+            <input type="checkbox" id="togglePriority" />
+            <span class="slider"></span>
+          </label>
+      </div>
+
+      <div class="notif-setting-item">
         <span>💰 Budget Reminders</span>
         <label class="toggle-switch">
             <input type="checkbox" id="toggleBudget" />
@@ -1274,8 +1364,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.8.1 </p>
-          <p>Last Updated: 25-Oct-2026</p>
+          <p>Version 13.8.2 </p>
+          <p>Last Updated: 27-Oct-2026</p>
           <p>Project Mode: Open source</p>
           <p>App Size : 7.0KB </p>
         </ul>
@@ -1352,6 +1442,20 @@
         <li>Create checklist and set status either Open/Closed</li>
         <li>Opened checklist listed in Home screen</li>
       </ul>
+      <h3>Priority Queue!</h3>
+      <hr />
+      <ul>
+        <li><strong>Add Items:</strong> Click 🎯 PRIORITY QUEUE → ＋ ADD PRIORITY ITEMS → Pick date & type item → Click Add</li>
+        <li><strong>View Items:</strong> Expand ⏳ PROGRESS QUEUE to see all dates with items and pending count</li>
+        <li><strong>Check Off:</strong> Click checkbox to mark item as done</li>
+        <li><strong>Edit:</strong> Click ✏️ icon to rename an item</li>
+        <li><strong>Delete:</strong> Click 🗑️ icon to move item to trash</li>
+        <li><strong>Auto Rollover:</strong> Unchecked items move to next day at midnight, marked as "Old · date"</li>
+        <li><strong>Home Widget:</strong> Home page shows all dates with items. Faded items are old (carried from previous days)</li>
+        <li><strong>Count Display:</strong> Shows "X pending / Y total" (old rolled items not counted)</li>
+      </ul>
+        <li>Notification shows only pending items with the pending / total count.</li>
+      </ul>
       <h3>Dark Mode!</h3>
       <hr />
       <ul>
@@ -1382,6 +1486,34 @@
         <li>Note: notifications are not supposed to working</li>
         <li> New features you may missed</li>
       </ul>
+    </div>
+    <div id="priority" class="page hidden">
+      <h2>🎯 Priority Queue</h2>
+      <div class="add-area">
+        <button id="showAddPriorityBtn" class="add-btn" aria-expanded="false">
+            ＋ ADD PRIORITY ITEMS <span class="arrow">▼</span>
+          </button>
+        <div id="priorityFormContainer" class="form">
+          <label>Date<input id="priorityDate" type="date" /></label>
+          <label>
+              Item<input
+                id="priorityText"
+                type="text"
+                maxlength="200"
+                placeholder="What needs to get done?"
+              />
+            </label>
+          <div class="form-actions">
+            <button id="savePriorityBtn" class="primary">Add Item</button>
+          </div>
+        </div>
+      </div>
+      <div class="add-area">
+        <button id="viewPriorityToggle" class="add-btn" aria-expanded="false">
+            ⏳ PROGRESS QUEUE <span class="arrow">▼</span>
+          </button>
+        <ul id="priorityList" class="list scrollable-list form"></ul>
+      </div>
     </div>
     <div id="utilities" class="page hidden">
       <h2>🛠️ Utilities</h2>
@@ -2130,6 +2262,8 @@ render();
             renderBudgets(); renderHomeBudgets(); break;
           case 'checklists':
             renderChecklists(); renderHomeCheck(); break;
+          case 'priorityQueue':
+            pqRender(); break;
           case 'calculationHistoryList':
           targetPageId = 'utilities';
           break;
@@ -2155,6 +2289,7 @@ render();
                 !appData.notifReminders &&
                 !appData.notifNotes &&
                 !appData.notifChecklist &&
+                !appData.notifPriority &&
                 !appData.notifBudget &&
                 !appData.notifMoonPhase
               ) {
@@ -2223,6 +2358,7 @@ render();
             if(byId('toggleBudget')) byId('toggleBudget').checked = appData.notifBudget;
             if(byId('toggleMoonPhase')) byId('toggleMoonPhase').checked = appData.notifMoonPhase;
             if(byId('toggleGold')) byId('toggleGold').checked = !!appData.notifGold;
+            if(byId('togglePriority')) byId('togglePriority').checked = appData.notifPriority !== false;
         }
 
         // Function to handle custom toggle changes
@@ -2253,6 +2389,8 @@ render();
           notifBudget: true,
           notifMoonPhase: true,
           notifGold: false,
+          notifPriority: true,
+          priorityQueue: [],
           // NEW: Calculation History
           calculationHistory: [],
           trash: [],
@@ -2281,6 +2419,8 @@ render();
             if (appData.notifBudget === undefined) appData.notifBudget = true;
             if (appData.notifMoonPhase === undefined) appData.notifMoonPhase = true;
             if (appData.notifGold === undefined) appData.notifGold = false;
+            if (appData.notifPriority === undefined) appData.notifPriority = true;
+            if (!Array.isArray(appData.priorityQueue)) appData.priorityQueue = [];
             if (!Array.isArray(appData.trash)) appData.trash = [];
             if (typeof renderTrash === 'function') renderTrash();
 
@@ -2298,6 +2438,7 @@ render();
             rerenderFor('notes');
             rerenderFor('budget');
             rerenderFor('checklists');
+            if (typeof pqInit === 'function') pqInit();
             // ✅ ADD THESE
             if (typeof window.renderPriceTrackerList === "function") {
               window.renderPriceTrackerList();
@@ -3407,7 +3548,7 @@ render();
               const body = document.createElement('div');
               body.style.fontSize = '13px';
               body.style.opacity = '0.85';
-              body.textContent = String(t.type || 'item').toUpperCase() + ' | Deleted: ' + (t.deletedAt || '');
+              body.textContent = String(t.type === 'priorityItem' ? 'priority' : (t.type || 'item')).toUpperCase() + ' | Deleted: ' + (t.deletedAt || '');
 
               const time = null;
 
@@ -3455,6 +3596,282 @@ render();
           showPage('trash');
           alert("Trash cleared successfully.");
           }
+          // ---------- PRIORITY QUEUE ----------
+          const PQ_DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+          const PQ_MON  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+          function pqPad(n){ return String(n).padStart(2,'0'); }
+          function pqKey(d){ return d.getFullYear() + '-' + pqPad(d.getMonth()+1) + '-' + pqPad(d.getDate()); }
+          function pqParse(k){ const p = k.split('-').map(Number); return new Date(p[0], p[1]-1, p[2]); }
+          function pqToday(){ return pqKey(new Date()); }
+          function pqLabel(k){ const d = pqParse(k); return pqPad(d.getDate()) + '-' + PQ_MON[d.getMonth()] + '-' + d.getFullYear(); }
+          function pqShort(k){ const d = pqParse(k); return pqPad(d.getDate()) + '-' + PQ_MON[d.getMonth()]; }
+          function pqNewId(){ return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+          function pqEnsure(){ if (!Array.isArray(appData.priorityQueue)) appData.priorityQueue = []; return appData.priorityQueue; }
+          let pqLastDay = pqToday();
+
+          // Unchecked items of every finished day are copied to the next day (once).
+          // Both days keep the item. Returns true if anything changed.
+          function pqRollover(queue, todayKey){
+            if (!queue.length) return false;
+            let changed = false;
+            const byDate = {};
+            queue.forEach(d => { byDate[d.date] = d; });
+            const dates = Object.keys(byDate).sort();
+            const end = pqParse(todayKey);
+            const cur = pqParse(dates[0]);
+            while (cur < end) {
+              const k = pqKey(cur);
+              const day = byDate[k];
+              if (day) {
+                const nd = new Date(cur); nd.setDate(nd.getDate() + 1);
+                const nk = pqKey(nd);
+                day.items.forEach(it => {
+                  if (it.done || it.r) return;
+                  let next = byDate[nk];
+                  if (!next) { next = { date: nk, items: [] }; byDate[nk] = next; queue.push(next); }
+                  if (!next.items.some(x => x.uid === it.uid)) {
+                    next.items.push({ id: pqNewId(), uid: it.uid, text: it.text, done: false, from: it.from || k });
+                  }
+                  it.r = true;
+                  changed = true;
+                });
+              }
+              cur.setDate(cur.getDate() + 1);
+            }
+            return changed;
+          }
+
+          function pqCheckRollover(){
+            const q = pqEnsure();
+            if (pqRollover(q, pqToday())) saveAll();
+          }
+
+          function pqInit(){
+            pqCheckRollover();
+            pqRender();
+          }
+
+          function pqFind(date, id){
+            const day = pqEnsure().find(d => d.date === date);
+            if (!day) return {};
+            return { day, item: day.items.find(i => i.id === id) };
+          }
+
+          function pqAdd(){
+            const dateEl = byId('priorityDate'), textEl = byId('priorityText');
+            const date = dateEl.value || pqToday();
+            const text = textEl.value.trim();
+            if (!text) { alert('Please enter an item.'); textEl.focus(); return; }
+            const q = pqEnsure();
+            let day = q.find(d => d.date === date);
+            if (!day) { day = { date, items: [] }; q.push(day); }
+            const id = pqNewId();
+            day.items.push({ id, uid: id, text, done: false, from: null });
+            pqRollover(q, pqToday());   // a past date rolls forward right away
+            saveAll();
+            pqRender();
+            textEl.value = '';
+            textEl.focus();
+          }
+
+          function pqToggle(date, id){
+            const { item } = pqFind(date, id);
+            if (!item) return;
+            item.done = !item.done;
+            saveAll();
+            pqRender();
+          }
+
+          function pqEdit(date, id){
+            const { item } = pqFind(date, id);
+            if (!item) return;
+            const n = prompt('Edit item:', item.text);
+            if (n === null) return;
+            const t = n.trim();
+            if (!t) { alert('Item cannot be empty.'); return; }
+            item.text = t;
+            saveAll();
+            pqRender();
+          }
+
+          function pqDelete(date, id){
+            const q = pqEnsure();
+            const { day, item } = pqFind(date, id);
+            if (!item) return;
+            day.items.splice(day.items.indexOf(item), 1);
+            if (!day.items.length) q.splice(q.indexOf(day), 1);
+            if (!Array.isArray(appData.trash)) appData.trash = [];
+            appData.trash.push({
+              type: 'priorityItem',
+              item: { title: item.text, date: date, entry: item },
+              deletedAt: formatDateDMYWithTime(new Date())
+            });
+            saveAll();
+            renderTrash();
+            pqRender();
+          }
+
+          function pqRestore(rec){
+            if (!rec || !rec.entry || !rec.date) return;
+            const q = pqEnsure();
+            let day = q.find(d => d.date === rec.date);
+            if (!day) { day = { date: rec.date, items: [] }; q.push(day); }
+            if (!day.items.some(i => i.id === rec.entry.id)) day.items.push(rec.entry);
+          }
+
+          function pqBuildRow(date, it, withActions){
+            const li = document.createElement('li');
+            // Mark as faded if this item was rolled over (r === true)
+            if (it.r === true) {
+              li.classList.add('pq-rolled');
+            }
+            const left = document.createElement('div'); left.className = 'pq-left';
+            const cb = document.createElement('input');
+            cb.type = 'checkbox'; cb.className = 'pq-check'; cb.checked = !!it.done;
+            cb.setAttribute('aria-label', 'Mark done: ' + it.text);
+            cb.addEventListener('change', () => pqToggle(date, it.id));
+            const body = document.createElement('div'); body.className = 'pq-body';
+            const txt = document.createElement('span');
+            txt.className = 'pq-text' + (it.done ? ' done' : '');
+            txt.textContent = it.text;
+            body.appendChild(txt);
+            if (it.from && it.from !== date) {
+              const tag = document.createElement('span'); tag.className = 'pq-tag';
+              tag.textContent = 'Old · ' + pqShort(it.from);
+              tag.title = 'Carried over from ' + pqLabel(it.from);
+              body.appendChild(tag);
+            }
+            left.append(cb, body);
+            li.appendChild(left);
+            if (withActions) {
+              const right = document.createElement('div'); right.className = 'pq-right';
+              const ed = document.createElement('button'); ed.className = 'icon-small'; ed.textContent = '✏️'; ed.title = 'Edit';
+              ed.addEventListener('click', () => pqEdit(date, it.id));
+              const del = document.createElement('button'); del.className = 'icon-small'; del.textContent = '🗑️'; del.title = 'Delete';
+              del.addEventListener('click', () => pqDelete(date, it.id));
+              right.append(ed, del);
+              li.appendChild(right);
+            }
+            return li;
+          }
+
+          function pqRenderPage(){
+            const box = byId('priorityList');
+            if (!box) return;
+            const dateEl = byId('priorityDate');
+            if (dateEl && !dateEl.value) dateEl.value = pqToday();
+            box.innerHTML = '';
+            const q = pqEnsure().filter(d => d.items.length).slice().sort((a, b) => a.date < b.date ? 1 : -1);
+            if (!q.length) {
+              const li = document.createElement('li'); li.className = 'pq-empty';
+              li.textContent = 'No priority items yet.';
+              box.appendChild(li);
+              return;
+            }
+            const today = pqToday();
+            q.forEach(day => {
+              const li = document.createElement('li'); li.className = 'pq-day';
+              const h = document.createElement('h4');
+              const title = document.createElement('span');
+              title.textContent = pqLabel(day.date) + ' · ' + PQ_DAYS[pqParse(day.date).getDay()];
+              if (day.date === today) {
+                const b = document.createElement('span'); b.className = 'pq-today-badge'; b.textContent = 'Today';
+                title.appendChild(b);
+              }
+              // Only count items that are NOT rolled over (r !== true) and are not done
+              const activeItems = day.items.filter(i => i.r !== true);
+              const completed = activeItems.filter(i => i.done).length;
+              const meta = document.createElement('span'); meta.className = 'pq-meta';
+              meta.textContent = completed + '/' + activeItems.length + ' completed';
+              h.append(title, meta);
+              li.appendChild(h);
+              li.appendChild(document.createElement('hr'));
+              const ul = document.createElement('ul'); ul.className = 'list';
+              day.items.forEach(it => ul.appendChild(pqBuildRow(day.date, it, true)));
+              li.appendChild(ul);
+              box.appendChild(li);
+            });
+          }
+
+          function pqRenderHome(){
+            const box = byId('homePriorityContainer');
+            if (!box) return;
+            box.innerHTML = '';
+            const q = pqEnsure().filter(d => d.items.length).slice().sort((a, b) => a.date < b.date ? 1 : -1);
+            if (!q.length) {
+              const p = document.createElement('div'); p.className = 'pq-empty';
+              p.textContent = 'No priority items.';
+              box.appendChild(p);
+              return;
+            }
+            const today = pqToday();
+            q.forEach(day => {
+              const li = document.createElement('li'); li.className = 'pq-day-home';
+              const h = document.createElement('h4');
+              const title = document.createElement('span');
+              title.textContent = pqLabel(day.date) + ' · ' + PQ_DAYS[pqParse(day.date).getDay()];
+              if (day.date === today) {
+                const b = document.createElement('span'); b.className = 'pq-today-badge'; b.textContent = 'Today';
+                title.appendChild(b);
+              }
+              const completed = day.items.filter(i => i.done && i.r !== true).length;
+              const activeItems = day.items.filter(i => i.r !== true).length;
+              const meta = document.createElement('span'); meta.className = 'pq-meta';
+              meta.textContent = completed + '/' + activeItems + ' completed';
+              h.append(title, meta);
+              li.appendChild(h);
+              const ul = document.createElement('ul'); ul.className = 'list';
+              day.items.forEach(it => ul.appendChild(pqBuildRow(day.date, it, false)));
+              li.appendChild(ul);
+              box.appendChild(li);
+            });
+          }
+
+          function pqRender(){ pqRenderPage(); pqRenderHome(); }
+
+          // Notification text: pending (unchecked) items of today, with pending / total count
+          function buildPriorityNotif(){
+            const sim = JSON.parse(JSON.stringify(pqEnsure()));
+            pqRollover(sim, pqToday());
+            const day = sim.find(d => d.date === pqToday());
+            if (!day) return null;
+            const pending = day.items.filter(i => !i.done);
+            if (!pending.length) return null;
+            const MAX = 6;
+            const lines = pending.slice(0, MAX).map(i => '• ' + i.text + (i.from ? ' (old)' : ''));
+            if (pending.length > MAX) lines.push('+' + (pending.length - MAX) + ' more');
+            return {
+              title: '🎯 Priority Queue (' + pending.length + '/' + day.items.length + ' pending)',
+              body: lines.join('\n')
+            };
+          }
+
+          byId('savePriorityBtn').addEventListener('click', pqAdd);
+          byId('priorityText').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); pqAdd(); } });
+          [[byId('homePriorityToggle'), byId('homePriorityContainer')],
+           [byId('showAddPriorityBtn'), byId('priorityFormContainer')],
+           [byId('viewPriorityToggle'), byId('priorityList')]]
+            .forEach(([btn, container]) => {
+              if (btn && container) {
+                btn.addEventListener('click', () => {
+                  const open = container.classList.toggle('visible');
+                  btn.classList.toggle('open', open);
+                  btn.setAttribute('aria-expanded', String(open));
+                });
+              }
+            });
+
+          // New day (app left open past midnight / tab brought back): roll over and refresh
+          function pqDayWatch(){
+            if (pqToday() !== pqLastDay) {
+              pqLastDay = pqToday();
+              pqCheckRollover();
+              pqRender();
+            }
+          }
+          setInterval(pqDayWatch, 60000);
+          document.addEventListener('visibilitychange', () => { if (!document.hidden) pqDayWatch(); });
+
           // ---------- Form Show/Hide ----------
           function showForm(el){ el.classList.add('visible'); }
           function hideForm(el){ el.classList.remove('visible'); }
@@ -3476,6 +3893,10 @@ render();
           // Trash Bin: collapsed like Reminders; just refresh its list
           if (pageId === 'trash') {
             renderTrash();
+          }
+
+          if (pageId === 'priority') {
+            pqRender();
           }
 
           // Special handling for the notifications page
@@ -3651,6 +4072,22 @@ render();
                   showOnceSW(registration, "Nothing Reminder - ⚠️ Reminders", {
                       body: reminderSummary, icon: 'assets/icon.png', requireInteraction: true, tag: 'reminders-summary'
                   });
+              }
+          }
+
+          // PRIORITY QUEUE Summary (unchecked items only, pending / total)
+          if (appData.notifPriority !== false) {
+              const pq = buildPriorityNotif();
+              if (pq) {
+                  showOnceSW(registration, pq.title, {
+                      body: pq.body, icon: 'assets/icon.png', badge: 'assets/icon.png',
+                      requireInteraction: true, tag: 'priority-summary', data: { page: 'priority' }
+                  });
+              } else {
+                  try {
+                      const old = await registration.getNotifications({ tag: 'priority-summary' });
+                      old.forEach(n => n.close());
+                  } catch (e) {}
               }
           }
 
@@ -4249,6 +4686,16 @@ render();
                 const t = appData.trash[i];
                 if (!t) return;
 
+                // Priority Queue items go back to their own day
+                if (t.type === 'priorityItem') {
+                  pqRestore(t.item);
+                  appData.trash.splice(i, 1);
+                  saveAll();
+                  renderTrash();
+                  showPage('priority');
+                  return;
+                }
+
                 // 1️⃣ Restore data
                 if (Array.isArray(appData[t.type])) {
                   appData[t.type].unshift(t.item);
@@ -4372,6 +4819,7 @@ render();
                 byId('toggleNotes').addEventListener('change', (e) => handleCustomNotifToggle('notifNotes', e));
                 byId('toggleChecklist').addEventListener('change', (e) => handleCustomNotifToggle('notifChecklist', e));
                 byId('toggleBudget').addEventListener('change', (e) => handleCustomNotifToggle('notifBudget', e));
+                byId('togglePriority')?.addEventListener('change', (e) => handleCustomNotifToggle('notifPriority', e));
                 byId('toggleGold')?.addEventListener('change', (e) => {
                   localStorage.removeItem('gold_notif_checked');
                   handleCustomNotifToggle('notifGold', e);
@@ -4483,6 +4931,7 @@ render();
                 if (appData.profilePhoto) byId('profilePhoto').src = appData.profilePhoto;
 
                 // 2. Initial synchronous render of all data
+                pqRender();
                 renderReminders();
                 renderNotes();
                 renderBudgets();

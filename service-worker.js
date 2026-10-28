@@ -365,6 +365,35 @@ if (
       }
     }
 
+    // ── Priority Queue — unchecked items only, pending / total ──
+    if (data.notifPriority !== false && Array.isArray(data.priorityQueue) && data.priorityQueue.length) {
+      const todayKey = pqKey(today);
+      const sim = JSON.parse(JSON.stringify(data.priorityQueue));
+      pqRollover(sim, todayKey);
+      const day = sim.find(d => d.date === todayKey);
+      const activeItems = day ? day.items.filter(i => i.r !== true) : [];
+      const pending = activeItems.filter(i => !i.done);
+      if (pending.length) {
+        const completed = activeItems.length - pending.length;
+        const MAX = 6;
+        const lines = pending.slice(0, MAX).map(i => '• ' + i.text + (i.from ? ' (old)' : ''));
+        if (pending.length > MAX) lines.push('+' + (pending.length - MAX) + ' more');
+        await showOnce('🎯 Priority Queue (' + completed + '/' + activeItems.length + ' completed)', {
+          body: lines.join('\n'),
+          icon: './assets/icon.png',
+          badge: './assets/icon.png',
+          tag: 'priority-summary',
+          requireInteraction: true,
+          data: { page: 'priority' }
+        });
+      } else {
+        try {
+          const old = await self.registration.getNotifications({ tag: 'priority-summary' });
+          old.forEach(n => n.close());
+        } catch (e) {}
+      }
+    }
+
     // ── 3. Budget — daily spend limit ──────────────────────────
     if (   data.notifBudget &&   Array.isArray(data.budget) &&   data.budget.length ) {
       for (const b of data.budget) {
@@ -492,4 +521,38 @@ function getMoonPhase(y, m, d) {
   const index = Math.floor((phase / lp) * 8 + 0.5) % 8;
   return ['New Moon','Waxing Crescent','First Quarter','Waxing Gibbous',
           'Full Moon','Waning Gibbous','Last Quarter','Waning Crescent'][index];
+}
+
+// ── Priority Queue helpers (same rollover rule as index.html) ──
+function pqPad(n) { return String(n).padStart(2, '0'); }
+function pqKey(d) { return d.getFullYear() + '-' + pqPad(d.getMonth() + 1) + '-' + pqPad(d.getDate()); }
+function pqParse(k) { const p = k.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]); }
+function pqRollover(queue, todayKey) {
+  if (!queue.length) return false;
+  let changed = false;
+  const byDate = {};
+  queue.forEach(d => { byDate[d.date] = d; });
+  const dates = Object.keys(byDate).sort();
+  const end = pqParse(todayKey);
+  const cur = pqParse(dates[0]);
+  while (cur < end) {
+    const k = pqKey(cur);
+    const day = byDate[k];
+    if (day) {
+      const nd = new Date(cur); nd.setDate(nd.getDate() + 1);
+      const nk = pqKey(nd);
+      day.items.forEach(it => {
+        if (it.done || it.r) return;
+        let next = byDate[nk];
+        if (!next) { next = { date: nk, items: [] }; byDate[nk] = next; queue.push(next); }
+        if (!next.items.some(x => x.uid === it.uid)) {
+          next.items.push({ id: 'sw' + Math.random().toString(36).slice(2, 8), uid: it.uid, text: it.text, done: false, from: it.from || k });
+        }
+        it.r = true;
+        changed = true;
+      });
+    }
+    cur.setDate(cur.getDate() + 1);
+  }
+  return changed;
 }

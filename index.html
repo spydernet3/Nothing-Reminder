@@ -46,7 +46,7 @@
     .add-btn {
       display: block;
       width: 100%;
-      padding: 10px;
+      padding: 14px 10px;
       border: none;
       background: #888;
       font-style: Italic;
@@ -484,7 +484,8 @@
     
     .pq-day hr { margin: 0 0 8px 0; border: 0; border-top: 1px solid #bbb; width: 100%; }
     .dark .pq-day hr { border-top-color: #666; }
-    .pq-meta { font-size: 12px; font-weight: 400; opacity: 0.75; white-space: nowrap; }
+    .pq-meta {
+      margin-left: 8px; font-size: 12px; font-weight: 400; opacity: 0.75; white-space: nowrap; }
     .pq-today-badge {
       font-size: 11px; font-weight: 600; padding: 2px 8px; margin-left: 6px;
       border-radius: 12px; background: var(--accent); color: #fff;
@@ -2280,23 +2281,8 @@ render();
             function triggerNotifications() {
               checkNotifications(false);
             }
-            function checkNotifications(force = false) {
-              // SAFETY: do nothing if notifications are not available
-              if (!("Notification" in window)) return;
-              if (Notification.permission !== "granted") return;
-              // STOP if user turned OFF everything
-              if (
-                !appData.notifReminders &&
-                !appData.notifNotes &&
-                !appData.notifChecklist &&
-                !appData.notifPriority &&
-                !appData.notifBudget &&
-                !appData.notifMoonPhase
-              ) {
-                return;
-              }
-            }
-
+            // Notification handling is in the async checkNotifications function below
+        
         // ---------- NEW: Notification Settings Logic ----------
         function updateBrowserPermissionUI() {
             const status = Notification.permission;

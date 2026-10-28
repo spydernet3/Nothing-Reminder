@@ -1,3 +1,4 @@
+
 const DB_NAME   = 'NothingReminderDB';
 const DB_VERSION = 1;
 const STORE_NAME = 'appData';

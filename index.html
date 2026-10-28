@@ -2360,7 +2360,24 @@ render();
 
         // ---------- Storage ----------
 
-        const defaultData = {
+
+        // Notification cooldown tracking - prevent repeats across systems
+        let notificationCooldowns = {};
+        const NOTIFICATION_COOLDOWN_MS = 30 * 60 * 1000; // 30 minutes
+        
+        function shouldShowNotification(tag) {
+          const now = Date.now();
+          const lastShown = notificationCooldowns[tag];
+          if (!lastShown) return true; // First time
+          const timeSinceLastShow = now - lastShown;
+          return timeSinceLastShow > NOTIFICATION_COOLDOWN_MS;
+        }
+        
+        function markNotificationShown(tag) {
+          notificationCooldowns[tag] = Date.now();
+        }
+
+                const defaultData = {
           reminders: [],
           notes: [],
           profileName: '',
@@ -2451,7 +2468,8 @@ render();
 
         tx.oncomplete = async () => {
           if (typeof updateStorageUsage === "function") updateStorageUsage();
-          triggerNotifications();
+          // Trigger notifications after save (based on user customization)
+          setTimeout(() => triggerNotifications(), 200);
           console.log("Saved to IndexedDB ✔");
         };
 
@@ -4015,14 +4033,14 @@ render();
             return summary.length > 0 ? summary.join('\n') : "No active budget overview available.";
         }
 
-        // Show only if the same notification (same tag) is not already on screen
+        // Show notification if not already visible (prevents spam)
         async function showOnceSW(registration, title, options) {
           try {
             const active = await registration.getNotifications({ tag: options.tag });
             if (active && active.length) {
-              // Same content still on screen -> do nothing (no repeat)
+              // Same notification already on screen -> skip
               if (active.some(n => n.title === title && n.body === options.body)) return;
-              // Content changed -> update the existing notification
+              // Different content -> update the notification
               options = Object.assign({}, options, { renotify: true });
             }
           } catch (e) {}
@@ -4956,20 +4974,13 @@ render();
                 // Notifications are now checked on page load (below) and on every data save (in saveAll).
                 if ("Notification" in window) {
                     updateBrowserPermissionUI();
-                    checkNotifications(); // Check once on page load
-
-                    // AUTO TRIGGER: re-check while the app is open / when you return to it.
-                    // showOnceSW() skips any notification that is still on screen, so nothing is repeated;
-                    // a notification you cleared comes back on the next auto check.
-                    let lastAutoCheck = Date.now();
-                    const autoCheck = (minGapMs) => {
-                      if (document.visibilityState !== 'visible') return;
-                      if (Date.now() - lastAutoCheck < minGapMs) return;
-                      lastAutoCheck = Date.now();
+                    // Wait for service worker before checking notifications
+                    navigator.serviceWorker.ready.then(() => {
                       checkNotifications();
-                    };
-                    setInterval(() => autoCheck(25 * 60 * 1000), 30 * 60 * 1000);
-                    document.addEventListener('visibilitychange', () => autoCheck(10 * 60 * 1000));
+                    });
+
+                    // Notifications triggered only on data changes (in saveAll)
+                    // No periodic checking - respects user's customization
                 }
               window.addEventListener('load', () => {
                 if (!appData.trash) appData.trash = [];
@@ -4977,6 +4988,15 @@ render();
                 byId('emptyTrashBtn')?.addEventListener('click', emptyTrashAll);
               });
 
+              // Request notification permission on load (if not already)
+              window.addEventListener('load', async () => {
+                if ("Notification" in window && Notification.permission === "default") {
+                  try {
+                    await Notification.requestPermission();
+                  } catch (e) {}
+                }
+              });
+              
               // Ensure only Home is visible and sidebar is hidden on initial page load
               window.addEventListener('load', () => {
                 const sidebar = document.getElementById('sidebar');

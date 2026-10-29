@@ -2222,12 +2222,16 @@ render();
       });
     }
 
-    // <!-- NOTIFICATION FIX 1: Cleaned up Service Worker Registration -->
+    // <!-- NOTIFICATION FIX 1: ONE service worker only -->
+    // firebase-messaging-sw.js imports service-worker.js, so it handles both FCM and
+    // the app notifications. Registering two different scripts on the same scope made
+    // them replace each other on every page load. Relative path = works in a sub-folder too.
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('service-worker.js')
+          navigator.serviceWorker.register('firebase-messaging-sw.js')
             .then((registration) => {
               console.log('SW registered successfully:', registration);
+              registration.update().catch(() => {});
             })
             .catch((error) => {
               console.error('SW registration failed:', error);
@@ -2281,6 +2285,7 @@ render();
             function triggerNotifications() {
               checkNotifications(false);
             }
+            window.checkNotificationsNow = triggerNotifications;
             // Notification handling is in the async checkNotifications function below
         
         // ---------- NEW: Notification Settings Logic ----------
@@ -3833,19 +3838,21 @@ render();
 
           function pqRender(){ pqRenderPage(); pqRenderHome(); }
 
-          // Notification text: pending (unchecked) items of today, with pending / total count
+          // Notification text: pending (unchecked) items of today, with completed / total count.
+          // Must stay identical to the service worker so the same tag is never re-alerted.
           function buildPriorityNotif(){
             const sim = JSON.parse(JSON.stringify(pqEnsure()));
             pqRollover(sim, pqToday());
             const day = sim.find(d => d.date === pqToday());
             if (!day) return null;
-            const pending = day.items.filter(i => !i.done);
+            const active = day.items.filter(i => i.r !== true);
+            const pending = active.filter(i => !i.done);
             if (!pending.length) return null;
             const MAX = 6;
             const lines = pending.slice(0, MAX).map(i => '• ' + i.text + (i.from ? ' (old)' : ''));
             if (pending.length > MAX) lines.push('+' + (pending.length - MAX) + ' more');
             return {
-              title: '🎯 Priority Queue (' + pending.length + '/' + day.items.length + ' pending)',
+              title: '🎯 Priority Queue (' + (active.length - pending.length) + '/' + active.length + ' completed)',
               body: lines.join('\n')
             };
           }
@@ -6248,6 +6255,16 @@ render();
               });
           // ---------- End Initial Render Code ----------
 
+              // Cold start from a notification click: service worker opens index.html#<page>
+              function goToHashPage() {
+                const id = decodeURIComponent((location.hash || '').replace('#', ''));
+                if (id && document.getElementById(id) && document.getElementById(id).classList.contains('page')) {
+                  showPage(id);
+                }
+              }
+              window.addEventListener('load', () => setTimeout(goToHashPage, 300));
+              window.addEventListener('hashchange', goToHashPage);
+
               // Handle page navigation triggered by notification click
               navigator.serviceWorker.addEventListener('message', event => {
                 if (event.data?.type === 'NAVIGATE' && event.data.page) {
@@ -6260,119 +6277,84 @@ render();
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script type="module">
-    import {
-              initializeApp
-            } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+    import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-messaging.js";
 
-            import {
-              getMessaging,
-              getToken
-            } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-messaging.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyCnyA68mu1E5moiv09wwW-kNBFqE0K2tW8",
+      authDomain: "nothing-reminder-push.firebaseapp.com",
+      projectId: "nothing-reminder-push",
+      storageBucket: "nothing-reminder-push.firebasestorage.app",
+      messagingSenderId: "158222414455",
+      appId: "1:158222414455:web:92bf9df29028216fed0c72"
+    };
+    const VAPID_KEY = 'BNY4juw2qYL4xNdTUHyUv3ZltbQkBupxLzqFAvS3nw5h5dyMPTIN1DgRSz8AAftiImKuqTxJwqKaz6TCeh6J3r8';
+    const SAVE_URL  = 'https://nothing-reminder-push.mersalmgblog.workers.dev/save-token';
+    const RESEND_MS = 24 * 60 * 60 * 1000;   // re-send the token to the server once a day
 
-            const firebaseConfig = {
+    const app = initializeApp(firebaseConfig);
+    const messaging = getMessaging(app);
+    window.fcmToken = null;
 
-              apiKey:
-              "AIzaSyCnyA68mu1E5moiv09wwW-kNBFqE0K2tW8",
+    let running = false;
+    async function initFCM() {
+      if (running) return;
+      running = true;
+      try {
+        if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
 
-              authDomain:
-              "nothing-reminder-push.firebaseapp.com",
+        // Never prompt here (a prompt without a user tap is blocked by Chrome and was
+        // fighting with the app's own permission request). Wait until it is granted.
+        if (Notification.permission !== 'granted') {
+          console.log('FCM: waiting for notification permission');
+          return;
+        }
 
-              projectId:
-              "nothing-reminder-push",
+        // Same relative path as the registration in the main script -> no worker swapping.
+        const registration = await navigator.serviceWorker.register('firebase-messaging-sw.js');
+        await navigator.serviceWorker.ready;
 
-              storageBucket:
-              "nothing-reminder-push.firebasestorage.app",
+        const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: registration });
+        if (!token) { console.error('NO FCM TOKEN RECEIVED'); return; }
+        window.fcmToken = token;
 
-              messagingSenderId:
-              "158222414455",
+        // Only talk to the server when the token is new or the daily refresh is due.
+        let last = {};
+        try { last = JSON.parse(localStorage.getItem('fcmTokenSaved') || '{}'); } catch (e) {}
+        if (last.token === token && Date.now() - (last.at || 0) < RESEND_MS) return;
 
-              appId:
-              "1:158222414455:web:92bf9df29028216fed0c72"
-            };
+        const res = await fetch(SAVE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token })
+        });
+        if (!res.ok) throw new Error('save-token HTTP ' + res.status);
+        try { localStorage.setItem('fcmTokenSaved', JSON.stringify({ token, at: Date.now() })); } catch (e) {}
+        console.log('FCM TOKEN SAVED');
+      } catch (e) {
+        console.error('FCM ERROR:', e);
+      } finally {
+        running = false;
+      }
+    }
+    window.initFCM = initFCM;
 
-            const app =
-              initializeApp(firebaseConfig);
+    // Open app in foreground: the service worker is not woken by FCM then, so ask it to run
+    // the same notification logic (data-only pushes arrive here).
+    onMessage(messaging, async () => {
+      try {
+        const reg = await navigator.serviceWorker.getRegistration();
+        if (reg && typeof window.checkNotificationsNow === 'function') window.checkNotificationsNow();
+      } catch (e) {}
+    });
 
-            const messaging =
-              getMessaging(app);
-
-            window.fcmToken = null;
-
-            async function initFCM() {
-
-              try {
-
-                const permission =
-                  await Notification.requestPermission();
-
-                console.log(
-                  'NOTIFICATION PERMISSION:',
-                  permission
-                );
-
-                if (permission !== 'granted') {
-
-                  console.log(
-                    'Notification permission denied'
-                  );
-
-                  return;
-                }
-
-                const registration =
-              await navigator.serviceWorker.register(
-
-                '/firebase-messaging-sw.js'
-              );
-
-            const token =
-              await getToken(messaging, {
-
-                vapidKey:
-                'BNY4juw2qYL4xNdTUHyUv3ZltbQkBupxLzqFAvS3nw5h5dyMPTIN1DgRSz8AAftiImKuqTxJwqKaz6TCeh6J3r8',
-
-                serviceWorkerRegistration:
-                registration
-              });
-            if (!token) {
-              console.error('NO FCM TOKEN RECEIVED');
-              return;
-            }
-              console.log(
-              'FCM TOKEN GENERATED'
-            );
-
-            await fetch(
-              'https://nothing-reminder-push.mersalmgblog.workers.dev/save-token',
-              {
-                method: 'POST',
-
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-
-                body: JSON.stringify({
-                  token
-                })
-              }
-            );
-
-            console.log(
-              'FCM TOKEN SAVED'
-            );
-
-              } catch (e) {
-
-                console.error(
-                  'FCM ERROR:',
-                  e
-                );
-              }
-            }
-
-            initFCM();
-
-</script>
+    initFCM();                                              // already granted -> get/refresh token
+    window.addEventListener('focus', initFCM);              // retry after failed network etc.
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) initFCM(); });
+    try {                                                   // permission granted later (button / prompt)
+      navigator.permissions.query({ name: 'notifications' }).then(st => { st.onchange = initFCM; });
+    } catch (e) {}
+  </script>
 
 </body>
 

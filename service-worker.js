@@ -5,42 +5,32 @@ const STORE_NAME = 'appData';
 const CACHE_NAME = 'app-cache-v2';
 
 // ── Cache install ──────────────────────────────────────────────
+// Each file is cached on its own and failures are ignored: one missing file
+// used to make cache.addAll() reject, abort the install, and leave the OLD
+// worker (without the Priority Queue push code) running.
 self.addEventListener('install', event => {
-
-  event.waitUntil(
-
-    caches.open(CACHE_NAME).then(cache =>
-
-      cache.addAll([
-  './manifest.json',
-  './assets/icon.png'
-])
-    )
-  );
-
-  // self.skipWaiting();
+  event.waitUntil((async () => {
+    try {
+      const cache = await caches.open(CACHE_NAME);
+      await Promise.all(['./manifest.json', './assets/icon.png'].map(u =>
+        cache.add(u).catch(err => console.warn('SW cache skip:', u, err))
+      ));
+    } catch (e) { console.warn('SW cache open failed:', e); }
+    // Take over immediately instead of waiting for every tab / app window to close.
+    await self.skipWaiting();
+  })());
 });
+
 self.addEventListener('activate', event => {
-
-  event.waitUntil(
-
-    caches.keys().then(keys =>
-
-      Promise.all(
-
-        keys.map(key => {
-
-          if (
-            key !== CACHE_NAME &&
-            key !== 'gold-state'
-          ) {
-
-            return caches.delete(key);
-          }
-        })
-      )
-    )
-  );
+  event.waitUntil((async () => {
+    try {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(key =>
+        (key !== CACHE_NAME && key !== 'gold-state') ? caches.delete(key) : null
+      ));
+    } catch (e) {}
+    await self.clients.claim();
+  })());
 });
 
 // ── Show a notification ONLY if the same one is not already on screen ──
@@ -189,6 +179,41 @@ today.setHours(0, 0, 0, 0);
 console.log(
   'BACKGROUND PUSH STARTED'
 );
+    // ── Priority Queue — unchecked items only, completed / total ──
+    // Runs FIRST and in its own try/catch so an error in any other section
+    // can never stop the priority notification.
+    try {
+      if (data.notifPriority !== false && Array.isArray(data.priorityQueue) && data.priorityQueue.length) {
+        const todayKey = pqKey(today);
+        const sim = JSON.parse(JSON.stringify(data.priorityQueue));
+        sim.forEach(d => { if (!Array.isArray(d.items)) d.items = []; });
+        pqRollover(sim, todayKey);
+        const day = sim.find(d => d.date === todayKey);
+        const activeItems = day ? day.items.filter(i => i.r !== true) : [];
+        const pending = activeItems.filter(i => !i.done);
+        if (pending.length) {
+          const completed = activeItems.length - pending.length;
+          const MAX = 6;
+          const lines = pending.slice(0, MAX).map(i => '• ' + i.text + (i.from ? ' (old)' : ''));
+          if (pending.length > MAX) lines.push('+' + (pending.length - MAX) + ' more');
+          await showOnce('🎯 Priority Queue (' + completed + '/' + activeItems.length + ' completed)', {
+            body: lines.join('\n'),
+            icon: './assets/icon.png',
+            badge: './assets/icon.png',
+            tag: 'priority-summary',
+            requireInteraction: true,
+            data: { page: 'priority' }
+          });
+        } else {
+          try {
+            const old = await self.registration.getNotifications({ tag: 'priority-summary' });
+            old.forEach(n => n.close());
+          } catch (e) {}
+        }
+      }
+    } catch (e) { console.error('Priority push failed:', e); }
+
+    try {
     // ── 1. Expired / due reminders ──────────────────────────────
 if (
   data.notifReminders &&
@@ -306,6 +331,9 @@ if (
     );
   }
 }
+    } catch (e) { console.error('Reminders push failed:', e); }
+
+    try {
 // ── Notes notifications ─────────────────────────
 if (
   data.notifNotes &&
@@ -347,6 +375,9 @@ if (
     );
   }
 }
+    } catch (e) { console.error('Notes push failed:', e); }
+
+    try {
     // ── 2. Open checklists ──────────────────────────────────────
     if (   data.notifChecklist &&   Array.isArray(data.checklists) &&   data.checklists.length ) {
       const open = data.checklists.filter(c => c.status === 'open');
@@ -365,36 +396,9 @@ if (
         });
       }
     }
+    } catch (e) { console.error('Checklist push failed:', e); }
 
-    // ── Priority Queue — unchecked items only, pending / total ──
-    if (data.notifPriority !== false && Array.isArray(data.priorityQueue) && data.priorityQueue.length) {
-      const todayKey = pqKey(today);
-      const sim = JSON.parse(JSON.stringify(data.priorityQueue));
-      pqRollover(sim, todayKey);
-      const day = sim.find(d => d.date === todayKey);
-      const activeItems = day ? day.items.filter(i => i.r !== true) : [];
-      const pending = activeItems.filter(i => !i.done);
-      if (pending.length) {
-        const completed = activeItems.length - pending.length;
-        const MAX = 6;
-        const lines = pending.slice(0, MAX).map(i => '• ' + i.text + (i.from ? ' (old)' : ''));
-        if (pending.length > MAX) lines.push('+' + (pending.length - MAX) + ' more');
-        await showOnce('🎯 Priority Queue (' + completed + '/' + activeItems.length + ' completed)', {
-          body: lines.join('\n'),
-          icon: './assets/icon.png',
-          badge: './assets/icon.png',
-          tag: 'priority-summary',
-          requireInteraction: true,
-          data: { page: 'priority' }
-        });
-      } else {
-        try {
-          const old = await self.registration.getNotifications({ tag: 'priority-summary' });
-          old.forEach(n => n.close());
-        } catch (e) {}
-      }
-    }
-
+    try {
     // ── 3. Budget — daily spend limit ──────────────────────────
     if (   data.notifBudget &&   Array.isArray(data.budget) &&   data.budget.length ) {
       for (const b of data.budget) {
@@ -417,9 +421,10 @@ if (
         });
       }
     }
+    } catch (e) { console.error('Budget push failed:', e); }
 
     // ── 5. Gold rate change ─────────────
-    await goldChangeCheck(data);
+    try { await goldChangeCheck(data); } catch (e) {}
 
     // ── 4. Moon phase — Pournami / Amavasai ────────────────────
     if (data.notifMoonPhase) {

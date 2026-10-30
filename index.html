@@ -974,7 +974,7 @@
     <div class="profile">
       <img
           id="profilePhoto"
-          src="/assets/default-avatar.png"
+          src="assets/default-avatar.png"
           alt="Profile"
           width="45"
           height="45"
@@ -2329,6 +2329,8 @@ render();
             updateBrowserPermissionUI();
             if (permission === 'granted') {
             updateBrowserPermissionUI();
+            triggerNotifications();
+            if (typeof window.initFCM === 'function') window.initFCM();
           }
           });
         }
@@ -2440,7 +2442,7 @@ render();
             }
             restoreNotifications();
             profileName.textContent = appData.profileName || "👤 User";
-           profilePhoto.src = appData.profilePhoto || '/assets/default-avatar.png';
+           profilePhoto.src = appData.profilePhoto || 'assets/default-avatar.png';
             
             rerenderFor('reminders');
             rerenderFor('notes');
@@ -4040,132 +4042,24 @@ render();
             return summary.length > 0 ? summary.join('\n') : "No active budget overview available.";
         }
 
-        // Show notification if not already visible (prevents spam)
-        async function showOnceSW(registration, title, options) {
-          try {
-            const active = await registration.getNotifications({ tag: options.tag });
-            if (active && active.length) {
-              // Same notification already on screen -> skip
-              if (active.some(n => n.title === title && n.body === options.body)) return;
-              // Different content -> update the notification
-              options = Object.assign({}, options, { renotify: true });
-            }
-          } catch (e) {}
-          return registration.showNotification(title, options);
+        // ---------- In-app notification refresh ----------
+        // The service worker is the ONLY place that builds / shows notifications (same code
+        // for background push and in-app). The page just tells it that data changed or the
+        // app opened. It updates what is on screen silently and never repeats the same text.
+        let notifTimer = null;
+        async function checkNotifications() {
+          clearTimeout(notifTimer);
+          notifTimer = setTimeout(async () => {
+            if (!('serviceWorker' in navigator)) return;
+            if (!('Notification' in window) || Notification.permission !== 'granted') return;
+            try {
+              const reg = await navigator.serviceWorker.ready;
+              const target = navigator.serviceWorker.controller || reg.active;
+              if (target) target.postMessage({ type: 'CHECK_NOTIFICATIONS' });
+            } catch (e) { console.warn('Notification refresh failed:', e); }
+          }, 300);
         }
 
-        // The single, correct checkNotifications function using registration.showNotification()
-        async function checkNotifications(){
-          showMoonPhaseNotification();
-          if(!(Notification && Notification.permission === 'granted')) {
-             console.log("Global notification permission not granted. Skipping custom checks.");
-             return;
-          }
-
-          const registration = await navigator.serviceWorker.getRegistration();
-          if (!registration) {
-             console.warn("Service Worker not registered. Cannot show persistent notifications via SW.");
-             // Fallback to non-persistent notification if SW isn't ready (less reliable on Android)
-             // If permission granted, show a basic one
-             if (Notification.permission === 'granted') {
-                new Notification("Nothing Reminder", { body: "Checking reminders..." });
-             }
-             return;
-          }
-
-          // GOLD change (throttled inside)
-          if (appData.notifGold && typeof window.goldNotifyCheck === 'function') window.goldNotifyCheck(registration);
-
-          // REMINDERS Summary
-          if (appData.notifReminders) {
-              const reminderSummary = buildReminderSummary();
-              if (reminderSummary !== "No reminders due today/tomorrow.") {
-                  showOnceSW(registration, "Nothing Reminder - ⚠️ Reminders", {
-                      body: reminderSummary, icon: 'assets/icon.png', requireInteraction: true, tag: 'reminders-summary'
-                  });
-              }
-          }
-
-          // PRIORITY QUEUE Summary (unchecked items only, pending / total)
-          if (appData.notifPriority !== false) {
-              const pq = buildPriorityNotif();
-              if (pq) {
-                  showOnceSW(registration, pq.title, {
-                      body: pq.body, icon: 'assets/icon.png', badge: 'assets/icon.png',
-                      requireInteraction: true, tag: 'priority-summary', data: { page: 'priority' }
-                  });
-              } else {
-                  try {
-                      const old = await registration.getNotifications({ tag: 'priority-summary' });
-                      old.forEach(n => n.close());
-                  } catch (e) {}
-              }
-          }
-
-          // CHECKLIST Summary
-          if (appData.notifChecklist) {
-              const checklistSummary = buildChecklistSummary();
-              if (checklistSummary !== "No open checklists.") {
-                   showOnceSW(registration, "Nothing Reminder - ✒ Checklist", {
-                      body: checklistSummary, icon: 'assets/icon.png', requireInteraction: true, tag: 'checklists-summary'
-                  });
-              }
-          }
-
-         // ---------------- BUDGET NOTIFICATION FIX ----------------
-          if (appData.notifBudget && appData.budget.length) {
-            
-            appData.budget.forEach(async (b) => {
-          
-              const registration = await navigator.serviceWorker.getRegistration();
-              if (!registration) return;
-          
-              // Correct used amount
-              const used = b.expenses
-                ? b.expenses.reduce((sum, e) => sum + Number(e.amount), 0)
-                : 0;
-          
-              // Correct remaining amount
-              const remaining = Number(b.amount) - used;
-          
-              // Correct dynamic days left
-              const days = b.endDate ? Math.max(0, daysLeft(b.endDate)) : null;
-          
-              // Correct per-day calculation
-              const perDay = (days && days > 0)
-                  ? (remaining / days).toFixed(2)
-                  : remaining;
-                  
-              let notificationBody = "";
-
-              if (days === 0) {
-                  // 1. Separate Logic for Finished Budgets
-                  notificationBody = `Budget: ${b.title} |🎉 CONGRATS YOU SAVED ₹${remaining}`;
-              } else {
-                  // 2. Separate Logic for Active Budgets
-                  notificationBody = `Budget: ${b.title} | Remaining: ₹${remaining} | Per Day: ₹${perDay} | Days Left: ${days !== null ? days : "N/A"}`;
-              }
-
-              // 3. SHOW NOTIFICATION (Triggers separately for each item in the list)
-              showOnceSW(registration, "Nothing Reminder - 💰 Budget Tracker", {
-                  body: notificationBody,
-                  icon: "assets/icon.png",
-                  // Unique tag ensures separate notification for every budget item
-                  tag: `budget-item-${b.title}`,
-                  badge: "assets/icon.png"
-              });
-            });
-          }
-          // NOTES Summary
-          if (appData.notifNotes) {
-              const notesSummary = buildNotesSummary();
-              if (notesSummary !== "No notes added yet.") {
-                  showOnceSW(registration, "Nothing Reminder - 📝 Notes", {
-                      body: notesSummary, icon: 'assets/icon.png', requireInteraction: true, tag: 'notes-summary'
-                  });
-              }
-          }
-        }
         // ---------- Calculation History Functions ----------
                 
                 function saveHistory(result) {
@@ -4951,32 +4845,6 @@ render();
 
                 // NEW: Initialize calculator mode
                 switchCalculatorMode();
-                async function showMoonPhaseNotification() {
-                    if (!appData.notifMoonPhase) return;
-                    if (Notification.permission !== "granted") return;
-
-                    const registration = await navigator.serviceWorker.getRegistration();
-                    if (!registration) return;
-
-                    const phase = getTodayPhase();
-
-                    if (phase === "pournami") {
-                        showOnceSW(registration, "🌕 Pournami Today!", {
-                            body: "Full Moon (Pournami) is happening today.",
-                            icon: "assets/icon.png",
-                            requireInteraction: true,
-                            tag: "moon-phase"
-                        });
-                    }
-                    else if (phase === "amavasai") {
-                        showOnceSW(registration, "🌑 Amavasai Today!", {
-                            body: "New Moon (Amavasai) Is Happening.",
-                            icon: "assets/icon.png",
-                            requireInteraction: true,
-                            tag: "moon-phase"
-                        });
-                    }
-                }
                 // 3. Setup notifications
                 // Notifications are now checked on page load (below) and on every data save (in saveAll).
                 if ("Notification" in window) {
@@ -5261,23 +5129,7 @@ render();
 
                   const rates = await fetchRates();
                   saveToday(rates);
-                  const last = readJSON("gold_notif_last", null);
-                  localStorage.setItem("gold_notif_last", JSON.stringify(rates));
-                  if (!last) return;                                   // first run = baseline only
-                  const d22 = rates["22k"] - last["22k"];
-                  if (Math.abs(d22) < NOTIFY_MIN_CHANGE) return;
-
-                  reg = reg || (await navigator.serviceWorker.getRegistration());
-                  if (!reg) return;
-                  const arrow = d22 > 0 ? "▲ +" : "▼ -";
-                  await reg.showNotification("🥇 Gold Rate " + (d22 > 0 ? "Up" : "Down"), {
-                    body: "22K " + fmt(rates["22k"]) + "/g (" + arrow + "₹" + Math.abs(d22) + ")  |  24K " + fmt(rates["24k"]) + "/g  |  18K " + fmt(rates["18k"]) + "/g",
-                    icon: "assets/icon.png",
-                    badge: "assets/icon.png",
-                    tag: "gold-rate",
-                    renotify: true,
-                    data: { page: "utilities" }
-                  });
+                  // notification itself is raised by the service worker (single baseline, no duplicates)
                 } catch (e) { console.warn("Gold notify skipped:", e); }
               };
               setInterval(() => { if (typeof window.goldNotifyCheck === "function") window.goldNotifyCheck(); }, 30 * 60 * 1000);
@@ -6278,7 +6130,7 @@ render();
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-    import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-messaging.js";
+    import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-messaging.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCnyA68mu1E5moiv09wwW-kNBFqE0K2tW8",
@@ -6339,16 +6191,8 @@ render();
     }
     window.initFCM = initFCM;
 
-    // Open app in foreground: the service worker is not woken by FCM then, so ask it to run
-    // the same notification logic (data-only pushes arrive here).
-    onMessage(messaging, async () => {
-      try {
-        const reg = await navigator.serviceWorker.getRegistration();
-        if (reg && typeof window.checkNotificationsNow === 'function') window.checkNotificationsNow();
-      } catch (e) {}
-    });
-
     initFCM();                                              // already granted -> get/refresh token
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && window.checkNotificationsNow) window.checkNotificationsNow(); });
     window.addEventListener('focus', initFCM);              // retry after failed network etc.
     document.addEventListener('visibilitychange', () => { if (!document.hidden) initFCM(); });
     try {                                                   // permission granted later (button / prompt)

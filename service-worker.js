@@ -34,7 +34,7 @@ self.addEventListener('activate', event => {
 });
 
 // ── Show a notification ONLY if the same one is not already on screen ──
-// (fixes the 7 AM / 2 PM duplicate: if you have not cleared it, we skip it)
+// (fixes the 7 AM / 2 PM / 8 PM duplicate: if you have not cleared it, we skip it)
 async function showOnce(title, options) {
   try {
     const active = await self.registration.getNotifications({ tag: options.tag });
@@ -130,322 +130,232 @@ async function fetchGoldRates() {
   };
 }
 
-async function goldChangeCheck(data) {
-  if (!data.notifGold) return;
+
+// ═════════════════════════════════════════════════════════════════
+//  ONE place builds and shows every notification.
+//  - mode 'push' : scheduled FCM push (7 AM / 2 PM / 8 PM, set in the Cloudflare worker). Re-shows a notification
+//                  the user cleared; if one is still on screen with the same text it
+//                  is left alone, if the text changed it is updated and alerts once.
+//  - mode 'page' : the app was opened / data was saved. Only UPDATES a notification
+//                  that is on screen (silently) or shows a changed one once. It never
+//                  re-shows something the user already dismissed.
+//  The page does not build notifications any more; it just sends
+//  {type:'CHECK_NOTIFICATIONS'} so page and push can never disagree or repeat.
+// ═════════════════════════════════════════════════════════════════
+const ICON = './assets/icon.png';
+let runChain = Promise.resolve();
+
+function runNotifications(mode) {
+  // serialise runs (push + page message at the same moment must not double-show)
+  runChain = runChain.then(() => doRun(mode)).catch(e => console.error('Notification run failed:', e));
+  return runChain;
+}
+
+function istToday() {
+  const t = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+  t.setHours(0, 0, 0, 0);
+  return t;
+}
+
+async function notify(ctx, tag, title, body, page, requireInteraction) {
+  const sig = ctx.dayKey + '|' + title + '|' + body;
+  let active = [];
+  try { active = await self.registration.getNotifications({ tag }); } catch (e) {}
+
+  // identical notification still on screen -> nothing to do
+  if (active.some(n => n.title === title && n.body === body)) { ctx.sigs[tag] = sig; return false; }
+
+  const options = {
+    body, icon: ICON, badge: ICON, tag,
+    requireInteraction: !!requireInteraction,
+    data: { page: page || '' }
+  };
+  if (active.length) {
+    // on screen but the data changed -> update it; only a scheduled push makes a sound
+    options.renotify = (ctx.mode === 'push');
+  } else if (ctx.mode === 'page' && ctx.sigs[tag] === sig) {
+    // user already saw and cleared exactly this today -> do not bring it back
+    return false;
+  }
   try {
+    await self.registration.showNotification(title, options);
+    ctx.sigs[tag] = sig;
+    return true;
+  } catch (e) { console.warn('showNotification failed:', tag, e); return false; }
+}
+
+async function closeTag(ctx, tag) {
+  try {
+    const old = await self.registration.getNotifications({ tag });
+    old.forEach(n => n.close());
+  } catch (e) {}
+  delete ctx.sigs[tag];
+}
+
+async function closeStaleBudget(ctx, keepTags) {
+  try {
+    const all = await self.registration.getNotifications();
+    all.forEach(n => { if (n.tag && n.tag.indexOf('budget-item-') === 0 && !keepTags.has(n.tag)) n.close(); });
+  } catch (e) {}
+  Object.keys(ctx.sigs).forEach(t => { if (t.indexOf('budget-item-') === 0 && !keepTags.has(t)) delete ctx.sigs[t]; });
+}
+
+function dayDiff(dateStr, today) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const end = new Date(y, m - 1, d); end.setHours(0, 0, 0, 0);
+  return Math.floor((end - today) / 86400000);
+}
+
+async function section(name, fn) {
+  try { await fn(); } catch (e) { console.error(name + ' notification failed:', e); }
+}
+
+async function doRun(mode) {
+  if (typeof Notification !== 'undefined' && Notification.permission && Notification.permission !== 'granted') return;
+  const data = await readAppData();
+  if (!data || typeof data !== 'object') return;
+
+  const today = istToday();
+  const ctx = { mode, today, dayKey: pqKey(today), sigs: (await stateGet('notif-sig')) || {} };
+  // forget signatures from earlier days
+  Object.keys(ctx.sigs).forEach(t => { if (String(ctx.sigs[t]).split('|')[0] !== ctx.dayKey) delete ctx.sigs[t]; });
+
+  // ── Priority Queue (first: it is the most important one) ────
+  await section('Priority', async () => {
+    if (data.notifPriority === false || !Array.isArray(data.priorityQueue) || !data.priorityQueue.length) {
+      return closeTag(ctx, 'priority-summary');
+    }
+    const sim = JSON.parse(JSON.stringify(data.priorityQueue));
+    sim.forEach(d => { if (!Array.isArray(d.items)) d.items = []; });
+    pqRollover(sim, ctx.dayKey);
+    const day = sim.find(d => d.date === ctx.dayKey);
+    const active = day ? day.items.filter(i => i.r !== true) : [];
+    const pending = active.filter(i => !i.done);
+    if (!pending.length) return closeTag(ctx, 'priority-summary');
+    const MAX = 6;
+    const lines = pending.slice(0, MAX).map(i => '• ' + i.text + (i.from ? ' (old)' : ''));
+    if (pending.length > MAX) lines.push('+' + (pending.length - MAX) + ' more');
+    await notify(ctx, 'priority-summary',
+      '🎯 Priority Queue (' + (active.length - pending.length) + '/' + active.length + ' completed)',
+      lines.join('\n'), 'priority', true);
+  });
+
+  // ── Reminders: expired / today / tomorrow ───────────────────
+  await section('Reminders', async () => {
+    if (!data.notifReminders || !Array.isArray(data.reminders)) return closeTag(ctx, 'reminders-summary');
+    const lines = [];
+    data.reminders.forEach(r => {
+      if (!r || !r.endDate) return;
+      const diff = dayDiff(r.endDate, today);
+      if (diff < 0) lines.push(r.title + ' — EXPIRED');
+      else if (diff === 0) lines.push(r.title + ' — Due today');
+      else if (diff === 1) lines.push(r.title + ' — 1 day left');
+    });
+    if (!lines.length) return closeTag(ctx, 'reminders-summary');
+    await notify(ctx, 'reminders-summary', '⚠️ Reminder Alert', lines.join('\n'), 'reminders', true);
+  });
+
+  // ── Notes: latest few ───────────────────────────────────────
+  await section('Notes', async () => {
+    if (!data.notifNotes || !Array.isArray(data.notes) || !data.notes.length) return closeTag(ctx, 'notes-summary');
+    const MAX = 5;
+    const recent = data.notes.slice().reverse();
+    const lines = recent.slice(0, MAX).map(n => {
+      let t = n.text;
+      if (n.isTable) t = '[Table Note]';
+      else if (!t && n.file) t = '[File: ' + n.file.name + ']';
+      else if (!t) t = '[Empty Note]';
+      else if (t.length > 40) t = t.slice(0, 40) + '...';
+      return '- ' + t;
+    });
+    if (recent.length > MAX) lines.push('+' + (recent.length - MAX) + ' more');
+    await notify(ctx, 'notes-summary', '📝 Notes Reminder', lines.join('\n'), 'notes', false);
+  });
+
+  // ── Open checklists ─────────────────────────────────────────
+  await section('Checklist', async () => {
+    const open = (data.notifChecklist && Array.isArray(data.checklists)) ? data.checklists.filter(c => c.status === 'open') : [];
+    if (!open.length) return closeTag(ctx, 'checklists-summary');
+    const lines = open.map(c => c.title + ' — ' + (c.items ? c.items.length : 0) + ' items pending');
+    await notify(ctx, 'checklists-summary', '✒️ Pending Checklists', lines.join('\n'), 'Check', true);
+  });
+
+  // ── Budget: one notification per budget, removed when the budget is deleted ──
+  await section('Budget', async () => {
+    const keep = new Set();
+    if (data.notifBudget && Array.isArray(data.budget)) {
+      for (const b of data.budget) {
+        const tag = 'budget-item-' + b.title;
+        keep.add(tag);
+        const used = (b.expenses || []).reduce((s, e) => s + Number(e.amount || 0), 0);
+        const remaining = Number(b.amount) - used;
+        let body;
+        if (!b.endDate) {
+          body = b.title + ': ₹' + remaining + ' left';
+        } else {
+          const days = Math.max(0, dayDiff(b.endDate, today));
+          if (days === 0) {
+            body = remaining >= 0
+              ? b.title + ': 🎉 Budget ended — you saved ₹' + remaining
+              : b.title + ': Budget ended — over by ₹' + Math.abs(remaining);
+          } else {
+            body = b.title + ': Spend ₹' + (remaining / days).toFixed(2) + '/day — ₹' + remaining + ' left over ' + days + ' days';
+          }
+        }
+        await notify(ctx, tag, '💰 Budget Reminder', body, 'budget', false);
+      }
+    }
+    await closeStaleBudget(ctx, keep);
+  });
+
+  // ── Moon phase ──────────────────────────────────────────────
+  await section('Moon', async () => {
+    if (!data.notifMoonPhase) return closeTag(ctx, 'moon-phase');
+    const phase = getMoonPhase(today.getFullYear(), today.getMonth(), today.getDate());
+    if (phase === 'Full Moon') await notify(ctx, 'moon-phase', '🌕 Pournami Today!', 'Full Moon (Pournami) is today.', '', true);
+    else if (phase === 'New Moon') await notify(ctx, 'moon-phase', '🌑 Amavasai Today!', 'New Moon (Amavasai) is today.', '', true);
+    else await closeTag(ctx, 'moon-phase');
+  });
+
+  // ── Gold rate (network, so last) ────────────────────────────
+  await section('Gold', async () => {
+    if (!data.notifGold) return;
+    // the page may ask often; only hit the network every 30 min unless it is a scheduled push
+    const lastRun = (await stateGet('gold-checked')) || 0;
+    if (mode === 'page' && Date.now() - lastRun < 30 * 60 * 1000) return;
+    await stateSet('gold-checked', Date.now());
     const rates = await fetchGoldRates();
     const last = await stateGet('gold-last');
     await stateSet('gold-last', rates);
-    if (!last) return; // first run = baseline only
+    if (!last) return;                       // first run = baseline only
     const d22 = rates['22k'] - last['22k'];
     if (Math.abs(d22) < GOLD_NOTIFY_MIN_CHANGE) return;
     const arrow = d22 > 0 ? '▲ +' : '▼ -';
     const f = v => '₹' + Number(v).toLocaleString('en-IN');
-    await self.registration.showNotification('🥇 Gold Rate ' + (d22 > 0 ? 'Up' : 'Down'), {
-      body: '22K ' + f(rates['22k']) + '/g (' + arrow + '₹' + Math.abs(d22) + ')  |  24K ' + f(rates['24k']) + '/g  |  18K ' + f(rates['18k']) + '/g',
-      icon: './assets/icon.png',
-      badge: './assets/icon.png',
-      tag: 'gold-rate',
-      renotify: true,
-      data: { page: 'utilities' }
-    });
-  } catch (e) { console.warn('Gold check skipped:', e); }
+    ctx.mode = 'push';                       // a real price move should always alert
+    await notify(ctx, 'gold-rate', '🥇 Gold Rate ' + (d22 > 0 ? 'Up' : 'Down'),
+      '22K ' + f(rates['22k']) + '/g (' + arrow + '₹' + Math.abs(d22) + ')  |  24K ' + f(rates['24k']) + '/g  |  18K ' + f(rates['18k']) + '/g',
+      'utilities', false);
+  });
+
+  await stateSet('notif-sig', ctx.sigs);
 }
 
-// ── Background push event — CORE of the feature ────────────────
+// ── Background push (FCM wakes the worker) ─────────────────────
 self.addEventListener('push', event => {
-  event.waitUntil((async () => {
-    const data = await readAppData();
-  
-    if (
-  !data ||
-  typeof data !== 'object'
-) {
-  return;
-}
+  event.waitUntil(runNotifications('push'));
+});
 
-const today =
-  new Date(
-    new Date().toLocaleString(
-      'en-US',
-      {
-        timeZone:
-        'Asia/Kolkata'
-      }
-    )
-  );
-
-today.setHours(0, 0, 0, 0);
-console.log(
-  'BACKGROUND PUSH STARTED'
-);
-    // ── Priority Queue — unchecked items only, completed / total ──
-    // Runs FIRST and in its own try/catch so an error in any other section
-    // can never stop the priority notification.
-    try {
-      if (data.notifPriority !== false && Array.isArray(data.priorityQueue) && data.priorityQueue.length) {
-        const todayKey = pqKey(today);
-        const sim = JSON.parse(JSON.stringify(data.priorityQueue));
-        sim.forEach(d => { if (!Array.isArray(d.items)) d.items = []; });
-        pqRollover(sim, todayKey);
-        const day = sim.find(d => d.date === todayKey);
-        const activeItems = day ? day.items.filter(i => i.r !== true) : [];
-        const pending = activeItems.filter(i => !i.done);
-        if (pending.length) {
-          const completed = activeItems.length - pending.length;
-          const MAX = 6;
-          const lines = pending.slice(0, MAX).map(i => '• ' + i.text + (i.from ? ' (old)' : ''));
-          if (pending.length > MAX) lines.push('+' + (pending.length - MAX) + ' more');
-          await showOnce('🎯 Priority Queue (' + completed + '/' + activeItems.length + ' completed)', {
-            body: lines.join('\n'),
-            icon: './assets/icon.png',
-            badge: './assets/icon.png',
-            tag: 'priority-summary',
-            requireInteraction: true,
-            data: { page: 'priority' }
-          });
-        } else {
-          try {
-            const old = await self.registration.getNotifications({ tag: 'priority-summary' });
-            old.forEach(n => n.close());
-          } catch (e) {}
-        }
-      }
-    } catch (e) { console.error('Priority push failed:', e); }
-
-    try {
-    // ── 1. Expired / due reminders ──────────────────────────────
-if (
-  data.notifReminders &&
-  Array.isArray(data.reminders) &&
-  data.reminders.length
-) {
-
-  const dueReminders =
-    data.reminders.filter(r => {
-
-      if (!r.endDate)
-        return false;
-
-      const [y, m, d] =
-        r.endDate
-        .split('-')
-        .map(Number);
-
-      const end =
-        new Date(y, m - 1, d);
-
-      end.setHours(
-        0, 0, 0, 0
-      );
-
-      const diff =
-        Math.floor(
-          (end - today) /
-          86400000
-        );
-
-      return (
-        diff < 0 ||
-        diff === 0 ||
-        diff === 1
-      );
-    });
-
-  if (dueReminders.length) {
-
-    const lines =
-      dueReminders.map(r => {
-
-        const [y, m, d] =
-          r.endDate
-          .split('-')
-          .map(Number);
-
-        const end =
-          new Date(y, m - 1, d);
-
-        end.setHours(
-          0, 0, 0, 0
-        );
-
-        const diff =
-          Math.floor(
-            (end - today) /
-            86400000
-          );
-
-        let status = '';
-
-        if (diff < 0) {
-
-          status =
-            'EXPIRED';
-
-        }
-
-        else if (diff === 0) {
-
-          status =
-            'Due today';
-
-        }
-
-        else if (diff === 1) {
-
-          status =
-            '1 day left';
-        }
-
-        return (
-          `${r.title} — ${status}`
-        );
-      });
-
-    await showOnce(
-
-      '⚠️ Reminder Alert',
-
-      {
-
-        body:
-          lines.join('\n'),
-
-        icon:
-          './assets/icon.png',
-
-        badge:
-          './assets/icon.png',
-
-        tag:
-          'reminders-summary',
-
-        requireInteraction:
-          true,
-
-        data: {
-          page:
-          'reminders'
-        }
-      }
-    );
+// ── Messages from the page ─────────────────────────────────────
+self.addEventListener('message', event => {
+  const d = event.data || {};
+  if (d.type === 'CHECK_NOTIFICATIONS') {
+    event.waitUntil(runNotifications('page'));
+  } else if (d.type === 'SHOW_NOTIFICATION') {
+    event.waitUntil(showOnce(d.title, {
+      body: d.body, icon: ICON, badge: ICON, tag: d.tag, requireInteraction: true
+    }));
   }
-}
-    } catch (e) { console.error('Reminders push failed:', e); }
-
-    try {
-// ── Notes notifications ─────────────────────────
-if (
-  data.notifNotes &&
-  Array.isArray(data.notes) &&
-  data.notes.length
-) {
-
-  const latest =
-    data.notes[
-      data.notes.length - 1
-    ];
-
-  if (
-    latest &&
-    typeof latest.text === 'string'
-  ) {
-
-    await showOnce(
-
-      '📝 Notes Reminder',
-
-      {
-
-        body:
-          latest.text.slice(0, 120),
-
-        icon:
-          './assets/icon.png',
-
-        badge:
-          './assets/icon.png',
-
-        tag:
-          'notes-summary',
-
-        data:
-          { page: 'notes' }
-      }
-    );
-  }
-}
-    } catch (e) { console.error('Notes push failed:', e); }
-
-    try {
-    // ── 2. Open checklists ──────────────────────────────────────
-    if (   data.notifChecklist &&   Array.isArray(data.checklists) &&   data.checklists.length ) {
-      const open = data.checklists.filter(c => c.status === 'open');
-      if (open.length) {
-        const lines = open.map(c =>
-          `${c.title} — ${c.items ? c.items.length : 0} items pending`
-        );
-
-        await showOnce('✒️ Pending Checklists', {
-          body: lines.join('\n'),
-          icon:   './assets/icon.png' ||   './manifest.json',
-          badge: './assets/icon.png',
-          tag: 'checklists-summary',
-          requireInteraction: true,
-          data: { page: 'Check' }
-        });
-      }
-    }
-    } catch (e) { console.error('Checklist push failed:', e); }
-
-    try {
-    // ── 3. Budget — daily spend limit ──────────────────────────
-    if (   data.notifBudget &&   Array.isArray(data.budget) &&   data.budget.length ) {
-      for (const b of data.budget) {
-        if (!b.endDate) continue;
-        const [y, m, d] = b.endDate.split('-').map(Number);
-        const end = new Date(y, m - 1, d);
-        const daysLeft = Math.max(0, Math.floor((end - today) / 86400000));
-        if (daysLeft === 0) continue;
-
-        const used = (b.expenses || []).reduce((s, e) => s + Number(e.amount), 0);
-        const remaining = Number(b.amount) - used;
-        const perDay = (remaining / daysLeft).toFixed(2);
-
-        await showOnce('💰 Budget Reminder', {
-          body: `${b.title}: Spend ₹${perDay}/day — ₹${remaining} left over ${daysLeft} days`,
-          icon:   './assets/icon.png' ||   './manifest.json',
-          badge: './assets/icon.png',
-          tag: `budget-item-${b.title}`,
-          data: { page: 'budget' }
-        });
-      }
-    }
-    } catch (e) { console.error('Budget push failed:', e); }
-
-    // ── 5. Gold rate change ─────────────
-    try { await goldChangeCheck(data); } catch (e) {}
-
-    // ── 4. Moon phase — Pournami / Amavasai ────────────────────
-    if (data.notifMoonPhase) {
-      const phase = getMoonPhase(today.getFullYear(), today.getMonth(), today.getDate());
-      if (phase === 'Full Moon') {
-        await showOnce('🌕 Pournami Today!', {
-          body: 'Full Moon (Pournami) is today.',
-          icon:   './assets/icon.png' ||   './manifest.json',
-          tag: 'moon-phase',
-          requireInteraction: true
-        });
-      } else if (phase === 'New Moon') {
-        await showOnce('🌑 Amavasai Today!', {
-          body: 'New Moon (Amavasai) is today.',
-          icon:   './assets/icon.png' ||   './manifest.json',
-          tag: 'moon-phase',
-          requireInteraction: true
-        });
-      }
-    }
-  })());
 });
 
 // ── Notification click — open the right page ───────────────────
@@ -505,19 +415,6 @@ self.addEventListener(
     );
   }
 );
-
-// ── Foreground message from page ───────────────────────────────
-self.addEventListener('message', event => {
-  if (   event.data &&   event.data.type ===   'SHOW_NOTIFICATION' ) {
-    showOnce(event.data.title, {
-      body: event.data.body,
-      icon:   './assets/icon.png' ||   './manifest.json',
-      badge: './assets/icon.png',
-      tag: event.data.tag,
-      requireInteraction: true
-    });
-  }
-});
 
 // ── Moon phase algorithm (copied into SW — no import needed) ───
 function getMoonPhase(y, m, d) {

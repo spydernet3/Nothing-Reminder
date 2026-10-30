@@ -8,8 +8,8 @@ importScripts(
 
 // App notification logic (reads the app data and shows Reminders, Checklist,
 // Notes, Budget, Gold and Moon Phase notifications on every push).
-// Loading it here means the push is handled no matter which of the two
-// service workers is the active one.
+// This is now the ONLY service worker the app registers, so every push
+// (and every "app opened" refresh) is handled by service-worker.js.
 importScripts('service-worker.js');
 
 firebase.initializeApp({

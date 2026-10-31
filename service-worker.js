@@ -66,7 +66,7 @@ function readAppData() {
         const tx    = db.transaction(STORE_NAME, 'readonly');
         const store = tx.objectStore(STORE_NAME);
         const get   = store.get('main');
-        get.onsuccess = () => resolve(get.result || null);
+        get.onsuccess = () => { resolve(get.result || null); try { db.close(); } catch (e) {} };
         get.onerror   = () => resolve(null);
       } catch { resolve(null); }
     };
@@ -132,15 +132,15 @@ async function fetchGoldRates() {
 
 
 // ═════════════════════════════════════════════════════════════════
-//  ONE place builds and shows every notification.
-//  - mode 'push' : scheduled FCM push (7 AM / 2 PM / 8 PM, set in the Cloudflare worker). Re-shows a notification
-//                  the user cleared; if one is still on screen with the same text it
-//                  is left alone, if the text changed it is updated and alerts once.
-//  - mode 'page' : the app was opened / data was saved. Only UPDATES a notification
-//                  that is on screen (silently) or shows a changed one once. It never
-//                  re-shows something the user already dismissed.
-//  The page does not build notifications any more; it just sends
-//  {type:'CHECK_NOTIFICATIONS'} so page and push can never disagree or repeat.
+//  ONE place builds and shows every notification. Two simple rules:
+//
+//  1. BACKGROUND PUSH (mode 'push'): whenever a push arrives, show the notifications
+//     — it does not matter how much time has passed.
+//  2. IN-APP (mode 'page'): when the app is opened or data is changed, show the
+//     notifications if none are on screen, or update the one that is on screen.
+//
+//  NO DUPLICATES: if a notification with the same text is already on screen it is
+//  left alone. If its data changed, the same notification is updated in place.
 // ═════════════════════════════════════════════════════════════════
 const ICON = './assets/icon.png';
 let runChain = Promise.resolve();
@@ -158,28 +158,23 @@ function istToday() {
 }
 
 async function notify(ctx, tag, title, body, page, requireInteraction) {
-  const sig = ctx.dayKey + '|' + title + '|' + body;
   let active = [];
   try { active = await self.registration.getNotifications({ tag }); } catch (e) {}
 
-  // identical notification still on screen -> nothing to do
-  if (active.some(n => n.title === title && n.body === body)) { ctx.sigs[tag] = sig; return false; }
+  // same notification already on screen -> no duplicate
+  if (active.some(n => n.title === title && n.body === body)) return false;
 
   const options = {
     body, icon: ICON, badge: ICON, tag,
     requireInteraction: !!requireInteraction,
     data: { page: page || '' }
   };
-  if (active.length) {
-    // on screen but the data changed -> update it; only a scheduled push makes a sound
-    options.renotify = (ctx.mode === 'push');
-  } else if (ctx.mode === 'page' && ctx.sigs[tag] === sig) {
-    // user already saw and cleared exactly this today -> do not bring it back
-    return false;
-  }
+  // same tag replaces the old one (never two). Changed data from a push alerts once;
+  // changed data from the app updates quietly.
+  if (active.length) options.renotify = (ctx.mode === 'push');
+
   try {
     await self.registration.showNotification(title, options);
-    ctx.sigs[tag] = sig;
     return true;
   } catch (e) { console.warn('showNotification failed:', tag, e); return false; }
 }
@@ -189,7 +184,6 @@ async function closeTag(ctx, tag) {
     const old = await self.registration.getNotifications({ tag });
     old.forEach(n => n.close());
   } catch (e) {}
-  delete ctx.sigs[tag];
 }
 
 async function closeStaleBudget(ctx, keepTags) {
@@ -197,7 +191,6 @@ async function closeStaleBudget(ctx, keepTags) {
     const all = await self.registration.getNotifications();
     all.forEach(n => { if (n.tag && n.tag.indexOf('budget-item-') === 0 && !keepTags.has(n.tag)) n.close(); });
   } catch (e) {}
-  Object.keys(ctx.sigs).forEach(t => { if (t.indexOf('budget-item-') === 0 && !keepTags.has(t)) delete ctx.sigs[t]; });
 }
 
 function dayDiff(dateStr, today) {
@@ -216,9 +209,7 @@ async function doRun(mode) {
   if (!data || typeof data !== 'object') return;
 
   const today = istToday();
-  const ctx = { mode, today, dayKey: pqKey(today), sigs: (await stateGet('notif-sig')) || {} };
-  // forget signatures from earlier days
-  Object.keys(ctx.sigs).forEach(t => { if (String(ctx.sigs[t]).split('|')[0] !== ctx.dayKey) delete ctx.sigs[t]; });
+  const ctx = { mode, today, dayKey: pqKey(today) };
 
   // ── Priority Queue (first: it is the most important one) ────
   await section('Priority', async () => {
@@ -242,7 +233,7 @@ async function doRun(mode) {
 
   // ── Reminders: expired / today / tomorrow ───────────────────
   await section('Reminders', async () => {
-    if (!data.notifReminders || !Array.isArray(data.reminders)) return closeTag(ctx, 'reminders-summary');
+    if (data.notifReminders === false || !Array.isArray(data.reminders)) return closeTag(ctx, 'reminders-summary');
     const lines = [];
     data.reminders.forEach(r => {
       if (!r || !r.endDate) return;
@@ -257,7 +248,7 @@ async function doRun(mode) {
 
   // ── Notes: latest few ───────────────────────────────────────
   await section('Notes', async () => {
-    if (!data.notifNotes || !Array.isArray(data.notes) || !data.notes.length) return closeTag(ctx, 'notes-summary');
+    if (data.notifNotes === false || !Array.isArray(data.notes) || !data.notes.length) return closeTag(ctx, 'notes-summary');
     const MAX = 5;
     const recent = data.notes.slice().reverse();
     const lines = recent.slice(0, MAX).map(n => {
@@ -274,7 +265,7 @@ async function doRun(mode) {
 
   // ── Open checklists ─────────────────────────────────────────
   await section('Checklist', async () => {
-    const open = (data.notifChecklist && Array.isArray(data.checklists)) ? data.checklists.filter(c => c.status === 'open') : [];
+    const open = (data.notifChecklist !== false && Array.isArray(data.checklists)) ? data.checklists.filter(c => c && c.status === 'open') : [];
     if (!open.length) return closeTag(ctx, 'checklists-summary');
     const lines = open.map(c => c.title + ' — ' + (c.items ? c.items.length : 0) + ' items pending');
     await notify(ctx, 'checklists-summary', '✒️ Pending Checklists', lines.join('\n'), 'Check', true);
@@ -283,7 +274,7 @@ async function doRun(mode) {
   // ── Budget: one notification per budget, removed when the budget is deleted ──
   await section('Budget', async () => {
     const keep = new Set();
-    if (data.notifBudget && Array.isArray(data.budget)) {
+    if (data.notifBudget !== false && Array.isArray(data.budget)) {
       for (const b of data.budget) {
         const tag = 'budget-item-' + b.title;
         keep.add(tag);
@@ -310,7 +301,7 @@ async function doRun(mode) {
 
   // ── Moon phase ──────────────────────────────────────────────
   await section('Moon', async () => {
-    if (!data.notifMoonPhase) return closeTag(ctx, 'moon-phase');
+    if (data.notifMoonPhase === false) return closeTag(ctx, 'moon-phase');
     const phase = getMoonPhase(today.getFullYear(), today.getMonth(), today.getDate());
     if (phase === 'Full Moon') await notify(ctx, 'moon-phase', '🌕 Pournami Today!', 'Full Moon (Pournami) is today.', '', true);
     else if (phase === 'New Moon') await notify(ctx, 'moon-phase', '🌑 Amavasai Today!', 'New Moon (Amavasai) is today.', '', true);
@@ -319,7 +310,7 @@ async function doRun(mode) {
 
   // ── Gold rate (network, so last) ────────────────────────────
   await section('Gold', async () => {
-    if (!data.notifGold) return;
+    if (data.notifGold !== true) return;
     // the page may ask often; only hit the network every 30 min unless it is a scheduled push
     const lastRun = (await stateGet('gold-checked')) || 0;
     if (mode === 'page' && Date.now() - lastRun < 30 * 60 * 1000) return;
@@ -338,7 +329,6 @@ async function doRun(mode) {
       'utilities', false);
   });
 
-  await stateSet('notif-sig', ctx.sigs);
 }
 
 // ── Background push (FCM wakes the worker) ─────────────────────

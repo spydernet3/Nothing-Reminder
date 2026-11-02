@@ -151,10 +151,18 @@ function runNotifications(mode) {
   return runChain;
 }
 
+// Today's calendar date in India. Built from date PARTS (not by parsing a formatted
+// string, which some Android Chrome versions break with a special space before AM/PM).
 function istToday() {
-  const t = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
-  t.setHours(0, 0, 0, 0);
-  return t;
+  try {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit'
+    }).formatToParts(new Date());
+    const g = type => Number(parts.find(p => p.type === type).value);
+    const t = new Date(g('year'), g('month') - 1, g('day'));
+    if (!isNaN(t.getTime())) return t;
+  } catch (e) {}
+  const t = new Date(); t.setHours(0, 0, 0, 0); return t;   // fallback: device date
 }
 
 async function notify(ctx, tag, title, body, page, requireInteraction) {
@@ -196,7 +204,7 @@ async function closeStaleBudget(ctx, keepTags) {
 function dayDiff(dateStr, today) {
   const [y, m, d] = dateStr.split('-').map(Number);
   const end = new Date(y, m - 1, d); end.setHours(0, 0, 0, 0);
-  return Math.floor((end - today) / 86400000);
+  return Math.round((end - today) / 86400000);
 }
 
 async function section(name, fn) {

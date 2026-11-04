@@ -142,13 +142,18 @@ async function fetchGoldRates() {
 //  NO DUPLICATES: if a notification with the same text is already on screen it is
 //  left alone. If its data changed, the same notification is updated in place.
 // ═════════════════════════════════════════════════════════════════
-const SW_VERSION = '2026-11-04-c';   // keep equal to EXPECTED_SW_VERSION in index.html and ?v= in firebase-messaging-sw.js
+const SW_VERSION = '2026-11-04-d';   // keep equal to EXPECTED_SW_VERSION in index.html and ?v= in firebase-messaging-sw.js
 const ICON = './assets/icon.png';
 
 // Android silently DROPS notifications that one app posts too quickly one after another
 // (only the first one or two get through). So every notification is posted with a gap,
 // and afterwards we check that each one really is on screen and re-post any that were lost.
 const NOTIFY_GAP_MS = 1000;
+// A notification that the browser lists as "showing" is normally left alone. But on some phones the
+// browser lists one that the phone never really displayed, and then it would be skipped forever.
+// So an identical one is quietly re-posted (same tag = replaces it, no second copy, no sound)
+// when it was last posted more than this long ago.
+const REPOST_AFTER_MS = 5 * 60 * 1000;
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 let runChain = Promise.resolve();
@@ -186,8 +191,8 @@ async function notify(ctx, tag, title, body, page, requireInteraction) {
   let active = [];
   try { active = await self.registration.getNotifications({ tag }); } catch (e) {}
 
-  // same notification already on screen -> no duplicate
-  if (active.some(n => n.title === title && n.body === body)) return false;
+  const identical = active.some(n => n.title === title && n.body === body);
+  if (identical && Date.now() - (ctx.posted[tag] || 0) < REPOST_AFTER_MS) return false;   // just posted -> no duplicate
 
   const options = {
     body, icon: ICON, badge: ICON, tag,
@@ -196,10 +201,12 @@ async function notify(ctx, tag, title, body, page, requireInteraction) {
   };
   // same tag replaces the old one (never two). Changed data from a push alerts once;
   // changed data from the app updates quietly.
-  if (active.length) options.renotify = (ctx.mode === 'push');
+  // identical re-post is always silent
+  if (active.length) options.renotify = (ctx.mode === 'push') && !identical;
 
   try {
     await self.registration.showNotification(title, options);
+    ctx.posted[tag] = Date.now();
     await sleep(NOTIFY_GAP_MS);          // give Android time before the next one
     return true;
   } catch (e) { console.warn('showNotification failed:', tag, e); return false; }
@@ -265,7 +272,7 @@ async function doRun(mode) {
   if (!data || typeof data !== 'object') return;
 
   const today = istToday();
-  const ctx = { mode, today, dayKey: pqKey(today), expected: new Map() };
+  const ctx = { mode, today, dayKey: pqKey(today), expected: new Map(), posted: (await stateGet('posted-at')) || {} };
 
   // ── Priority Queue (first: it is the most important one) ────
   await section('Priority', async () => {
@@ -365,6 +372,8 @@ async function doRun(mode) {
   });
 
   await verifyShown(ctx);
+  Object.keys(ctx.posted).forEach(t => { if (!ctx.expected.has(t)) delete ctx.posted[t]; });
+  await stateSet('posted-at', ctx.posted);
 
   // ── Gold rate (network, so last) ────────────────────────────
   await section('Gold', async () => {

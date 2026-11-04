@@ -142,6 +142,7 @@ async function fetchGoldRates() {
 //  NO DUPLICATES: if a notification with the same text is already on screen it is
 //  left alone. If its data changed, the same notification is updated in place.
 // ═════════════════════════════════════════════════════════════════
+const SW_VERSION = '2026-11-04-a';   // keep equal to EXPECTED_SW_VERSION in index.html and ?v= in firebase-messaging-sw.js
 const ICON = './assets/icon.png';
 
 // Android silently DROPS notifications that one app posts too quickly one after another
@@ -391,6 +392,8 @@ self.addEventListener('push', event => {
 self.addEventListener('message', event => {
   const d = event.data || {};
   if (d.type === 'CHECK_NOTIFICATIONS') {
+    // tell the page immediately which version is running (an old cached worker never answers)
+    try { if (event.ports && event.ports[0]) event.ports[0].postMessage({ ok: true, version: SW_VERSION }); } catch (e) {}
     event.waitUntil(runNotifications('page'));
   } else if (d.type === 'SHOW_NOTIFICATION') {
     event.waitUntil(showOnce(d.title, {

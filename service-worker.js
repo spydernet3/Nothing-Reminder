@@ -142,7 +142,7 @@ async function fetchGoldRates() {
 //  NO DUPLICATES: if a notification with the same text is already on screen it is
 //  left alone. If its data changed, the same notification is updated in place.
 // ═════════════════════════════════════════════════════════════════
-const SW_VERSION = '2026-11-04-a';   // keep equal to EXPECTED_SW_VERSION in index.html and ?v= in firebase-messaging-sw.js
+const SW_VERSION = '2026-11-04-c';   // keep equal to EXPECTED_SW_VERSION in index.html and ?v= in firebase-messaging-sw.js
 const ICON = './assets/icon.png';
 
 // Android silently DROPS notifications that one app posts too quickly one after another
@@ -207,15 +207,20 @@ async function notify(ctx, tag, title, body, page, requireInteraction) {
 
 // After everything was posted: make sure each notification really is on screen.
 // Any that Android dropped are posted again (same tag = replaces, never a duplicate).
+async function missingNow(ctx) {
+  let now = [];
+  try { now = await self.registration.getNotifications(); } catch (e) { return []; }
+  const missing = [];
+  ctx.expected.forEach((v, tag) => {
+    if (!now.some(n => n.tag === tag && n.title === v.title && n.body === v.body)) missing.push([tag, v]);
+  });
+  return missing;
+}
+
 async function verifyShown(ctx) {
   for (let attempt = 0; attempt < 3; attempt++) {
-    let now = [];
-    try { now = await self.registration.getNotifications(); } catch (e) { return; }
-    const missing = [];
-    ctx.expected.forEach((v, tag) => {
-      if (!now.some(n => n.tag === tag && n.title === v.title && n.body === v.body)) missing.push([tag, v]);
-    });
-    if (!missing.length) return;
+    const missing = await missingNow(ctx);
+    if (!missing.length) return [];
     await sleep(NOTIFY_GAP_MS);
     for (const [tag, v] of missing) {
       try {
@@ -227,6 +232,7 @@ async function verifyShown(ctx) {
       await sleep(NOTIFY_GAP_MS);
     }
   }
+  return (await missingNow(ctx)).map(m => m[0]);
 }
 
 async function closeTag(ctx, tag) {

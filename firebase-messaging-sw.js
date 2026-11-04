@@ -13,7 +13,7 @@ importScripts(
 // The ?v= number changes whenever service-worker.js changes. This forces the browser to
 // download the new logic instead of using an old cached copy (a cached copy made new
 // uploads look like they did nothing).
-importScripts('service-worker.js?v=2026-11-04-a');
+importScripts('service-worker.js?v=2026-11-04-c');
 
 firebase.initializeApp({
 

@@ -143,11 +143,26 @@ async function fetchGoldRates() {
 //  left alone. If its data changed, the same notification is updated in place.
 // ═════════════════════════════════════════════════════════════════
 const ICON = './assets/icon.png';
+
+// Android silently DROPS notifications that one app posts too quickly one after another
+// (only the first one or two get through). So every notification is posted with a gap,
+// and afterwards we check that each one really is on screen and re-post any that were lost.
+const NOTIFY_GAP_MS = 1000;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
 let runChain = Promise.resolve();
+let pageRunQueued = false;
 
 function runNotifications(mode) {
+  // many quick "data saved" messages from the app -> one run is enough
+  if (mode === 'page') {
+    if (pageRunQueued) return runChain;
+    pageRunQueued = true;
+  }
   // serialise runs (push + page message at the same moment must not double-show)
-  runChain = runChain.then(() => doRun(mode)).catch(e => console.error('Notification run failed:', e));
+  runChain = runChain
+    .then(() => { if (mode === 'page') pageRunQueued = false; return doRun(mode); })
+    .catch(e => { pageRunQueued = false; console.error('Notification run failed:', e); });
   return runChain;
 }
 
@@ -166,6 +181,7 @@ function istToday() {
 }
 
 async function notify(ctx, tag, title, body, page, requireInteraction) {
+  ctx.expected.set(tag, { title, body, page, requireInteraction });   // must be on screen at the end
   let active = [];
   try { active = await self.registration.getNotifications({ tag }); } catch (e) {}
 
@@ -183,8 +199,33 @@ async function notify(ctx, tag, title, body, page, requireInteraction) {
 
   try {
     await self.registration.showNotification(title, options);
+    await sleep(NOTIFY_GAP_MS);          // give Android time before the next one
     return true;
   } catch (e) { console.warn('showNotification failed:', tag, e); return false; }
+}
+
+// After everything was posted: make sure each notification really is on screen.
+// Any that Android dropped are posted again (same tag = replaces, never a duplicate).
+async function verifyShown(ctx) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    let now = [];
+    try { now = await self.registration.getNotifications(); } catch (e) { return; }
+    const missing = [];
+    ctx.expected.forEach((v, tag) => {
+      if (!now.some(n => n.tag === tag && n.title === v.title && n.body === v.body)) missing.push([tag, v]);
+    });
+    if (!missing.length) return;
+    await sleep(NOTIFY_GAP_MS);
+    for (const [tag, v] of missing) {
+      try {
+        await self.registration.showNotification(v.title, {
+          body: v.body, icon: ICON, badge: ICON, tag,
+          requireInteraction: !!v.requireInteraction, data: { page: v.page || '' }
+        });
+      } catch (e) {}
+      await sleep(NOTIFY_GAP_MS);
+    }
+  }
 }
 
 async function closeTag(ctx, tag) {
@@ -217,7 +258,7 @@ async function doRun(mode) {
   if (!data || typeof data !== 'object') return;
 
   const today = istToday();
-  const ctx = { mode, today, dayKey: pqKey(today) };
+  const ctx = { mode, today, dayKey: pqKey(today), expected: new Map() };
 
   // ── Priority Queue (first: it is the most important one) ────
   await section('Priority', async () => {
@@ -315,6 +356,8 @@ async function doRun(mode) {
     else if (phase === 'New Moon') await notify(ctx, 'moon-phase', '🌑 Amavasai Today!', 'New Moon (Amavasai) is today.', '', true);
     else await closeTag(ctx, 'moon-phase');
   });
+
+  await verifyShown(ctx);
 
   // ── Gold rate (network, so last) ────────────────────────────
   await section('Gold', async () => {

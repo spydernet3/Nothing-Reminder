@@ -302,7 +302,10 @@
     #viewHistoryToggle,
     #homePriorityToggle,
     #showAddPriorityBtn,
-    #viewPriorityToggle {
+    #viewPriorityToggle,
+    #homeProgressToggle,
+    #showAddProgressBtn,
+    #viewProgressToggle {
       position: relative;
       user-select: none;
       display: flex;
@@ -334,7 +337,10 @@
     #viewRemindersToggle:hover,
     #homePriorityToggle:hover,
     #showAddPriorityBtn:hover,
-    #viewPriorityToggle:hover {
+    #viewPriorityToggle:hover,
+    #homeProgressToggle:hover,
+    #showAddProgressBtn:hover,
+    #viewProgressToggle:hover {
       background: #aaa;
     }
 
@@ -353,9 +359,62 @@
     #viewRemindersToggle.open .arrow,
     #homePriorityToggle.open .arrow,
     #showAddPriorityBtn.open .arrow,
-    #viewPriorityToggle.open .arrow {
+    #viewPriorityToggle.open .arrow,
+    #homeProgressToggle.open .arrow,
+    #showAddProgressBtn.open .arrow,
+    #viewProgressToggle.open .arrow {
       transform: rotate(180deg);
       transition: left 0s;
+    }
+
+    /* Progress Tracker + Priority Queue forms: the date input must be exactly the same size as the text input */
+    #progressTitle,
+    #progressDate,
+    #priorityDate,
+    #priorityText {
+      width: 100%;
+      height: 36px;
+      box-sizing: border-box;
+      margin: 0;
+    }
+
+    #progressDate,
+    #priorityDate {
+      display: block;
+      min-width: 0;
+      -webkit-appearance: none;
+      appearance: none;
+      text-align: left;
+      line-height: normal;
+    }
+
+    #progressDate::-webkit-date-and-time-value,
+    #priorityDate::-webkit-date-and-time-value {
+      text-align: left;
+      min-height: 1.2em;
+    }
+
+    /* Progress Tracker: title, then a vertical line with the steps hanging on it */
+    .pt-steps {
+      border-left: 2px solid var(--accent);
+      margin: 6px 0 4px 8px;
+      padding-left: 14px;
+    }
+
+    .pt-step {
+      position: relative;
+      margin: 8px 0;
+    }
+
+    .pt-step::before {
+      content: '';
+      position: absolute;
+      left: -20px;
+      top: 6px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
     }
 
     /* Add this to your existing <style> block */
@@ -996,6 +1055,7 @@
     <button class="menu-btn" data-page="budget">💰 Budget Tracker</button>
     <button class="menu-btn" data-page="Check">✒ Check List</button>
     <button class="menu-btn" data-page="priority">🎯 Priority Queue</button>
+    <button class="menu-btn" data-page="progress">📈 Progress Tracker</button>
     <button class="menu-btn" data-page="utilities">🛠️ Utilities</button>
     <button class="menu-btn" data-page="trash">🗑️ Trash Bin</button>
     <button class="menu-btn" data-page="other">🎲 More Apps</button>
@@ -1074,6 +1134,12 @@
             🎯 PRIORITY QUEUE <span class="arrow">▼</span>
           </button>
         <div id="homePriorityContainer" class="form"></div>
+      </div>
+      <div class="add-area">
+        <button id="homeProgressToggle" class="add-btn" aria-expanded="false">
+            📈 PROGRESS TRACKER <span class="arrow">▼</span>
+          </button>
+        <div id="homeProgressContainer" class="form"></div>
       </div>
       <div class="add-area">
         <button id="homeOverviewToggle" class="add-btn open" aria-expanded="true">
@@ -1365,8 +1431,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.8.2 </p>
-          <p>Last Updated: 27-Oct-2026</p>
+          <p>Version 13.9.0 </p>
+          <p>Last Updated: 06-Nov-2026</p>
           <p>Project Mode: Open source</p>
           <p>App Size : 7.0KB </p>
         </ul>
@@ -1457,6 +1523,18 @@
       </ul>
         <li>Notification shows only pending items with the pending / total count.</li>
       </ul>
+      <h3>Progress Tracker!</h3>
+      <hr />
+      <ul>
+        <li><strong>Add:</strong> Click 📈 Progress Tracker in the sidebar → ＋ ADD NEW PROGRESS → type a Title, pick a Date → Click Save</li>
+        <li><strong>View:</strong> Expand 👀 PROGRESS HISTORY to see every title with a vertical line and its steps below it</li>
+        <li><strong>Add Steps:</strong> Click ＋ Add step under a title → write text and/or attach a file (image, video, audio or any file) → Click Save step. Add as many steps as you wish</li>
+        <li><strong>Edit:</strong> Click ✏️ beside the title to change the title or date. Click ✏️ beside a step to change its text or replace/remove its file</li>
+        <li><strong>Delete:</strong> Click 🗑️ beside a title or a step to move it to the Trash Bin</li>
+        <li><strong>Restore:</strong> Open 🗑️ Trash Bin and click ♻️. A step goes back to its own progress in its old place, and a deleted progress comes back with all its steps</li>
+        <li><strong>Home:</strong> The 📈 PROGRESS TRACKER button on the Home page lists each title and its steps as plain text. Tap a line to open the Progress Tracker page</li>
+        <li>Progress Tracker does not send notifications.</li>
+      </ul>
       <h3>Dark Mode!</h3>
       <hr />
       <ul>
@@ -1472,8 +1550,12 @@
         <li>Notification will showed once page is active</li>
         <li>You will Turn Notification On/Off</li>
         <li>
-          When app is active then only Notification showed,Background push
-          Notification's are restricted
+          Background push notifications also arrive when the app is closed, at
+          the scheduled times (allow notifications for this site in your browser)
+        </li>
+        <li>
+          The same notification is never repeated. If your data changes, the
+          notification on screen is updated
         </li>
         <li>You can customize notification as per your requirements</li>
       </ul>
@@ -1516,6 +1598,31 @@
         <ul id="priorityList" class="list scrollable-list form"></ul>
       </div>
     </div>
+    <div id="progress" class="page hidden">
+      <h2>📈 Progress Tracker</h2>
+      <div class="add-area">
+        <button id="showAddProgressBtn" class="add-btn" aria-expanded="false">
+            ＋ ADD NEW PROGRESS <span class="arrow">▼</span>
+          </button>
+        <div id="progressFormContainer" class="form">
+          <label
+              >Title<input id="progressTitle" type="text" placeholder="Title"
+            /></label>
+          <label>Date<input id="progressDate" type="date" /></label>
+          <div class="form-actions">
+            <button id="saveProgressBtn" class="primary">Save</button>
+            <button id="cancelProgressBtn" class="secondary">Cancel</button>
+          </div>
+        </div>
+      </div>
+      <div class="add-area">
+        <button id="viewProgressToggle" class="add-btn" aria-expanded="false">
+            👀 PROGRESS HISTORY <span class="arrow">▼</span>
+          </button>
+        <ul id="progressList" class="list scrollable-list form"></ul>
+      </div>
+    </div>
+
     <div id="utilities" class="page hidden">
       <h2>🛠️ Utilities</h2>
       <div class="add-area">
@@ -2269,6 +2376,8 @@ render();
             renderChecklists(); renderHomeCheck(); break;
           case 'priorityQueue':
             pqRender(); break;
+          case 'progress':
+            renderProgress(); break;
           case 'calculationHistoryList':
           targetPageId = 'utilities';
           break;
@@ -2401,6 +2510,7 @@ render();
           notifGold: false,
           notifPriority: true,
           priorityQueue: [],
+          progress: [],
           // NEW: Calculation History
           calculationHistory: [],
           trash: [],
@@ -2431,6 +2541,7 @@ render();
             if (appData.notifGold === undefined) appData.notifGold = false;
             if (appData.notifPriority === undefined) appData.notifPriority = true;
             if (!Array.isArray(appData.priorityQueue)) appData.priorityQueue = [];
+            if (!Array.isArray(appData.progress)) appData.progress = [];
             if (!Array.isArray(appData.trash)) appData.trash = [];
             if (typeof renderTrash === 'function') renderTrash();
 
@@ -2448,6 +2559,7 @@ render();
             rerenderFor('notes');
             rerenderFor('budget');
             rerenderFor('checklists');
+            rerenderFor('progress');
             if (typeof pqInit === 'function') pqInit();
             // ✅ ADD THESE
             if (typeof window.renderPriceTrackerList === "function") {
@@ -3559,7 +3671,7 @@ render();
               const body = document.createElement('div');
               body.style.fontSize = '13px';
               body.style.opacity = '0.85';
-              body.textContent = String(t.type === 'priorityItem' ? 'priority' : (t.type || 'item')).toUpperCase() + ' | Deleted: ' + (t.deletedAt || '');
+              body.textContent = String(t.type === 'priorityItem' ? 'priority' : t.type === 'progressStep' ? 'progress step' : (t.type || 'item')).toUpperCase() + ' | Deleted: ' + (t.deletedAt || '');
 
               const time = null;
 
@@ -3910,6 +4022,10 @@ render();
 
           if (pageId === 'priority') {
             pqRender();
+          }
+
+          if (pageId === 'progress') {
+            renderProgress();
           }
 
           // Special handling for the notifications page
@@ -4619,6 +4735,16 @@ render();
                 const t = appData.trash[i];
                 if (!t) return;
 
+                // Progress Tracker steps go back into their own progress item
+                if (t.type === 'progressStep') {
+                  progressRestoreStep(t.item);
+                  appData.trash.splice(i, 1);
+                  saveAll();
+                  renderTrash();
+                  showPage('progress');
+                  return;
+                }
+
                 // Priority Queue items go back to their own day
                 if (t.type === 'priorityItem') {
                   pqRestore(t.item);
@@ -4721,6 +4847,337 @@ render();
                 });
                 function deleteCheck(i){ moveToTrash('checklists', appData.checklists[i], i); renderChecklists(); renderHomeOverview(); }
                 function deleteHistory(i){moveToTrash('calculationHistory', appData.calculationHistory[i], i); renderCalculationHistory();}
+
+                // ---------------- PROGRESS TRACKER ----------------
+                // appData.progress = [{ id, title, date, steps: [{ text, file, createdAt }] }]
+                let editingProgressIndex = null;
+
+                function pgNewId(){ return 'pg' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+                function pgEnsure(){
+                  if (!Array.isArray(appData.progress)) appData.progress = [];
+                  appData.progress.forEach(p => {
+                    if (!p.id) p.id = pgNewId();
+                    if (!Array.isArray(p.steps)) p.steps = [];
+                  });
+                  return appData.progress;
+                }
+
+                function pgStepLabel(st){
+                  if (!st) return 'Step';
+                  if (st.text) return st.text.length > 60 ? st.text.slice(0, 60) + '...' : st.text;
+                  if (st.file && st.file.name) return st.file.name;
+                  return 'Step';
+                }
+
+                // image / audio / video / any other file
+                function pgMediaEl(file){
+                  if (!file || !file.data) return null;
+                  const type = file.type || '';
+                  let el;
+                  if (type.includes('image')) {
+                    el = document.createElement('img');
+                    el.src = file.data;
+                    el.style.maxWidth = '200px';
+                    el.style.display = 'block';
+                    el.style.marginTop = '5px';
+                  } else if (type.includes('audio')) {
+                    el = document.createElement('audio');
+                    el.controls = true;
+                    el.src = file.data;
+                    el.style.display = 'block';
+                    el.style.marginTop = '5px';
+                  } else if (type.includes('video')) {
+                    el = document.createElement('video');
+                    el.controls = true;
+                    el.width = 200;
+                    el.src = file.data;
+                    el.style.display = 'block';
+                    el.style.marginTop = '5px';
+                  } else {
+                    el = document.createElement('a');
+                    el.href = file.data;
+                    el.download = file.name || 'file';
+                    el.textContent = '📎 ' + (file.name || 'file');
+                    el.style.display = 'block';
+                    el.style.marginTop = '5px';
+                  }
+                  return el;
+                }
+
+                function renderProgress(){
+                  const list = byId('progressList');
+                  if (!list) return;
+                  list.innerHTML = '';
+                  const items = pgEnsure();
+                  if (items.length === 0) {
+                    const li = document.createElement('li');
+                    li.textContent = 'No progress yet.'; li.style.opacity = '0.7';
+                    list.appendChild(li);
+                    renderHomeProgress();
+                    return;
+                  }
+                  const frag = document.createDocumentFragment();
+                  items.forEach((p, pi) => {
+                    const li = document.createElement('li');
+                    li.style.alignItems = 'flex-start';
+                    const left = document.createElement('div');
+                    left.className = 'item-left';
+                    left.style.flex = '1';
+                    left.style.minWidth = '0';
+
+                    const title = document.createElement('div');
+                    title.textContent = p.title; title.style.fontWeight = '600';
+                    const meta = document.createElement('div');
+                    meta.style.fontSize = '13px'; meta.style.opacity = '0.85';
+                    meta.textContent = 'Date: ' + (formatDMY(p.date) || '-') + ' | Steps: ' + p.steps.length;
+                    left.append(title, meta);
+
+                    // vertical line with the steps
+                    if (p.steps.length) {
+                      const line = document.createElement('div');
+                      line.className = 'pt-steps';
+                      p.steps.forEach((st, si) => {
+                        const stepEl = document.createElement('div');
+                        stepEl.className = 'pt-step';
+                        const row = document.createElement('div');
+                        row.style.display = 'flex'; row.style.justifyContent = 'space-between'; row.style.alignItems = 'flex-start';
+                        const body = document.createElement('div');
+                        body.style.flex = '1'; body.style.minWidth = '0';
+                        if (st.text) {
+                          const tx = document.createElement('div');
+                          tx.textContent = st.text; tx.style.whiteSpace = 'pre-wrap'; tx.style.wordBreak = 'break-word';
+                          body.appendChild(tx);
+                        }
+                        const when = document.createElement('small');
+                        when.style.opacity = '0.7'; when.textContent = st.createdAt || '';
+                        body.appendChild(when);
+                        const media = pgMediaEl(st.file);
+                        if (media) body.appendChild(media);
+
+                        const btns = document.createElement('div');
+                        btns.style.display = 'flex'; btns.style.alignItems = 'center';
+                        const eb = document.createElement('button'); eb.className = 'icon-small'; eb.textContent = '✏️'; eb.title = 'Edit step';
+                        eb.addEventListener('click', () => openStepForm(holder, pi, si));
+                        const db = document.createElement('button'); db.className = 'icon-small'; db.textContent = '🗑️'; db.title = 'Delete step';
+                        db.addEventListener('click', () => deleteProgressStep(pi, si));
+                        btns.append(eb, db);
+                        row.append(body, btns);
+                        stepEl.appendChild(row);
+                        line.appendChild(stepEl);
+                      });
+                      left.appendChild(line);
+                    }
+
+                    const addStepBtn = document.createElement('button');
+                    addStepBtn.className = 'secondary';
+                    addStepBtn.style.marginTop = '6px'; addStepBtn.style.alignSelf = 'flex-start';
+                    addStepBtn.textContent = '＋ Add step';
+                    const holder = document.createElement('div');
+                    addStepBtn.addEventListener('click', () => openStepForm(holder, pi, null));
+                    left.append(addStepBtn, holder);
+
+                    const right = document.createElement('div');
+                    right.style.display = 'flex'; right.style.alignItems = 'center';
+                    const editBtn = document.createElement('button'); editBtn.className = 'icon-small'; editBtn.textContent = '✏️'; editBtn.title = 'Edit';
+                    editBtn.addEventListener('click', () => editProgress(pi));
+                    const delBtn = document.createElement('button'); delBtn.className = 'icon-small'; delBtn.textContent = '🗑️'; delBtn.title = 'Delete';
+                    delBtn.addEventListener('click', () => deleteProgress(pi));
+                    right.append(editBtn, delBtn);
+
+                    li.append(left, right);
+                    frag.appendChild(li);
+                  });
+                  list.appendChild(frag);
+                  renderHomeProgress();
+                }
+
+                // Home: only titles and steps as plain text, no extra formatting
+                function renderHomeProgress(){
+                  const c = byId('homeProgressContainer');
+                  if (!c) return;
+                  c.innerHTML = '';
+                  const items = pgEnsure();
+                  if (items.length === 0) {
+                    const li = document.createElement('li');
+                    li.textContent = 'No progress yet.'; li.style.opacity = '0.7';
+                    c.appendChild(li);
+                    return;
+                  }
+                  // plain text lines, same as the other home items; tapping one opens the page
+                  const line = text => {
+                    const li = document.createElement('li');
+                    li.textContent = text;
+                    li.style.cursor = 'pointer';
+                    li.addEventListener('click', () => showPage('progress'));
+                    return li;
+                  };
+                  items.forEach(p => {
+                    c.appendChild(line(p.title));
+                    p.steps.forEach(st => c.appendChild(line('- ' + pgStepLabel(st))));
+                  });
+                }
+
+                function clearProgressForm(){
+                  byId('progressTitle').value = '';
+                  byId('progressDate').value = '';
+                }
+
+                function editProgress(i){
+                  const p = appData.progress[i];
+                  if (!p) return;
+                  editingProgressIndex = i;
+                  byId('progressTitle').value = p.title;
+                  byId('progressDate').value = p.date || '';
+                  showForm(byId('progressFormContainer'));
+                  byId('showAddProgressBtn').classList.add('open');
+                  byId('saveProgressBtn').textContent = 'Update';
+                  try { byId('progressFormContainer').scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+                }
+
+                function saveProgress(){
+                  const title = byId('progressTitle').value.trim();
+                  const date = byId('progressDate').value;
+                  if (!title) { alert('Title is required for the progress.'); return; }
+                  pgEnsure();
+                  if (editingProgressIndex !== null && appData.progress[editingProgressIndex]) {
+                    appData.progress[editingProgressIndex].title = title;
+                    appData.progress[editingProgressIndex].date = date;
+                  } else {
+                    appData.progress.push({ id: pgNewId(), title, date, steps: [] });
+                  }
+                  editingProgressIndex = null;
+                  saveAll(); renderProgress();
+                  hideForm(byId('progressFormContainer'));
+                  byId('showAddProgressBtn').classList.remove('open');
+                  byId('saveProgressBtn').textContent = 'Save';
+                  clearProgressForm();
+                }
+
+                function deleteProgress(i){
+                  moveToTrash('progress', appData.progress[i], i);
+                }
+
+                function deleteProgressStep(pi, si){
+                  const p = appData.progress[pi];
+                  if (!p || !p.steps[si]) return;
+                  const st = p.steps[si];
+                  appData.trash.push({
+                    type: 'progressStep',
+                    item: { title: pgStepLabel(st), step: st, progressId: p.id, progressTitle: p.title, progressDate: p.date || '', index: si },
+                    deletedAt: formatDateDMYWithTime(new Date())
+                  });
+                  p.steps.splice(si, 1);
+                  saveAll(); renderTrash(); renderProgress();
+                }
+
+                // Restore a deleted step into its progress (a new progress is made if that one is gone)
+                function progressRestoreStep(item){
+                  if (!item || !item.step) return;
+                  pgEnsure();
+                  let p = appData.progress.find(x => x.id === item.progressId);
+                  if (!p) {
+                    p = { id: pgNewId(), title: item.progressTitle || 'Restored steps', date: item.progressDate || '', steps: [] };
+                    appData.progress.unshift(p);
+                  }
+                  const at = Math.min(Math.max(item.index || 0, 0), p.steps.length);
+                  p.steps.splice(at, 0, item.step);
+                  renderProgress();
+                }
+
+                // Add / edit a step: text and/or any file (image, video, audio, document ...)
+                function openStepForm(holder, pi, si){
+                  holder.innerHTML = '';
+                  const p = appData.progress[pi];
+                  if (!p) return;
+                  const editing = (si !== null && si !== undefined);
+                  const existing = editing ? p.steps[si] : null;
+
+                  const box = document.createElement('div');
+                  box.className = 'form visible';
+                  box.style.maxWidth = '100%';
+
+                  const l1 = document.createElement('label');
+                  l1.append('Step text');
+                  const ta = document.createElement('textarea');
+                  ta.rows = 3; ta.placeholder = 'Write this step (optional if you attach a file)';
+                  ta.value = existing ? (existing.text || '') : '';
+                  l1.appendChild(ta);
+
+                  const l2 = document.createElement('label');
+                  l2.append('Attach file (image, video, audio or any file)');
+                  const fi = document.createElement('input');
+                  fi.type = 'file';
+                  l2.appendChild(fi);
+
+                  let removeBox = null;
+                  box.append(l1, l2);
+                  if (existing && existing.file) {
+                    const l3 = document.createElement('label');
+                    removeBox = document.createElement('input');
+                    removeBox.type = 'checkbox';
+                    const sp = document.createElement('span');
+                    sp.textContent = 'Remove current file (' + (existing.file.name || 'file') + ')';
+                    l3.append(removeBox, sp);
+                    box.appendChild(l3);
+                  }
+
+                  const actions = document.createElement('div');
+                  actions.className = 'form-actions';
+                  const saveB = document.createElement('button');
+                  saveB.className = 'primary'; saveB.textContent = editing ? 'Update step' : 'Save step';
+                  const cancelB = document.createElement('button');
+                  cancelB.className = 'secondary'; cancelB.textContent = 'Cancel';
+                  actions.append(saveB, cancelB);
+                  box.appendChild(actions);
+                  holder.appendChild(box);
+
+                  cancelB.addEventListener('click', () => { holder.innerHTML = ''; });
+                  saveB.addEventListener('click', () => {
+                    const text = ta.value.trim();
+                    const file = fi.files[0];
+                    const keepOld = !!(existing && existing.file && !(removeBox && removeBox.checked));
+                    if (!text && !file && !keepOld) { alert('Add text or attach a file for this step.'); return; }
+
+                    const finish = fileObj => {
+                      const step = {
+                        text,
+                        file: fileObj,
+                        createdAt: existing ? (existing.createdAt || formatDateDMYWithTime(new Date())) : formatDateDMYWithTime(new Date())
+                      };
+                      if (editing) p.steps[si] = step; else p.steps.push(step);
+                      saveAll(); renderProgress();
+                    };
+
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = e => finish({ name: file.name, type: file.type, data: e.target.result });
+                      reader.onerror = () => { console.error('Error reading file. Please try again.'); fi.value = ''; };
+                      reader.readAsDataURL(file);
+                    } else {
+                      finish(keepOld ? existing.file : null);
+                    }
+                  });
+                }
+
+                byId('showAddProgressBtn').addEventListener('click', function() {
+                  if (editingProgressIndex === null) byId('saveProgressBtn').textContent = 'Save';
+                  toggleCollapse(byId('progressFormContainer'), byId('showAddProgressBtn'));
+                });
+                byId('cancelProgressBtn').addEventListener('click', function() {
+                  hideForm(byId('progressFormContainer'));
+                  byId('showAddProgressBtn').classList.remove('open');
+                  editingProgressIndex = null;
+                  byId('saveProgressBtn').textContent = 'Save';
+                  clearProgressForm();
+                });
+                byId('saveProgressBtn').addEventListener('click', saveProgress);
+                byId('viewProgressToggle').addEventListener('click', function() {
+                  toggleCollapse(byId('progressList'), byId('viewProgressToggle'));
+                });
+                byId('homeProgressToggle').addEventListener('click', function() {
+                  toggleCollapse(byId('homeProgressContainer'), byId('homeProgressToggle'));
+                });
                 function rerenderBudget() { renderBudgets(); renderHomeBudgets(); }
 
                                 // ---------- Event Listeners ----------
@@ -4869,6 +5326,7 @@ render();
                 renderNotes();
                 renderBudgets();
                 renderChecklists();
+                renderProgress();
                 renderCalculationHistory()
 
                 // NEW: Initialize calculator mode

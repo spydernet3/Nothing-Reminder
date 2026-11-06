@@ -1022,6 +1022,23 @@
 #cal50 .qb .ok{background:#2e7d32;color:#fff;border-color:#2e7d32}
 #cal50 .qb .no{background:var(--accent);color:#fff;border-color:var(--accent)}
 #cal50 .qr{margin:12px 0;background:var(--bg);border-radius:10px;padding:12px}
+    /* ===== Backup & Restore (Import / Export) ===== */
+    #backupOverlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+      display: none; align-items: center; justify-content: center;
+      z-index: 99999; padding: 16px;
+    }
+    #backupOverlay.show { display: flex; }
+    #backupBox {
+      background: var(--card-bg, #fff); color: inherit; width: 100%; max-width: 360px;
+      border-radius: 12px; padding: 18px; box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+    }
+    #backupBox h3 { margin: 0 0 6px; }
+    #backupBox p { margin: 6px 0 12px; font-size: 13px; opacity: 0.85; }
+    #backupBox button { width: 100%; margin-top: 8px; padding: 10px; border-radius: 8px; border: 0; cursor: pointer; font-size: 15px; }
+    #backupBox .bk-main { background: var(--accent); color: #fff; }
+    #backupBox .bk-close { background: transparent; border: 1px solid #999; color: inherit; }
+    #backupStatus { font-size: 13px; min-height: 18px; margin-top: 8px; }
   </style>
 </head>
 
@@ -1408,8 +1425,8 @@
             depends on your browser behaviour
           </p>
           <p>
-            Import & Export and Sharing datas are not allowed for security
-            reasons
+            Backup files are created only on your device. Nothing is uploaded
+            or shared by the app. Keep your backup file safe.
           </p>
         </ul>
         <h2> 🌐 App Security</h2>
@@ -1431,7 +1448,7 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.9.0 </p>
+          <p>Version 13.8.4 </p>
           <p>Last Updated: 06-Nov-2026</p>
           <p>Project Mode: Open source</p>
           <p>App Size : 7.0KB </p>
@@ -1441,133 +1458,77 @@
       <h3>Install App</h3>
       <hr />
       <ul>
-        <li>
-          By Pressing Add to Home Screen Button There You can see Install App
-          to install page as PWA [Faster and unique icon compared to webpage]
-        </li>
-      </ul>
-      <h3>App Lock</h3>
-      <hr />
-      <ul>
-        <li>
-          By installing page as PWA you can use By Defauly App lock that contains your device
-        </li>
-        <li>
-          By enabling App lock for Browswer also the way you can protect the data without intalling page as
-          app
-        </li>
-      </ul>
-      <h3>Reminder!</h3>
-      <hr />
-      <ul>
-        <li>Go to the Reminders page</li>
-        <li>Click + Add New Reminder</li>
-        <li>Fill Title, Start Date, End Date</li>
-        <li>Click Save</li>
-        <li>Edit or delete using the ✏️ and 🗑️ button.</li>
-        <li>
-          Today & Tomorrow Due reminders will appeared on the Home page
-          automatically.
-        </li>
+        <li>Use Add to Home Screen / Install App to use it as a PWA (faster, own icon, device app lock).</li>
       </ul>
 
-      <h3>Notes!</h3>
+      <h3>Reminders</h3>
       <hr />
       <ul>
-        <li>Go to the Notes page.</li>
-        <li>Click + Add New Note.</li>
-        <li>Write your note in the textarea.</li>
-        <li>It supports file formats (Images, pdf, audio, video, docs).</li>
-        <li>Click Save. IST date & time are added automatically.</li>
-        <li>Edit or delete using the ✏️ and 🗑️ button.</li>
+        <li>Reminders page → ＋ Add New Reminder → Title, Start date, End date → Save.</li>
+        <li>Edit with ✏️, delete with 🗑️. Today and tomorrow due reminders show on Home.</li>
       </ul>
 
-      <h3>Budget Tracker!</h3>
+      <h3>Notes</h3>
       <hr />
       <ul>
-        <li>Go to the Budget Tracker page.</li>
-        <li>Click + Add New Budget.</li>
-        <li>That will showed Total Amount/Remaining Days</li>
-        <li>
-        <li>That will shows Cost per day How much you need to spend</li>
-        <li> Add Expenses and track everything </li>
-        <li>
-          At Budget reminder it will reminders your spend limit every day
-        </li>
-        <li>Edit or delete using the ✏️ and 🗑️ button.</li>
+        <li>Notes page → ＋ Add New Note → write text, optionally attach a file or tick table format → Save.</li>
+        <li>Saved date and time are added automatically and shown below each note, also on Home.</li>
       </ul>
 
-      <h3>Profile!</h3>
+      <h3>Budget Tracker</h3>
       <hr />
       <ul>
-        <li>Click the profile picture to upload a new image.</li>
-        <li>Click Edit Name to update the username now under Settings.</li>
+        <li>Add a budget with a total amount and days. The app shows the cost per day.</li>
+        <li>Add expenses to track spending. A daily reminder shows your spend limit.</li>
       </ul>
-      <h3>Checklist!</h3>
+
+      <h3>Checklist</h3>
       <hr />
       <ul>
-        <li>Create checklist and set status either Open/Closed</li>
-        <li>Opened checklist listed in Home screen</li>
+        <li>Create a checklist and set it Open or Closed. Open checklists show on Home.</li>
       </ul>
-      <h3>Priority Queue!</h3>
+
+      <h3>Priority Queue</h3>
       <hr />
       <ul>
-        <li><strong>Add Items:</strong> Click 🎯 PRIORITY QUEUE → ＋ ADD PRIORITY ITEMS → Pick date & type item → Click Add</li>
-        <li><strong>View Items:</strong> Expand ⏳ PROGRESS QUEUE to see all dates with items and pending count</li>
-        <li><strong>Check Off:</strong> Click checkbox to mark item as done</li>
-        <li><strong>Edit:</strong> Click ✏️ icon to rename an item</li>
-        <li><strong>Delete:</strong> Click 🗑️ icon to move item to trash</li>
-        <li><strong>Auto Rollover:</strong> Unchecked items move to next day at midnight, marked as "Old · date"</li>
-        <li><strong>Home Widget:</strong> Home page shows all dates with items. Faded items are old (carried from previous days)</li>
-        <li><strong>Count Display:</strong> Shows "X pending / Y total" (old rolled items not counted)</li>
+        <li>Pick a date, type an item, click Add. Tick the box when done.</li>
+        <li>Unchecked items move to the next day automatically.</li>
       </ul>
-        <li>Notification shows only pending items with the pending / total count.</li>
-      </ul>
-      <h3>Progress Tracker!</h3>
+
+      <h3>Progress Tracker</h3>
       <hr />
       <ul>
-        <li><strong>Add:</strong> Click 📈 Progress Tracker in the sidebar → ＋ ADD NEW PROGRESS → type a Title, pick a Date → Click Save</li>
-        <li><strong>View:</strong> Expand 👀 PROGRESS HISTORY to see every title with a vertical line and its steps below it</li>
-        <li><strong>Add Steps:</strong> Click ＋ Add step under a title → write text and/or attach a file (image, video, audio or any file) → Click Save step. Add as many steps as you wish</li>
-        <li><strong>Edit:</strong> Click ✏️ beside the title to change the title or date. Click ✏️ beside a step to change its text or replace/remove its file</li>
-        <li><strong>Delete:</strong> Click 🗑️ beside a title or a step to move it to the Trash Bin</li>
-        <li><strong>Restore:</strong> Open 🗑️ Trash Bin and click ♻️. A step goes back to its own progress in its old place, and a deleted progress comes back with all its steps</li>
-        <li><strong>Home:</strong> The 📈 PROGRESS TRACKER button on the Home page lists each title and its steps as plain text. Tap a line to open the Progress Tracker page</li>
-        <li>Progress Tracker does not send notifications.</li>
+        <li>Add a progress title and date, then add steps (text or a file) under it.</li>
+        <li>Home shows each progress title with its number of steps. Tap it to open the page.</li>
       </ul>
-      <h3>Dark Mode!</h3>
+
+      <h3>Trash Bin</h3>
       <hr />
       <ul>
-        <li>
-          Open Settings (⚙️) in the sidebar, then click the 🌙 button to
-          toggle dark mode.
-        </li>
-        <li>Dark mode preference is saved.</li>
+        <li>Deleted items go to the Trash Bin. Click ♻️ to restore them.</li>
       </ul>
-      <h3>Notification!</h3>
+
+      <h3>Settings</h3>
       <hr />
       <ul>
-        <li>Notification will showed once page is active</li>
-        <li>You will Turn Notification On/Off</li>
-        <li>
-          Background push notifications also arrive when the app is closed, at
-          the scheduled times (allow notifications for this site in your browser)
-        </li>
-        <li>
-          The same notification is never repeated. If your data changes, the
-          notification on screen is updated
-        </li>
-        <li>You can customize notification as per your requirements</li>
+        <li>Edit Name, Dark Mode and Notification Settings are inside ⚙️ Settings.</li>
+        <li>Click the profile picture to change it.</li>
+        <li>Notifications can be turned on or off for each feature. Allow notifications for this site in your browser.</li>
       </ul>
+
+      <h3>Import & Export (Backup)</h3>
+      <hr />
+      <ul>
+        <li>Open ⚙️ Settings and click the 💾 storage button.</li>
+        <li><strong>Export Data:</strong> downloads one backup file with all your data (reminders, notes, budgets, checklists, priority queue, progress, trash, files) and settings (name, photo, dark mode, notification choices).</li>
+        <li><strong>Import Data:</strong> choose a backup file. All current data and settings are replaced by the backup and the app reloads.</li>
+        <li>Export regularly and before clearing browser data or changing your device. Use Import on the new device to restore everything.</li>
+      </ul>
+
       <h3>Offline Mode</h3>
       <hr />
       <ul>
-        <li>
-          Step: Download Source Code Zip File in your Device and Extract foder
-          then Open index.html without internet in any broweser.
-        </li>
-        <li>Note: notifications are not supposed to working</li>
-        <li> New features you may missed</li>
+        <li>Download the source code, extract it and open index.html without internet. Notifications will not work offline.</li>
       </ul>
     </div>
     <div id="priority" class="page hidden">
@@ -2307,6 +2268,18 @@ render();
     </div>
   </div>
 
+  <div id="backupOverlay">
+    <div id="backupBox">
+      <h3>💾 Backup & Restore</h3>
+      <p>Export saves all your data and settings in one file. Import restores them from a backup file.</p>
+      <button class="bk-main" id="exportDataBtn">⬆️ Export Data</button>
+      <button class="bk-main" id="importDataBtn">⬇️ Import Data</button>
+      <input type="file" id="importDataFile" accept=".json,application/json" style="display:none" />
+      <div id="backupStatus"></div>
+      <button class="bk-close" id="backupCloseBtn">Close</button>
+    </div>
+  </div>
+
   <script>
     // ================= INDEXEDDB SETUP =================
     const DB_NAME = "NothingReminderDB";
@@ -2597,6 +2570,106 @@ render();
         };
       }
 
+        // ---------- Import / Export (all data + settings) ----------
+        const BACKUP_APP = 'NothingReminder';
+        const BACKUP_SKIP_KEYS = ['fcmTokenSaved']; // device specific push token
+
+        function backupStatus(msg, ok) {
+          const el = byId('backupStatus');
+          if (!el) return;
+          el.textContent = msg || '';
+          el.style.color = ok === false ? '#f44336' : 'var(--accent)';
+        }
+
+        function openBackupModal() {
+          backupStatus('');
+          byId('backupOverlay').classList.add('show');
+        }
+        function closeBackupModal() {
+          byId('backupOverlay').classList.remove('show');
+        }
+
+        function exportAllData() {
+          try {
+            const ls = {};
+            for (let i = 0; i < localStorage.length; i++) {
+              const k = localStorage.key(i);
+              if (BACKUP_SKIP_KEYS.includes(k)) continue;
+              ls[k] = localStorage.getItem(k);
+            }
+            const backup = {
+              app: BACKUP_APP,
+              version: '13.8.4',
+              exportedAt: new Date().toISOString(),
+              appData: structuredClone(appData),
+              localStorage: ls
+            };
+            const blob = new Blob([JSON.stringify(backup)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'NothingReminder-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 2000);
+            backupStatus('✅ Export completed.');
+          } catch (err) {
+            console.error(err);
+            backupStatus('Export failed.', false);
+          }
+        }
+
+        async function importAllData(file) {
+          if (!file) return;
+          let backup;
+          try {
+            backup = JSON.parse(await file.text());
+          } catch (e) {
+            backupStatus('Invalid file. Please choose a backup JSON file.', false);
+            return;
+          }
+          if (!backup || backup.app !== BACKUP_APP || !backup.appData || typeof backup.appData !== 'object') {
+            backupStatus('This is not a NothingReminder backup file.', false);
+            return;
+          }
+          if (!confirm('Import will replace ALL current data and settings with the backup. Continue?')) return;
+          try {
+            const restored = { ...defaultData, ...backup.appData };
+            const db = await openDB();
+            await new Promise((resolve, reject) => {
+              const tx = db.transaction(STORE_NAME, 'readwrite');
+              tx.objectStore(STORE_NAME).put(restored, 'main');
+              tx.oncomplete = resolve;
+              tx.onerror = () => reject(tx.error);
+            });
+            // restore the other saved settings (gold, weather, trends ...)
+            const keep = {};
+            BACKUP_SKIP_KEYS.forEach(k => { const v = localStorage.getItem(k); if (v !== null) keep[k] = v; });
+            localStorage.clear();
+            Object.entries(backup.localStorage || {}).forEach(([k, v]) => {
+              if (!BACKUP_SKIP_KEYS.includes(k) && typeof v === 'string') localStorage.setItem(k, v);
+            });
+            Object.entries(keep).forEach(([k, v]) => localStorage.setItem(k, v));
+            backupStatus('✅ Import completed. Reloading...');
+            setTimeout(() => location.reload(), 700);
+          } catch (err) {
+            console.error(err);
+            backupStatus('Import failed. Your current data was not changed.', false);
+          }
+        }
+
+        byId('viewStorageBtn')?.addEventListener('click', openBackupModal);
+        byId('backupCloseBtn')?.addEventListener('click', closeBackupModal);
+        byId('backupOverlay')?.addEventListener('click', e => { if (e.target.id === 'backupOverlay') closeBackupModal(); });
+        byId('exportDataBtn')?.addEventListener('click', exportAllData);
+        byId('importDataBtn')?.addEventListener('click', () => byId('importDataFile').click());
+        byId('importDataFile')?.addEventListener('change', e => {
+          const f = e.target.files[0];
+          e.target.value = '';
+          importAllData(f);
+        });
+
           function daysLeft(endDateStr){
           if(!endDateStr) return null;
           const [y,m,d] = endDateStr.split('-').map(Number);
@@ -2802,8 +2875,21 @@ render();
 
               tableHTML += '</tr></table>';
               text.appendChild(renderSafeTableFromText(n.text));
+              const tDate = document.createElement('small');
+              tDate.style.opacity = '0.7';
+              tDate.style.display = 'block';
+              tDate.textContent = n.createdAt || '';
+              text.appendChild(tDate);
             } else {
-              text.innerHTML = `<b>${(n.text || '').substring(0, 50)}...</b><br><small style=\"opacity:0.7\">${n.createdAt || ''}</small>`;
+              const full = n.text || (n.file && n.file.name ? '📎 ' + n.file.name : '');
+              const strong = document.createElement('b');
+              strong.textContent = full.length > 50 ? full.substring(0, 50) + '...' : full;
+              const dSmall = document.createElement('small');
+              dSmall.style.opacity = '0.7';
+              dSmall.textContent = n.createdAt || '';
+              text.appendChild(strong);
+              text.appendChild(document.createElement('br'));
+              text.appendChild(dSmall);
             }
             left.appendChild(text);
 
@@ -4992,7 +5078,7 @@ render();
                   renderHomeProgress();
                 }
 
-                // Home: only titles and steps as plain text, no extra formatting
+                // Home: only the title and the number of steps, as plain text
                 function renderHomeProgress(){
                   const c = byId('homeProgressContainer');
                   if (!c) return;
@@ -5013,8 +5099,8 @@ render();
                     return li;
                   };
                   items.forEach(p => {
-                    c.appendChild(line(p.title));
-                    p.steps.forEach(st => c.appendChild(line('- ' + pgStepLabel(st))));
+                    const n = (p.steps || []).length;
+                    c.appendChild(line(p.title + ' - ' + n + (n === 1 ? ' step' : ' steps')));
                   });
                 }
 

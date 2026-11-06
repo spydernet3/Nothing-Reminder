@@ -1448,7 +1448,7 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.8.4 </p>
+          <p>Version 13.9.0 </p>
           <p>Last Updated: 06-Nov-2026</p>
           <p>Project Mode: Open source</p>
           <p>App Size : 7.0KB </p>
@@ -1472,7 +1472,7 @@
       <hr />
       <ul>
         <li>Notes page → ＋ Add New Note → write text, optionally attach a file or tick table format → Save.</li>
-        <li>Saved date and time are added automatically and shown below each note, also on Home.</li>
+        <li>Saved date and time are added automatically and shown with each note, also on Home.</li>
       </ul>
 
       <h3>Budget Tracker</h3>
@@ -2599,7 +2599,7 @@ render();
             }
             const backup = {
               app: BACKUP_APP,
-              version: '13.8.4',
+              version: '13.9.0',
               exportedAt: new Date().toISOString(),
               appData: structuredClone(appData),
               localStorage: ls
@@ -2851,6 +2851,12 @@ render();
 
             // Main Text/Table Content
             const text = document.createElement('div');
+            // dot + saved date as the title, saved note content below it as normal text
+            const dateRow = document.createElement('b');
+            dateRow.style.display = 'block';
+            dateRow.style.marginBottom = '2px';
+            dateRow.textContent = '• ' + (n.createdAt || '');
+            text.appendChild(dateRow);
             if(n.isTable && n.text) {
               // Show first few rows of table in home view
               const lines = n.text.split('\n');
@@ -2875,21 +2881,14 @@ render();
 
               tableHTML += '</tr></table>';
               text.appendChild(renderSafeTableFromText(n.text));
-              const tDate = document.createElement('small');
-              tDate.style.opacity = '0.7';
-              tDate.style.display = 'block';
-              tDate.textContent = n.createdAt || '';
-              text.appendChild(tDate);
             } else {
               const full = n.text || (n.file && n.file.name ? '📎 ' + n.file.name : '');
-              const strong = document.createElement('b');
-              strong.textContent = full.length > 50 ? full.substring(0, 50) + '...' : full;
-              const dSmall = document.createElement('small');
-              dSmall.style.opacity = '0.7';
-              dSmall.textContent = n.createdAt || '';
-              text.appendChild(strong);
-              text.appendChild(document.createElement('br'));
-              text.appendChild(dSmall);
+              const para = document.createElement('p');
+              para.style.margin = '0';
+              para.style.fontSize = '13px';
+              para.style.opacity = '0.85';
+              para.textContent = full.length > 50 ? full.substring(0, 50) + '...' : full;
+              text.appendChild(para);
             }
             left.appendChild(text);
 

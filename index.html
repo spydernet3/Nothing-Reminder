@@ -1388,6 +1388,11 @@
       font-weight: 600;
       cursor: pointer;
     }
+    #sheet .pf-head { flex-wrap: nowrap; align-items: center; }
+    #sheet .pf-head .pf-meta { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; flex: 1; }
+    #sheet .pf-head #profileName { flex: 1; min-width: 0; margin: 0; }
+    #sheet .pf-head .pf-actions { flex: none; flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 6px; }
+    #sheet .pf-head .pf-actions .sh-pill { padding: 6px 10px; font-size: 12px; white-space: nowrap; text-align: center; }
     #sheet[data-mode="compact"] .pf-head { padding: 8px; margin-bottom: 6px; }
     #sheet[data-mode="compact"] .pf-head #profilePhoto { width: 46px; height: 46px; }
 
@@ -1565,6 +1570,11 @@
     .cal-chip { padding: 4px 10px; border-radius: 14px; border: 1px solid rgba(128,128,128,.5); background: transparent; color: inherit; font: inherit; font-size: 12.5px; cursor: pointer; }
     .cal-chip:hover { background: rgba(128,128,128,.2); }
     .cal-note { display: block; font-size: 12px; line-height: 1.45; opacity: .7; }
+    .pt-wp { display: flex; flex-direction: column; gap: 10px; }
+    .pt-wp label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; }
+    .pt-wp .cal-in { width: 100%; box-sizing: border-box; }
+    .pt-wp .form-actions { display: flex; gap: 8px; }
+    .pt-wp .form-actions button { flex: 1; }
     .cal-stats { display: flex; gap: 8px; margin: 8px 0; }
     .cal-stat { flex: 1; padding: 8px 4px; border-radius: 10px; background: rgba(128,128,128,.12); text-align: center; min-width: 0; }
     .cal-stat b { display: block; font-size: 17px; }
@@ -1656,6 +1666,7 @@
             <h3 id="profileName">👤 User</h3>
             <div class="pf-actions">
               <button type="button" class="sh-pill" id="editNameBtn">✏️ Edit Name</button>
+              <button type="button" class="sh-pill" id="weightProfileBtn" data-view-go="weightProfile">⚖️ Weight Profile</button>
               <button type="button" class="sh-pill" onclick="document.getElementById('photoUpload').click()">📷 Upload Photo</button>
             </div>
           </div>
@@ -1669,6 +1680,27 @@
           <button type="button" class="hub-tile" data-go="updateLog"><span class="ri g-teal"><svg aria-hidden="true"><use href="#i-refresh"/></svg></span><b>Update Blog</b><small>What's new</small></button>
           <button type="button" class="hub-tile" data-go="how"><span class="ri g-orange"><svg aria-hidden="true"><use href="#i-help"/></svg></span><b>How to Use</b><small>Install &amp; tips</small></button>
           <button type="button" class="hub-tile" data-go="terms"><span class="ri g-green"><svg aria-hidden="true"><use href="#i-shield"/></svg></span><b>Terms &amp; Conditions</b><small>Privacy policy</small></button>
+        </div>
+      </section>
+
+      <!-- Weight & Profile -->
+      <section data-view="weightProfile" hidden>
+        <div id="weightProfileForm" class="pt-wp">
+          <label>Your weight (kg)<input id="calPWeight" type="number" class="cal-in" min="20" max="300" step="0.1" inputmode="decimal" placeholder="e.g. 68.5" /></label>
+          <label>Weighed on<input id="calPDate" type="date" class="cal-in" /></label>
+          <label>Height (cm)<input id="calPHeight" type="number" class="cal-in" min="100" max="250" step="0.5" inputmode="decimal" placeholder="e.g. 165" /></label>
+          <label>Age (years)<input id="calPAge" type="number" class="cal-in" min="10" max="100" step="1" inputmode="numeric" placeholder="e.g. 30" /></label>
+          <label>Gender<select id="calPGender" class="cal-in">
+            <option value="">Select</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other / prefer not to say</option>
+          </select></label>
+          <label>Daily routine (without workouts)<select id="calPLife" class="cal-in"></select></label>
+          <div class="form-actions">
+            <button id="saveCalProfileBtn" class="primary">Save</button>
+          </div>
+          <small class="cal-note">Weight alone is enough to calculate calories burned. Height, age and gender are used for your daily calorie need and the weight estimate. Weigh yourself again after a week or two and save it here to keep the estimate accurate. This is a guide only, not medical advice.</small>
         </div>
       </section>
 
@@ -2242,26 +2274,12 @@
       <h2>🔥 Calories</h2>
 
       <div class="add-area">
-        <button id="calProfileToggle" class="add-btn" aria-expanded="false">
+        <button id="calProfileToggle" class="add-btn open" aria-expanded="true">
           ⚖️ MY WEIGHT &amp; PROFILE <span class="arrow">▼</span>
         </button>
-        <div id="calProfileWrap" class="form">
+        <div id="calProfileWrap" class="form visible">
           <div id="calProfileOut"></div>
-          <label>Your weight (kg)<input id="calPWeight" type="number" class="cal-in" min="20" max="300" step="0.1" inputmode="decimal" placeholder="e.g. 68.5" /></label>
-          <label>Weighed on<input id="calPDate" type="date" class="cal-in" /></label>
-          <label>Height (cm)<input id="calPHeight" type="number" class="cal-in" min="100" max="250" step="0.5" inputmode="decimal" placeholder="e.g. 165" /></label>
-          <label>Age (years)<input id="calPAge" type="number" class="cal-in" min="10" max="100" step="1" inputmode="numeric" placeholder="e.g. 30" /></label>
-          <label>Gender<select id="calPGender" class="cal-in">
-            <option value="">Select</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="other">Other / prefer not to say</option>
-          </select></label>
-          <label>Daily routine (without workouts)<select id="calPLife" class="cal-in"></select></label>
-          <div class="form-actions">
-            <button id="saveCalProfileBtn" class="primary">Save</button>
-          </div>
-          <small class="cal-note">Weight alone is enough to calculate calories burned. Height, age and gender are used for your daily calorie need and the weight estimate. Weigh yourself again after a week or two and save it here to keep the estimate accurate. This is a guide only, not medical advice.</small>
+          <button type="button" id="calAddProfileBtn" class="secondary" style="width:100%;margin-top:6px;">➕ Add your profile data</button>
         </div>
       </div>
 
@@ -2305,7 +2323,7 @@
           🏃 ADD EXERCISE (CALORIES BURNED) <span class="arrow">▼</span>
         </button>
         <div id="calBurnFormContainer" class="form">
-          <div id="calBNeedW" class="cal-info" hidden>⚠️ Enter your weight in <b>MY WEIGHT &amp; PROFILE</b> first. Calories burned depend on your body weight.</div>
+          <div id="calBNeedW" class="cal-info" hidden>⚠️ Tap <b>Add your profile data</b> and enter your weight first. Calories burned depend on your body weight.</div>
           <label>Date<input id="calBDate" type="date" class="cal-in" /></label>
           <label>Activity type<select id="calBCat" class="cal-in"></select></label>
           <div id="calBActWrap" class="cal-field">
@@ -2336,10 +2354,10 @@
       </div>
 
       <div class="add-area">
-        <button id="viewCalProgToggle" class="add-btn open" aria-expanded="true">
+        <button id="viewCalProgToggle" class="add-btn" aria-expanded="false">
           📊 DAY PROGRESS <span class="arrow">▼</span>
         </button>
-        <div id="calDayWrap" class="form visible">
+        <div id="calDayWrap" class="form">
           <div id="calDayBox"></div>
         </div>
       </div>
@@ -7110,10 +7128,11 @@ render();
                   return (p && Number(p.height) > 0 && Number(p.age) > 0 && p.gender) ? p : null;
                 }
                 function calBMR(p) {
+                  if (Number(p.bmrOv) > 0) return Math.round(p.bmrOv);
                   const base = 10 * p.weight + 6.25 * p.height - 5 * p.age;
                   return Math.round(base + (p.gender === 'male' ? 5 : p.gender === 'female' ? -161 : -78));
                 }
-                function calMaint(p) { return Math.round(calBMR(p) * (CAL_LIFE[p.life] || CAL_LIFE.sed)[1]); }
+                function calMaint(p) { if (Number(p.maintOv) > 0) return Math.round(p.maintOv); return Math.round(calBMR(p) * (CAL_LIFE[p.life] || CAL_LIFE.sed)[1]); }
                 // 7700 kcal ≈ 1 kg of body weight. Only completed days (before today) with food added are counted.
                 function calEstimate() {
                   const p = calProfFull();
@@ -7138,6 +7157,7 @@ render();
                   byId('calPGender').value = p.gender || '';
                   byId('calPLife').value = p.life || 'sed';
                 }
+                window.calLoadProfileForm = calLoadProfileForm;
 
                 function saveCalProfile() {
                   const w = parseFloat(byId('calPWeight').value);
@@ -7167,9 +7187,12 @@ render();
                   } else {
                     p.weightDate = old.weightDate;
                   }
+                  const same = old.weight === p.weight && old.height === p.height && old.age === p.age && old.gender === p.gender && old.life === p.life;
+                  if (same) { if (old.bmrOv) p.bmrOv = old.bmrOv; if (old.maintOv) p.maintOv = old.maintOv; }
                   appData.calProfile = p;
                   saveAll();
                   renderCalories();
+                  if (window.nrSetView) window.nrSetView('profile');
                 }
 
                 function renderCalProfile() {
@@ -7177,30 +7200,38 @@ render();
                   if (!out) return;
                   out.innerHTML = '';
                   const p = calProf();
-                  byId('calProfileToggle').innerHTML = (p ? '⚖️ MY WEIGHT &amp; PROFILE' : '⚠️ ENTER YOUR WEIGHT') + ' <span class="arrow">▼</span>';
+                  const full = calProfFull();
+                  const today = calKey(new Date());
+                  const from = (p && p.weightDate) || today;
+                  const foodDays = [...new Set(calEnsure().filter(e => e.date >= from && e.date <= today).map(e => e.date))];
+                  const burnDays = [...new Set(calBurnEnsure().filter(e => e.date >= from && e.date <= today).map(e => e.date))];
+                  const eaten = foodDays.reduce((t, k) => t + calTotal(k), 0);
+                  const burned = burnDays.reduce((t, k) => t + calBurnTotal(k), 0);
+                  let balance = null;
+                  if (full) { const m = calMaint(p); balance = foodDays.reduce((t, k) => t + calTotal(k) - m - calBurnTotal(k), 0); }
+                  const addBtn = byId('calAddProfileBtn');
+                  if (addBtn) { addBtn.style.display = full ? 'none' : ''; addBtn.textContent = !p ? '➕ Add your profile data' : '➕ Add height, age & gender'; }
+                  const cell = (v, l) => { const c = calMk('div', 'cal-stat'); c.appendChild(calMk('b', null, v)); const sm = calMk('small', null); sm.innerHTML = l; c.appendChild(sm); return c; };
+                  const stats = calMk('div', 'cal-stats');
+                  const kgTxt = balance === null ? '—' : (Math.round((p.weight + balance / 7700) * 10) / 10) + ' kg';
+                  const chg = balance === null ? '—' : (balance >= 0 ? '+' : '−') + calKg(Math.abs(balance) / 7700) + ' kg';
+                  stats.appendChild(cell(p ? kgTxt === '—' ? p.weight + ' kg' : kgTxt : '—', 'Overall weight'));
+                  stats.appendChild(cell(p && Number(p.height) > 0 ? p.height + ' cm' : '—', 'Height'));
+                  stats.appendChild(cell(calFmt(eaten), '🍽️ Eaten kcal<br>(total)'));
+                  stats.appendChild(cell(calFmt(burned), '🔥 Burned kcal<br>(total)'));
+                  stats.appendChild(cell(balance === null ? '—' : calSigned(balance), '📈 Calories +/−<br>(total)'));
+                  stats.appendChild(cell(chg, '⚖️ Weight +/−<br>(total)'));
+                  stats.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:8px;';
+                  out.appendChild(stats);
                   if (!p) {
                     const i = calMk('div', 'cal-info');
-                    i.innerHTML = '👋 <b>Enter your weight below.</b> It is used to calculate the calories you burn, and (with your height, age and gender) to estimate how your weight changes from the food and exercise you add.';
-                    out.appendChild(i);
-                    return;
-                  }
-                  const full = calProfFull();
-                  const stats = calMk('div', 'cal-stats');
-                  const cell = (v, l) => { const c = calMk('div', 'cal-stat'); c.appendChild(calMk('b', null, v)); c.appendChild(calMk('small', null, l)); return c; };
-                  stats.appendChild(cell(p.weight + ' kg', 'Last weigh-in'));
-                  if (full) {
-                    stats.appendChild(cell(calFmt(calBMR(p)), 'BMR kcal/day'));
-                    stats.appendChild(cell(calFmt(calMaint(p)), 'Maintenance kcal/day'));
-                  }
-                  out.appendChild(stats);
-                  const when = calMk('small', 'cal-note', 'Weighed on ' + calLabel(p.weightDate || calKey(new Date())) + '.');
-                  out.appendChild(when);
-                  if (!full) {
-                    const i = calMk('div', 'cal-info', 'Add your height, age and gender to see your daily calorie need and the weight estimate.');
                     i.style.margin = '8px 0';
+                    i.innerHTML = '👋 <b>Add your profile data.</b> Your weight is used to calculate the calories you burn, and with your height, age and gender to estimate your BMR, maintenance calories and weight change.';
                     out.appendChild(i);
                     return;
                   }
+                  out.appendChild(calMk('small', 'cal-note', 'Last weighed ' + p.weight + ' kg on ' + calLabel(p.weightDate || today) + '. Totals count everything you added since then, including today.'));
+                  if (!full) return;
                   const est = calEstimate();
                   const box = calMk('div', 'cal-info');
                   box.style.margin = '8px 0';
@@ -7214,16 +7245,12 @@ render();
                       '<small>Recent daily balance: ' + calSigned(est.avg7) + ' kcal/day. Calories eaten − maintenance − exercise. About 7,700 kcal = 1 kg.</small>';
                   }
                   out.appendChild(box);
-                  const gb = calMk('button', 'secondary', 'Use maintenance (' + calFmt(calMaint(p)) + ' kcal) as daily goal');
-                  gb.addEventListener('click', () => { appData.calorieGoal = calMaint(p); saveAll(); renderCalories(); });
-                  out.appendChild(gb);
                   const log = (p.log || []).slice(-5).reverse();
                   if (log.length > 1) {
                     const h = calMk('div', null, 'Recent weigh-ins');
                     h.style.cssText = 'font-size:13px;font-weight:600;margin:10px 0 4px;';
                     out.appendChild(h);
-                    const t = calMk('small', 'cal-note', log.map(x => calLabel(x.date).split(' · ')[0] + ': ' + x.kg + ' kg').join('  |  '));
-                    out.appendChild(t);
+                    out.appendChild(calMk('small', 'cal-note', log.map(x => calLabel(x.date).split(' · ')[0] + ': ' + x.kg + ' kg').join('  |  ')));
                   }
                 }
 
@@ -7485,9 +7512,8 @@ render();
                 }
 
                 function calOpenProfile() {
-                  showForm(byId('calProfileWrap'));
-                  byId('calProfileToggle').classList.add('open');
-                  try { byId('calProfileToggle').scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) { }
+                  calLoadProfileForm();
+                  if (window.nrOpenSheet) window.nrOpenSheet('profile', 'weightProfile');
                 }
 
                 function saveBurn() {
@@ -7501,7 +7527,7 @@ render();
                     if (!(kcal > 0)) { alert('Enter the calories burned.'); return; }
                     kcal = Math.round(kcal);
                   } else {
-                    if (!p) { alert('Enter your weight first (MY WEIGHT & PROFILE).'); calOpenProfile(); return; }
+                    if (!p) { alert('Enter your weight first (Add your profile data).'); calOpenProfile(); return; }
                     mins = parseFloat(byId('calBMins').value);
                     if (!(mins > 0)) { alert('Enter the duration in minutes.'); return; }
                     kcal = Math.round(a.met * p.weight * mins / 60);
@@ -7558,6 +7584,7 @@ render();
                 }
 
                 // ----- day progress -----
+                let calGoalEditing = false;
                 function renderCalDay() {
                   const box = byId('calDayBox');
                   if (!box) return;
@@ -7603,6 +7630,14 @@ render();
                     '<small class="cal-note">Limit = daily goal ' + calFmt(goal) + (burned ? ' + exercise ' + calFmt(burned) : '') + ' = ' + calFmt(budget) + ' kcal</small>';
                   box.appendChild(sum);
 
+                  const fullP = calProfFull();
+                  if (fullP) {
+                    const bm = calMk('div', 'cal-stats');
+                    bm.innerHTML = '<div class="cal-stat"><b>' + calFmt(calBMR(fullP)) + '</b><small>BMR kcal/day</small></div>' +
+                      '<div class="cal-stat"><b>' + calFmt(calMaint(fullP)) + '</b><small>Maintenance kcal/day</small></div>';
+                    box.appendChild(bm);
+                  }
+
                   // weight effect of the day
                   const full = calProfFull();
                   if (full && entries.length) {
@@ -7615,7 +7650,7 @@ render();
                       (k === calKey(new Date()) ? ' Today is not finished yet.' : '') + '</small>';
                     box.appendChild(wb);
                   } else if (!calProf() && (entries.length || burns.length)) {
-                    const wb = calMk('div', 'cal-info', '⚖️ Enter your weight in MY WEIGHT & PROFILE to see how your weight changes.');
+                    const wb = calMk('div', 'cal-info', '⚖️ Enter your weight in Add your profile data above to see how your weight changes.');
                     wb.style.margin = '8px 0';
                     box.appendChild(wb);
                   }
@@ -7632,25 +7667,75 @@ render();
                   }
 
                   // goal
+                  const goalSet = !!appData.calGoalSet || Number(appData.calorieGoal) !== 2000;
+                  const fullG = calProfFull();
                   const gr = calMk('div');
-                  gr.style.cssText = 'display:flex;gap:6px;align-items:center;margin:10px 0 4px;';
+                  gr.style.cssText = 'display:flex;gap:6px;align-items:center;margin:10px 0 4px;flex-wrap:wrap;';
                   const gl = calMk('span', null, '🎯 Daily goal (kcal)');
                   gl.style.cssText = 'font-size:13px;font-weight:600;white-space:nowrap;';
-                  const gi = calMk('input', 'cal-in');
-                  gi.type = 'number'; gi.min = '500'; gi.step = '50'; gi.value = goal; gi.style.flex = '1';
-                  const gb = calMk('button', 'primary', 'Set');
-                  gb.addEventListener('click', () => {
-                    const v = parseFloat(gi.value);
-                    if (!(v >= 500 && v <= 10000)) { alert('Enter a goal between 500 and 10000 kcal.'); return; }
-                    appData.calorieGoal = Math.round(v);
-                    saveAll();
-                    renderCalories();
-                  });
-                  gr.append(gl, gi, gb);
-                  box.appendChild(gr);
-                  const tip = calMk('small', null, full
-                    ? 'Your maintenance is about ' + calFmt(calMaint(full)) + ' kcal/day. Eat less than this to lose weight and more to gain.'
-                    : 'Average adult needs about 1800-2500 kcal per day. Add your profile above for a personal number.');
+                  if (goalSet && !calGoalEditing) {
+                    const gv = calMk('b', null, calFmt(goal) + ' kcal');
+                    gv.style.cssText = 'flex:1;font-size:15px;';
+                    const eb = calMk('button', 'secondary', '✏️ Edit');
+                    eb.addEventListener('click', () => { calGoalEditing = true; renderCalDay(); });
+                    gr.append(gl, gv, eb);
+                    box.appendChild(gr);
+                  } else {
+                    const gi = calMk('input', 'cal-in');
+                    gi.type = 'number'; gi.min = '500'; gi.step = '50'; gi.value = goal; gi.style.flex = '1';
+                    gr.append(gl, gi);
+                    box.appendChild(gr);
+                    let bi = null, mi = null;
+                    if (goalSet && fullG) {
+                      const mk = (label, val) => {
+                        const r = calMk('div');
+                        r.style.cssText = 'display:flex;gap:6px;align-items:center;margin:6px 0;';
+                        const l = calMk('span', null, label);
+                        l.style.cssText = 'font-size:13px;font-weight:600;white-space:nowrap;';
+                        const i = calMk('input', 'cal-in');
+                        i.type = 'number'; i.min = '500'; i.step = '10'; i.value = val; i.style.flex = '1';
+                        r.append(l, i); box.appendChild(r); return i;
+                      };
+                      bi = mk('🔥 BMR kcal/day', calBMR(fullG));
+                      mi = mk('⚖️ Maintenance kcal/day', calMaint(fullG));
+                    }
+                    const ar = calMk('div');
+                    ar.style.cssText = 'display:flex;gap:6px;margin:6px 0;';
+                    const gb = calMk('button', 'primary', goalSet ? 'Save' : 'Set');
+                    gb.addEventListener('click', () => {
+                      const v = parseFloat(gi.value);
+                      if (!(v >= 500 && v <= 10000)) { alert('Enter a goal between 500 and 10000 kcal.'); return; }
+                      if (bi && mi) {
+                        const bv = parseFloat(bi.value), mv = parseFloat(mi.value);
+                        if (!(bv >= 500 && bv <= 10000) || !(mv >= 500 && mv <= 10000)) { alert('BMR and maintenance must be between 500 and 10000 kcal.'); return; }
+                        const pr = appData.calProfile;
+                        const bc = Math.round(bv) !== calBMR(Object.assign({}, pr, { bmrOv: 0, maintOv: 0 }));
+                        const mcalc = Math.round((bc ? Math.round(bv) : calBMR(Object.assign({}, pr, { bmrOv: 0 }))) * (CAL_LIFE[pr.life] || CAL_LIFE.sed)[1]);
+                        pr.bmrOv = bc ? Math.round(bv) : 0;
+                        pr.maintOv = Math.round(mv) !== mcalc ? Math.round(mv) : 0;
+                      }
+                      appData.calorieGoal = Math.round(v);
+                      appData.calGoalSet = true;
+                      calGoalEditing = false;
+                      saveAll();
+                      renderCalories();
+                    });
+                    ar.appendChild(gb);
+                    if (goalSet) {
+                      const cb = calMk('button', 'secondary', 'Cancel');
+                      cb.addEventListener('click', () => { calGoalEditing = false; renderCalDay(); });
+                      ar.appendChild(cb);
+                    }
+                    if (fullG) {
+                      const ub = calMk('button', 'secondary', 'Use maintenance as goal');
+                      ub.addEventListener('click', () => { appData.calorieGoal = calMaint(fullG); appData.calGoalSet = true; calGoalEditing = false; saveAll(); renderCalories(); });
+                      ar.appendChild(ub);
+                    }
+                    box.appendChild(ar);
+                  }
+                  const tip = calMk('small', null, fullG
+                    ? 'Your maintenance is about ' + calFmt(calMaint(fullG)) + ' kcal/day. Eat less than this to lose weight and more to gain.'
+                    : 'Average adult needs about 1800-2500 kcal per day. Add your profile data above for a personal number.');
                   tip.style.cssText = 'display:block;opacity:.7;margin-bottom:10px;';
                   box.appendChild(tip);
 
@@ -7800,7 +7885,7 @@ render();
                 }
 
                 function renderCalories(fromPage) {
-                  if (!byId('calProfileWrap').contains(document.activeElement)) calLoadProfileForm();
+                  if (!byId('weightProfileForm').contains(document.activeElement)) calLoadProfileForm();
                   renderCalProfile();
                   renderCalDay();
                   renderCalHist();
@@ -7862,6 +7947,7 @@ render();
                 });
 
                 byId('saveCalProfileBtn').addEventListener('click', saveCalProfile);
+                byId('calAddProfileBtn').addEventListener('click', calOpenProfile);
                 byId('calProfileToggle').addEventListener('click', function () {
                   calLoadProfileForm();
                   toggleCollapse(byId('calProfileWrap'), byId('calProfileToggle'));
@@ -9417,7 +9503,7 @@ render();
       const $ = id => document.getElementById(id);
       const HUB_PAGES = ['reminders', 'notes', 'budget', 'Check', 'priority', 'progress', 'piggyBank', 'calories'];
       const PROFILE_PAGES = ['trash', 'notifications', 'terms', 'how', 'other', 'updateLog'];
-      const TITLES = { hub: 'Reminder Hub', utilities: 'Utilities', profile: 'Profile', settings: 'Settings', storage: 'Storage' };
+      const TITLES = { hub: 'Reminder Hub', utilities: 'Utilities', profile: 'Profile', settings: 'Settings', storage: 'Storage', weightProfile: 'Weight & Profile' };
       const MODE_KEY = 'nr_viewMode';
       const FALLBACK_AVATAR = 'data:image/svg+xml;utf8,' + encodeURIComponent(
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#9e9e9e"/>' +
@@ -9460,6 +9546,7 @@ render();
         $('sheetTitle').textContent = TITLES[v] || '';
         $('sheetBack').hidden = (v === 'hub' || v === 'utilities' || v === 'profile');
         body.scrollTop = 0;
+        if (v === 'weightProfile' && typeof window.calLoadProfileForm === 'function') window.calLoadProfileForm();
         if (v === 'storage') { const st = $('backupStatus'); if (st) st.textContent = ''; if (typeof window.updateLastBackupText === 'function') window.updateLastBackupText(); }
       }
 
@@ -9475,6 +9562,7 @@ render();
       }
 
       window.nrOpenSheet = openSheet;
+      window.nrSetView = setView;
 
       function closeSheet() {
         if (!sheet.classList.contains('open')) return;

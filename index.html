@@ -1879,7 +1879,7 @@
                 <span>Columns <input type="number" id="tblCols" min="1" max="10" value="3" style="width:70px;"></span>
               </div>
               <div id="tblGrid" style="margin-top:10px;overflow-x:auto;"></div>
-              <small style="display:block;opacity:.7;margin-top:6px;">First row is the heading. Fill the cells, then add it to the note.</small>
+              <small id="tblHint" style="display:block;opacity:.7;margin-top:6px;">First row is the heading. Fill the cells, then add it to the note.</small>
               <div class="form-actions" style="margin-top:8px;">
                 <button type="button" id="tblApply" class="primary">✔ Add table to note</button>
                 <button type="button" id="tblClose" class="secondary">Close</button>
@@ -4325,7 +4325,25 @@ render();
           const note = appData.notes[index];
           editingNoteIndex = index;
 
-          byId('noteText').value = (note.text || '').replace(/^Created: [^\n]*\n\n/, '');
+          const rawText = (note.text || '').replace(/^Created: [^\n]*\n\n/, '');
+          if (typeof window.nrTblReset === 'function') window.nrTblReset();
+          if (note.isTable && typeof window.nrTblLoad === 'function') {
+            // table note: open the table editor with its rows and columns
+            const rows = [], other = [];
+            rawText.split('\n').forEach(line => {
+              if (!line.includes('|')) { other.push(line); return; }
+              if (line.includes('---')) return;
+              let t = line.trim();
+              if (t.startsWith('|')) t = t.slice(1);
+              if (t.endsWith('|')) t = t.slice(0, -1);
+              const cells = t.split('|').map(c => c.trim());
+              if (cells.some(c => c)) rows.push(cells);
+            });
+            byId('noteText').value = other.join('\n').trim();
+            if (rows.length) window.nrTblLoad(rows);
+          } else {
+            byId('noteText').value = rawText;
+          }
 
           // Show the form
           showForm(byId('noteFormContainer'));
@@ -4337,7 +4355,12 @@ render();
 
         // Updated saveNote (removed AI-related code)
         function saveNote(){
-          const text = byId('noteText').value.trim();
+          let text = byId('noteText').value.trim();
+          if (typeof window.nrTblSerialize === 'function') {
+            const tt = window.nrTblSerialize();
+            if (tt === null) return;
+            if (tt) text = (text ? text + '\n\n' : '') + tt;
+          }
           const fileInput = byId('noteFile');
           const file = fileInput.files[0];
           // a note is a table when it was made with Insert Table (| rows and a --- line)
@@ -8020,6 +8043,7 @@ render();
                 // Notes Listeners
                 byId('showAddNoteBtn').addEventListener('click', function() {
                   byId('saveNoteBtn').textContent = 'Save'; // Ensure it says Save
+                  if (editingNoteIndex === null && typeof window.nrTblReset === 'function' && !byId('noteFormContainer').classList.contains('visible')) window.nrTblReset();
                   toggleCollapse(byId('noteFormContainer'), byId('showAddNoteBtn'));
                 });
 
@@ -9318,11 +9342,12 @@ render();
 
               const clamp = (v, a, b) => Math.min(b, Math.max(a, parseInt(v, 10) || a));
 
-              function build() {
+              function build(preset) {
                 const r = clamp(rowsI.value, 2, 30), c = clamp(colsI.value, 1, 10);
                 rowsI.value = r; colsI.value = c;
                 const old = {};
                 grid.querySelectorAll('input').forEach(i => { old[i.dataset.r + ',' + i.dataset.c] = i.value; });
+                if (preset) Object.assign(old, preset);
                 grid.innerHTML = '';
                 const table = document.createElement('table');
                 table.style.borderCollapse = 'separate';
@@ -9347,7 +9372,54 @@ render();
                 grid.appendChild(table);
               }
 
-              function reset() { box.hidden = true; grid.innerHTML = ''; rowsI.value = 3; colsI.value = 3; }
+              const hint = g('tblHint');
+              let editMode = false;
+              function reset() {
+                box.hidden = true; grid.innerHTML = ''; rowsI.value = 3; colsI.value = 3;
+                editMode = false;
+                btn.style.display = ''; apply.style.display = ''; closeB.style.display = '';
+                if (hint) hint.textContent = 'First row is the heading. Fill the cells, then add it to the note.';
+              }
+              function serialize() {
+                const r = clamp(rowsI.value, 2, 30), c = clamp(colsI.value, 1, 10);
+                const rows = [];
+                let any = false;
+                for (let i = 0; i < r; i++) {
+                  const cells = [];
+                  for (let j = 0; j < c; j++) {
+                    const inp = grid.querySelector('input[data-r="' + i + '"][data-c="' + j + '"]');
+                    const v = (inp ? inp.value : '').replace(/\|/g, '/').replace(/\s+/g, ' ').trim();
+                    if (v) any = true;
+                    cells.push(v);
+                  }
+                  rows.push(cells);
+                }
+                const fmt = cells => '| ' + cells.join(' | ') + ' |';
+                const lines = [fmt(rows[0]), fmt(new Array(c).fill('---'))];
+                rows.slice(1).forEach(cells => lines.push(fmt(cells)));
+                return { any, text: lines.join('\n') };
+              }
+              window.nrTblReset = reset;
+              // load an existing table note into the editor
+              window.nrTblLoad = function (rows) {
+                const preset = {};
+                let cols = 1;
+                rows.forEach((cells, i) => { cols = Math.max(cols, cells.length); cells.forEach((v, j) => { preset[i + ',' + j] = v; }); });
+                grid.innerHTML = '';
+                rowsI.value = Math.max(2, rows.length); colsI.value = cols;
+                editMode = true;
+                box.hidden = false;
+                btn.style.display = 'none'; apply.style.display = 'none'; closeB.style.display = 'none';
+                if (hint) hint.textContent = 'Edit the cells, or change Rows / Columns to add more. Press Update to save the table.';
+                build(preset);
+              };
+              // table text for Update (only while a table note is being edited)
+              window.nrTblSerialize = function () {
+                if (!editMode || box.hidden) return '';
+                const t = serialize();
+                if (!t.any) { alert('Fill at least one cell in the table.'); return null; }
+                return t.text;
+              };
 
               btn.addEventListener('click', () => {
                 box.hidden = !box.hidden;

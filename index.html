@@ -1034,6 +1034,8 @@
       background: var(--sh-bg);
       border-top: 1px solid var(--sh-line);
       padding-bottom: env(safe-area-inset-bottom, 0px);
+      border-radius: 26px 26px 0 0;
+      overflow: hidden;
     }
     #navBar .nav-in {
       display: flex;
@@ -1057,6 +1059,9 @@
       font-weight: 600;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
+      border-radius: 20px;
+      margin: 5px 3px;
+      transition: background 0.15s;
     }
     .nav-tab .ni {
       font-size: 22px;
@@ -1076,8 +1081,9 @@
       top: 0;
       width: 30px;
       height: 3px;
-      border-radius: 0 0 3px 3px;
+      border-radius: 0 0 6px 6px;
       background: var(--accent);
+      top: -5px;
     }
     .nav-tab .nav-av {
       width: 26px;
@@ -1088,7 +1094,7 @@
       background: var(--sh-card);
     }
     .nav-tab.active .nav-av { border-color: var(--accent); }
-    .nav-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; border-radius: 10px; }
+    .nav-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; border-radius: 20px; }
 
 
     /* ---------- "By Spydernet" strip under the nav buttons ---------- */
@@ -1151,7 +1157,9 @@
       right: 0;
       margin: 0 auto;
       max-width: 560px;
-      bottom: calc(var(--nav-h) + var(--by-h) + env(safe-area-inset-bottom, 0px));
+      bottom: calc(var(--nav-h) + var(--by-h) + env(safe-area-inset-bottom, 0px) - 30px);
+      padding-bottom: 30px;
+      box-sizing: border-box;
       z-index: 900;
       display: flex;
       flex-direction: column;
@@ -1164,16 +1172,16 @@
       transform: translateY(115%);
       visibility: hidden;
       transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), height 0.25s ease, visibility 0s 0.3s;
-      height: 52vh;
-      height: 52dvh;
+      height: calc(52vh + 30px);
+      height: calc(52dvh + 30px);
     }
     #sheet.open { transform: translateY(0); visibility: visible; transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), height 0.25s ease; }
     #sheet.dragging { transition: none; }
-    #sheet[data-mode="compact"] { height: auto; max-height: 40vh; max-height: 40dvh; }
+    #sheet[data-mode="compact"] { height: auto; max-height: calc(40vh + 30px); max-height: calc(40dvh + 30px); }
     #sheet.expanded,
     #sheet[data-mode="compact"].expanded {
-      height: calc(100vh - var(--nav-h) - var(--by-h) - 24px);
-      height: calc(100dvh - var(--nav-h) - var(--by-h) - env(safe-area-inset-bottom, 0px) - 24px);
+      height: calc(100vh - var(--nav-h) - var(--by-h) - 24px + 30px);
+      height: calc(100dvh - var(--nav-h) - var(--by-h) - env(safe-area-inset-bottom, 0px) - 24px + 30px);
       max-height: none;
     }
 
@@ -1423,7 +1431,7 @@
         <span class="ni"><img id="navAvatar" class="nav-av" src="assets/default-avatar.png" alt="" /></span><span>Profile</span>
       </button>
     </div>
-    <div class="nav-by"><a href="https://github.com/spydernet3" target="_blank" rel="noopener">By Spydernet</a></div>
+    <div class="nav-by"><a href="https://spydernetofficial.blogspot.com" target="_blank" rel="noopener">By Spydernet</a></div>
   </nav>
 
   <!-- ============ MINI BOTTOM SHEET ============ -->

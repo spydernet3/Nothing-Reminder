@@ -285,7 +285,9 @@
     #viewPriorityToggle,
     #homeProgressToggle,
     #showAddProgressBtn,
-    #viewProgressToggle {
+    #viewProgressToggle,
+    #showAddBbBtn,
+    #viewBbToggle {
       position: relative;
       user-select: none;
       display: flex;
@@ -320,7 +322,9 @@
     #viewPriorityToggle:hover,
     #homeProgressToggle:hover,
     #showAddProgressBtn:hover,
-    #viewProgressToggle:hover {
+    #viewProgressToggle:hover,
+    #showAddBbBtn:hover,
+    #viewBbToggle:hover {
       background: #aaa;
     }
 
@@ -342,7 +346,9 @@
     #viewPriorityToggle.open .arrow,
     #homeProgressToggle.open .arrow,
     #showAddProgressBtn.open .arrow,
-    #viewProgressToggle.open .arrow {
+    #viewProgressToggle.open .arrow,
+    #showAddBbBtn.open .arrow,
+    #viewBbToggle.open .arrow {
       transform: rotate(180deg);
       transition: left 0s;
     }
@@ -374,6 +380,39 @@
       min-height: 1.2em;
     }
 
+
+    /* Piggy Bank: inputs sized like the Progress Tracker / Priority Queue ones */
+    #bbTitle, #bbDate, #bbAmount,
+    .pt-form .bb-in {
+      width: 100%;
+      height: 36px;
+      box-sizing: border-box;
+      margin: 0;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font: inherit;
+      font-size: 14px;
+    }
+    #bbDate, .pt-form input[type="date"].bb-in {
+      display: block;
+      min-width: 0;
+      -webkit-appearance: none;
+      appearance: none;
+      text-align: left;
+      line-height: normal;
+    }
+    #bbDate::-webkit-date-and-time-value,
+    .pt-form input[type="date"].bb-in::-webkit-date-and-time-value { text-align: left; min-height: 1.2em; }
+    #bbNotes { width: 100%; box-sizing: border-box; font: inherit; font-size: 14px; resize: vertical; min-height: 60px; }
+    .pt-form .bb-in:focus { outline: 2px solid var(--accent); border-color: transparent; }
+    .pt-form textarea.bb-in { height: auto; min-height: 70px; }
+    .bb-total { font-size: 13px; opacity: .9; }
+    .bb-amt { font-weight: 600; }
+    .bb-total-all {
+      font-weight: 700; font-size: 15px; padding: 4px 0 2px;
+    }
+
     /* Progress Tracker: title, then a vertical line with the steps hanging on it */
     .pt-steps {
       border-left: 2px solid var(--accent);
@@ -383,8 +422,60 @@
 
     .pt-step {
       position: relative;
-      margin: 8px 0;
+      margin: 20px 0;
+      padding: 2px 0;
     }
+
+    /* Progress step input card */
+    .pt-form {
+      width: 100%;
+      margin: 14px 0 6px;
+      padding: 16px;
+      border-radius: 16px;
+      background: #fff;
+      border: 1px solid #e3e3e3;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, .06);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .pt-form .pf-head { font-weight: 700; font-size: 15px; }
+    .pt-form .pf-field { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; font-weight: 600; }
+    .pt-form textarea {
+      width: 100%;
+      min-height: 96px;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #d4d4d4;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 400;
+      resize: vertical;
+    }
+    .pt-form textarea:focus { outline: 2px solid var(--accent); border-color: transparent; }
+    .pt-form .pf-file {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border: 1.5px dashed #bdbdbd;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 13.5px;
+      font-weight: 500;
+      word-break: break-all;
+    }
+    .pt-form .pf-file:hover { border-color: var(--accent); }
+    .pt-form .pf-note { font-size: 12px; font-weight: 400; opacity: .7; }
+    .pt-form .pf-check { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; }
+    .pt-form .pf-actions { display: flex; gap: 10px; }
+    .pt-form .pf-actions button { flex: 1; padding: 11px 12px; border-radius: 12px; font-size: 14px; font-weight: 600; }
+    .dark .pt-form { background: #2a2a2a; border-color: #3a3a3a; box-shadow: none; }
+    .dark .pt-form .pf-file { border-color: #555; }
+
+    .pt-step:first-child { margin-top: 12px; }
+    .pt-step:last-child { margin-bottom: 10px; }
+    .pt-step small { display: block; margin-top: 4px; }
 
     .pt-step::before {
       content: '';
@@ -1443,6 +1534,34 @@
       .sh-row .ri { --s: 36px; }
     }
 
+
+    /* ===== CALORIES ===== */
+    #showAddCalBtn, #viewCalProgToggle, #viewCalHistToggle {
+      position: relative; user-select: none; display: flex; justify-content: space-between; align-items: center;
+      font-weight: 600; font-size: 15px; cursor: pointer; padding: 10px; border: none; background: #888; color: #fff;
+      border-radius: 6px; text-align: left;
+    }
+    #showAddCalBtn:hover, #viewCalProgToggle:hover, #viewCalHistToggle:hover { background: #aaa; }
+    #showAddCalBtn.open .arrow, #viewCalProgToggle.open .arrow, #viewCalHistToggle.open .arrow { transform: rotate(180deg); }
+    .cal-in {
+      width: 100%; height: 36px; box-sizing: border-box; margin: 0; padding: 8px; border-radius: 6px;
+      border: 1px solid #ccc; font: inherit; font-size: 14px;
+    }
+    input[type="date"].cal-in { display: block; min-width: 0; -webkit-appearance: none; appearance: none; text-align: left; line-height: normal; }
+    input[type="date"].cal-in::-webkit-date-and-time-value { text-align: left; min-height: 1.2em; }
+    .cal-in:focus { outline: 2px solid var(--accent); border-color: transparent; }
+    .cal-field { display: flex; flex-direction: column; font-size: 13px; gap: 6px; }
+    .cal-field[hidden] { display: none; }
+    .cal-info { padding: 10px; border-radius: 10px; font-size: 13px; line-height: 1.5; background: rgba(128,128,128,.12); }
+    .cal-result { font-weight: 700; font-size: 17px; color: var(--accent); }
+    .cal-bar { height: 12px; border-radius: 8px; background: rgba(128,128,128,.25); overflow: hidden; }
+    .cal-bar i { display: block; height: 100%; background: var(--accent); border-radius: 8px; transition: width .3s; }
+    .cal-bar.over i { background: #e53935; }
+    h4.cal-meal { margin: 12px 0 2px; font-size: 15px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    #calDayBox hr { margin: 4px 0 8px; border: 0; border-top: 1px solid #bbb; width: 100%; }
+    .dark #calDayBox hr { border-top-color: #666; }
+    .dark .cal-in { background: #333 !important; color: #fff !important; border: 1px solid #444 !important; }
+
     @media (prefers-reduced-motion: reduce) {
       #sheet, #sheetBackdrop, .nav-tab .ni, .sw, .sw::after { transition: none !important; }
     }
@@ -1450,7 +1569,7 @@
 </head>
 
 <body>
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h5v-6h4v6h5V10"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4.5l3 1.8"/><path d="M4.5 4.2 2.5 6.2M19.5 4.2l2 2"/></symbol><symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></symbol><symbol id="i-notes" viewBox="0 0 24 24"><path d="M7 3h7.5L19 7.5V21H7z"/><path d="M14.5 3v5H19"/><path d="M10 13h6M10 17h6"/></symbol><symbol id="i-wallet" viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 1 2-2h13v3"/><path d="M3 8v10a2 2 0 0 0 2 2h14a1.5 1.5 0 0 0 1.5-1.5v-8A1.5 1.5 0 0 0 19 9H5a2 2 0 0 1-2-1"/><circle cx="16.5" cy="14.5" r="1" fill="#fff"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="M9.5 6.5H20M9.5 12H20M9.5 17.5H20"/><path d="m3.5 6.5 1.4 1.4 2.4-2.8M3.5 12l1.4 1.4 2.4-2.8M3.5 17.5l1.4 1.4 2.4-2.8"/></symbol><symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="#fff"/></symbol><symbol id="i-trend" viewBox="0 0 24 24"><path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/></symbol><symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol><symbol id="i-calendar2" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 17.2h.01M12 17.2h.01" stroke-width="2.6"/></symbol><symbol id="i-calc" viewBox="0 0 24 24"><rect x="5" y="2.5" width="14" height="19" rx="3"/><rect x="8" y="5.5" width="8" height="3.5" rx="1"/><path d="M8.5 13h.01M12 13h.01M15.5 13h.01M8.5 17h.01M12 17h.01M15.5 17h.01" stroke-width="2.6"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.5 13.2A8.5 8.5 0 1 1 10.8 3.5a6.8 6.8 0 0 0 9.7 9.7z"/></symbol><symbol id="i-sunrise" viewBox="0 0 24 24"><path d="M12 3v3.5M4.9 8.4l2.4 2.4M19.1 8.4l-2.4 2.4M2.5 17.5h3M18.5 17.5h3"/><path d="M7 17.5a5 5 0 0 1 10 0"/><path d="M3.5 21h17"/></symbol><symbol id="i-gold" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 7.5h7M8.5 11h7M8.5 7.5h1.6c3.2 0 3.7 3.5 0 3.5H8.5l5.5 5.5"/></symbol><symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7.5 18.5a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18.4 10.8 3.9 3.9 0 0 1 17.5 18.5z"/></symbol><symbol id="i-qr" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><path d="M14 14h3v3h-3zM20.5 14v.01M14 20.5h3M20.5 17.5v3"/></symbol><symbol id="i-cart" viewBox="0 0 24 24"><path d="M3 3.5h2.2l2.3 11.6a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L20.5 8H6"/><circle cx="10" cy="20.5" r="1.1" fill="#fff"/><circle cx="17" cy="20.5" r="1.1" fill="#fff"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M3.5 3.5v17h17"/><path d="m7.5 15 3.8-4 3 3 5-6"/></symbol><symbol id="i-history" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3.5 8.5"/><path d="M3.5 3.5v5h5"/><path d="M12 7.5V12l3 2"/></symbol><symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 6.5h9M19 6.5h1M4 12h3M13 12h7M4 17.5h11M19 17.5h1"/><circle cx="16" cy="6.5" r="2.4"/><circle cx="10" cy="12" r="2.4"/><circle cx="17" cy="17.5" r="2.4"/></symbol><symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 6.5 2.5 8 2.5 8h-17S6 15.5 6 9"/><path d="M10.2 20.5a2 2 0 0 0 3.6 0"/></symbol><symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></symbol><symbol id="i-game" viewBox="0 0 24 24"><path d="M6.5 11.5h4M8.5 9.5v4"/><path d="M15 12.5h.01M18 10.5h.01"/><path d="M17.3 5.5H6.7a4 4 0 0 0-3.9 3.2l-1.3 6.3a2.6 2.6 0 0 0 4.6 1.9l1.6-2.4h8.6l1.6 2.4a2.6 2.6 0 0 0 4.6-1.9l-1.3-6.3a4 4 0 0 0-3.9-3.2z"/></symbol><symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20.5 12A8.5 8.5 0 0 1 6 18"/><path d="M3.5 12A8.5 8.5 0 0 1 18 6"/><path d="M20.5 3.5v4.5H16M3.5 20.5V16H8"/></symbol><symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M9.3 9.2a2.8 2.8 0 1 1 3.9 2.6c-.8.4-1.2 1-1.2 1.8"/><path d="M12 17h.01" stroke-width="2.6"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2.5 19.5 5.5v6c0 4.8-3.2 8.4-7.5 10-4.3-1.6-7.5-5.2-7.5-10v-6z"/><path d="m8.8 12 2.2 2.2 4.2-4.4"/></symbol><symbol id="i-trash" viewBox="0 0 24 24"><path d="M3.5 6.5h17M9 6.5V4h6v2.5"/><path d="m5.5 6.5 1 14h11l1-14"/><path d="M10 11v5.5M14 11v5.5"/></symbol><symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4.2 4-6.5 8-6.5s7.2 2.3 8 6.5"/></symbol></defs></svg>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h5v-6h4v6h5V10"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4.5l3 1.8"/><path d="M4.5 4.2 2.5 6.2M19.5 4.2l2 2"/></symbol><symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></symbol><symbol id="i-notes" viewBox="0 0 24 24"><path d="M7 3h7.5L19 7.5V21H7z"/><path d="M14.5 3v5H19"/><path d="M10 13h6M10 17h6"/></symbol><symbol id="i-wallet" viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 1 2-2h13v3"/><path d="M3 8v10a2 2 0 0 0 2 2h14a1.5 1.5 0 0 0 1.5-1.5v-8A1.5 1.5 0 0 0 19 9H5a2 2 0 0 1-2-1"/><circle cx="16.5" cy="14.5" r="1" fill="#fff"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="M9.5 6.5H20M9.5 12H20M9.5 17.5H20"/><path d="m3.5 6.5 1.4 1.4 2.4-2.8M3.5 12l1.4 1.4 2.4-2.8M3.5 17.5l1.4 1.4 2.4-2.8"/></symbol><symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="#fff"/></symbol><symbol id="i-trend" viewBox="0 0 24 24"><path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/></symbol><symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol><symbol id="i-calendar2" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 17.2h.01M12 17.2h.01" stroke-width="2.6"/></symbol><symbol id="i-calc" viewBox="0 0 24 24"><rect x="5" y="2.5" width="14" height="19" rx="3"/><rect x="8" y="5.5" width="8" height="3.5" rx="1"/><path d="M8.5 13h.01M12 13h.01M15.5 13h.01M8.5 17h.01M12 17h.01M15.5 17h.01" stroke-width="2.6"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.5 13.2A8.5 8.5 0 1 1 10.8 3.5a6.8 6.8 0 0 0 9.7 9.7z"/></symbol><symbol id="i-sunrise" viewBox="0 0 24 24"><path d="M12 3v3.5M4.9 8.4l2.4 2.4M19.1 8.4l-2.4 2.4M2.5 17.5h3M18.5 17.5h3"/><path d="M7 17.5a5 5 0 0 1 10 0"/><path d="M3.5 21h17"/></symbol><symbol id="i-gold" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 7.5h7M8.5 11h7M8.5 7.5h1.6c3.2 0 3.7 3.5 0 3.5H8.5l5.5 5.5"/></symbol><symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7.5 18.5a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18.4 10.8 3.9 3.9 0 0 1 17.5 18.5z"/></symbol><symbol id="i-qr" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><path d="M14 14h3v3h-3zM20.5 14v.01M14 20.5h3M20.5 17.5v3"/></symbol><symbol id="i-cart" viewBox="0 0 24 24"><path d="M3 3.5h2.2l2.3 11.6a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L20.5 8H6"/><circle cx="10" cy="20.5" r="1.1" fill="#fff"/><circle cx="17" cy="20.5" r="1.1" fill="#fff"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M3.5 3.5v17h17"/><path d="m7.5 15 3.8-4 3 3 5-6"/></symbol><symbol id="i-history" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3.5 8.5"/><path d="M3.5 3.5v5h5"/><path d="M12 7.5V12l3 2"/></symbol><symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 6.5h9M19 6.5h1M4 12h3M13 12h7M4 17.5h11M19 17.5h1"/><circle cx="16" cy="6.5" r="2.4"/><circle cx="10" cy="12" r="2.4"/><circle cx="17" cy="17.5" r="2.4"/></symbol><symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 6.5 2.5 8 2.5 8h-17S6 15.5 6 9"/><path d="M10.2 20.5a2 2 0 0 0 3.6 0"/></symbol><symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></symbol><symbol id="i-game" viewBox="0 0 24 24"><path d="M6.5 11.5h4M8.5 9.5v4"/><path d="M15 12.5h.01M18 10.5h.01"/><path d="M17.3 5.5H6.7a4 4 0 0 0-3.9 3.2l-1.3 6.3a2.6 2.6 0 0 0 4.6 1.9l1.6-2.4h8.6l1.6 2.4a2.6 2.6 0 0 0 4.6-1.9l-1.3-6.3a4 4 0 0 0-3.9-3.2z"/></symbol><symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20.5 12A8.5 8.5 0 0 1 6 18"/><path d="M3.5 12A8.5 8.5 0 0 1 18 6"/><path d="M20.5 3.5v4.5H16M3.5 20.5V16H8"/></symbol><symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M9.3 9.2a2.8 2.8 0 1 1 3.9 2.6c-.8.4-1.2 1-1.2 1.8"/><path d="M12 17h.01" stroke-width="2.6"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2.5 19.5 5.5v6c0 4.8-3.2 8.4-7.5 10-4.3-1.6-7.5-5.2-7.5-10v-6z"/><path d="m8.8 12 2.2 2.2 4.2-4.4"/></symbol><symbol id="i-trash" viewBox="0 0 24 24"><path d="M3.5 6.5h17M9 6.5V4h6v2.5"/><path d="m5.5 6.5 1 14h11l1-14"/><path d="M10 11v5.5M14 11v5.5"/></symbol><symbol id="i-bank" viewBox="0 0 24 24"><path d="M4.5 13c0-3.3 3-5.8 7-5.8 1.4 0 2.7.3 3.8.9L18.5 6.5v3.4c.9.8 1.5 1.8 1.5 3.1 0 1.5-.8 2.8-2 3.6V19h-2.8v-1.3H9.8V19H7v-2.6c-1.5-.8-2.5-2-2.5-3.4z"/><path d="M9.5 10h3"/><path d="M15.6 12.4h.01" stroke-width="2.6"/><path d="M4.5 12.3H3"/></symbol><symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4.2 4-6.5 8-6.5s7.2 2.3 8 6.5"/></symbol><symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 2.5c.8 3.6 5.5 5.6 5.5 10.6a5.5 5.5 0 0 1-11 0c0-2.2 1-3.6 2.2-4.8.3 1.5 1 2.3 1.9 2.6C10.2 8.2 10.6 5 12 2.5z"/><path d="M12 21a2.6 2.6 0 0 1-2.6-2.6c0-1.4 1.2-2.3 2.6-3.6 1.4 1.3 2.6 2.2 2.6 3.6A2.6 2.6 0 0 1 12 21z"/></symbol></defs></svg>
   <button id="installBtn" onclick="installApp()">
     INSTALL APP 🐒
     </button>
@@ -1495,6 +1614,8 @@
           <button type="button" class="hub-tile" data-go="Check"><span class="ri g-blue"><svg aria-hidden="true"><use href="#i-check"/></svg></span><b>Check List</b><small>Tick things off</small></button>
           <button type="button" class="hub-tile" data-go="priority"><span class="ri g-red"><svg aria-hidden="true"><use href="#i-target"/></svg></span><b>Priority Queue</b><small>What's next</small></button>
           <button type="button" class="hub-tile" data-go="progress"><span class="ri g-purple"><svg aria-hidden="true"><use href="#i-trend"/></svg></span><b>Progress Tracker</b><small>Track your goals</small></button>
+          <button type="button" class="hub-tile" data-go="piggyBank"><span class="ri g-pink"><svg aria-hidden="true"><use href="#i-bank"/></svg></span><b>Piggy Bank</b><small>Daily savings</small></button>
+          <button type="button" class="hub-tile" data-go="calories"><span class="ri g-red"><svg aria-hidden="true"><use href="#i-flame"/></svg></span><b>Calories</b><small>Food &amp; daily kcal</small></button>
         </div>
       </section>
 
@@ -1570,6 +1691,7 @@
         </div>
 
         <div class="sh-label">Data backup</div>
+        <p class="sh-note" id="lastBackupText" style="margin:0 0 8px;font-weight:600;"></p>
         <div class="bk-row">
           <button type="button" id="exportDataBtn">⬆️ Export</button>
           <button type="button" id="importDataBtn">⬇️ Import</button>
@@ -1703,13 +1825,24 @@
               Note<textarea
                 id="noteText"
                 rows="4"
-                placeholder="Create a note here, use | to add a title and --- to separate columns for table format."
+                placeholder="Write your note here. Use ▦ Insert Table to add a table."
               ></textarea>
             </label>
-          <label>
-              Table Format<input type="checkbox" id="tableFormatCheckbox" />
-              <span>Enable table format</span>
-            </label>
+          <div style="margin:6px 0 10px;">
+            <button type="button" id="insertTableBtn" class="secondary">▦ Insert Table</button>
+            <div id="tblBuilder" hidden style="margin-top:10px;">
+              <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;">
+                <span>Rows <input type="number" id="tblRows" min="2" max="30" value="3" style="width:70px;"></span>
+                <span>Columns <input type="number" id="tblCols" min="1" max="10" value="3" style="width:70px;"></span>
+              </div>
+              <div id="tblGrid" style="margin-top:10px;overflow-x:auto;"></div>
+              <small style="display:block;opacity:.7;margin-top:6px;">First row is the heading. Fill the cells, then add it to the note.</small>
+              <div class="form-actions" style="margin-top:8px;">
+                <button type="button" id="tblApply" class="primary">✔ Add table to note</button>
+                <button type="button" id="tblClose" class="secondary">Close</button>
+              </div>
+            </div>
+          </div>
           <div class="form-actions">
             <button id="saveNoteBtn" class="primary">Save</button>
             <button id="cancelNoteBtn" class="secondary">Cancel</button>
@@ -1912,7 +2045,7 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.8.5 </p>
+          <p>Version 13.8.6 </p>
           <p>Last Updated: 07-Nov-2026</p>
           <p>Project Mode: Open source</p>
           <p>App Size : 7.0KB </p>
@@ -1968,6 +2101,22 @@
         <li>Home shows each progress title with its number of steps. Tap it to open the page.</li>
       </ul>
 
+      <h3>Piggy Bank</h3>
+      <hr />
+      <ul>
+        <li>Piggy Bank page → ＋ Add New Savings → Title, Date, Amount, Notes (optional) → Save.</li>
+        <li>Tap ＋ Add savings under a title to add more amounts (date and amount) on the same date or any other date. "Till saved" shows next to the title.</li>
+        <li>Edit with ✏️, delete with 🗑️ (restore from the Trash Bin).</li>
+      </ul>
+
+      <h3>Calories</h3>
+      <hr />
+      <ul>
+        <li>Reminder Hub → Calories → ＋ Add Food. Choose the meal, the food type (South Indian, North Indian, Snacks, Sweets, Fruits, Drinks) and the food.</li>
+        <li>Enter how many pieces / servings or the weight you ate. The calories are calculated automatically. Use "Other" to enter your own calories per 100 g.</li>
+        <li>Day Progress shows your total against your daily goal. Track History shows the last 7 days and every tracked day. Edit with ✏️, delete with 🗑️ (restore from the Trash Bin).</li>
+      </ul>
+
       <h3>Trash Bin</h3>
       <hr />
       <ul>
@@ -1986,7 +2135,7 @@
       <hr />
       <ul>
         <li>Open ⚙️ Settings and click the 💾 storage button.</li>
-        <li><strong>Export Data:</strong> downloads one backup file with all your data (reminders, notes, budgets, checklists, priority queue, progress, trash, files) and settings (name, photo, dark mode, notification choices).</li>
+        <li><strong>Export Data:</strong> downloads one backup file with all your data (reminders, notes, budgets, checklists, priority queue, progress, Piggy Bank, trash, files) and settings (name, photo, dark mode, notification choices).</li>
         <li><strong>Import Data:</strong> choose a backup file. All current data and settings are replaced by the backup and the app reloads.</li>
         <li>Export regularly and before clearing browser data or changing your device. Use Import on the new device to restore everything.</li>
       </ul>
@@ -2047,6 +2196,85 @@
             👀 PROGRESS HISTORY <span class="arrow">▼</span>
           </button>
         <ul id="progressList" class="list scrollable-list form"></ul>
+      </div>
+    </div>
+
+    <div id="piggyBank" class="page hidden">
+      <h2>🐷 Piggy Bank</h2>
+      <div class="add-area">
+        <button id="showAddBbBtn" class="add-btn" aria-expanded="false">
+            ＋ ADD NEW SAVINGS <span class="arrow">▼</span>
+          </button>
+        <div id="bbFormContainer" class="form">
+          <label>Title<input id="bbTitle" type="text" maxlength="80" placeholder="Title (e.g. New phone)" /></label>
+          <label>Date<input id="bbDate" type="date" /></label>
+          <label>Amount (₹)<input id="bbAmount" type="number" inputmode="decimal" min="0" step="any" placeholder="Amount" /></label>
+          <label>Notes (optional)<textarea id="bbNotes" rows="2" maxlength="300" placeholder="Notes (optional)"></textarea></label>
+          <div class="form-actions">
+            <button id="saveBbBtn" class="primary">Save</button>
+            <button id="cancelBbBtn" class="secondary">Cancel</button>
+          </div>
+        </div>
+      </div>
+      <div class="add-area">
+        <button id="viewBbToggle" class="add-btn" aria-expanded="false">
+            👀 VIEW PIGGY BANK <span class="arrow">▼</span>
+          </button>
+        <ul id="bbList" class="list scrollable-list form"></ul>
+      </div>
+    </div>
+
+    <div id="calories" class="page hidden">
+      <h2>🔥 Calories</h2>
+      <div class="add-area">
+        <button id="showAddCalBtn" class="add-btn" aria-expanded="false">
+          ＋ ADD FOOD <span class="arrow">▼</span>
+        </button>
+        <div id="calFormContainer" class="form">
+          <label>Date<input id="calDate" type="date" class="cal-in" /></label>
+          <label>Meal<select id="calMeal" class="cal-in"></select></label>
+          <label>Food type<select id="calCat" class="cal-in"></select></label>
+          <div id="calFoodWrap" class="cal-field">
+            <span>Select food</span>
+            <select id="calFood" class="cal-in"></select>
+          </div>
+          <div id="calCustomWrap" class="cal-field" hidden>
+            <span>Food name</span>
+            <input id="calCustomName" type="text" class="cal-in" maxlength="80" placeholder="Food name" />
+            <span>Calories per 100 g (kcal)</span>
+            <input id="calCustomKcal" type="number" class="cal-in" min="0" step="any" inputmode="decimal" placeholder="e.g. 250" />
+          </div>
+          <div id="calInfo" class="cal-info"></div>
+          <div id="calServWrap" class="cal-field">
+            <span id="calServLbl">How many?</span>
+            <input id="calServ" type="number" class="cal-in" min="0" step="any" inputmode="decimal" placeholder="1" />
+          </div>
+          <div class="cal-field">
+            <span id="calWeightLbl">Weight eaten (grams)</span>
+            <input id="calWeight" type="number" class="cal-in" min="0" step="any" inputmode="decimal" placeholder="Weight" />
+          </div>
+          <div id="calResult" class="cal-result"></div>
+          <div class="form-actions">
+            <button id="saveCalBtn" class="primary">Save</button>
+            <button id="cancelCalBtn" class="secondary">Cancel</button>
+          </div>
+        </div>
+      </div>
+      <div class="add-area">
+        <button id="viewCalProgToggle" class="add-btn open" aria-expanded="true">
+          📊 DAY PROGRESS <span class="arrow">▼</span>
+        </button>
+        <div id="calDayWrap" class="form visible">
+          <div id="calDayBox"></div>
+        </div>
+      </div>
+      <div class="add-area">
+        <button id="viewCalHistToggle" class="add-btn" aria-expanded="false">
+          📅 TRACK HISTORY <span class="arrow">▼</span>
+        </button>
+        <div id="calHistWrap" class="form">
+          <div id="calHistBox"></div>
+        </div>
       </div>
     </div>
 
@@ -2591,6 +2819,7 @@ render();
         <div id="priceTrackerForm" class="form">
           <label>PRODUCT LINK</label>
           <label>⚠ Track Amazon Product=  Either Product Page 🌐 Link Or Share Link</label>
+          <label>⚠ Track Flipkart Product=  Either Product Page 🌐 Link Or Share Link</label>
           <input id="trackUrl" type="text" placeholder="Paste Amazon Or Flipkart Link">
 
           <label>PRODUCT TITLE</label>
@@ -2833,6 +3062,10 @@ render();
             pqRender(); break;
           case 'progress':
             renderProgress(); break;
+          case 'piggyBank':
+            renderPiggyBank(); break;
+          case 'calories':
+            renderCalories(); break;
           case 'calculationHistoryList':
           targetPageId = 'utilities';
           break;
@@ -2966,6 +3199,9 @@ render();
           notifPriority: true,
           priorityQueue: [],
           progress: [],
+          piggyBank: [],
+          calories: [],
+          calorieGoal: 2000,
           // NEW: Calculation History
           calculationHistory: [],
           trash: [],
@@ -2997,6 +3233,17 @@ render();
             if (appData.notifPriority === undefined) appData.notifPriority = true;
             if (!Array.isArray(appData.priorityQueue)) appData.priorityQueue = [];
             if (!Array.isArray(appData.progress)) appData.progress = [];
+            if (Array.isArray(appData.biggyBank)) {            // earlier build used the name "biggy"
+              if (!Array.isArray(appData.piggyBank) || !appData.piggyBank.length) appData.piggyBank = appData.biggyBank;
+              delete appData.biggyBank;
+            }
+            if (!Array.isArray(appData.piggyBank)) appData.piggyBank = [];
+            if (!Array.isArray(appData.calories)) appData.calories = [];
+            if (!(Number(appData.calorieGoal) > 0)) appData.calorieGoal = 2000;
+            if (Array.isArray(appData.trash)) appData.trash.forEach(t => {
+              if (t && t.type === 'biggyBank') t.type = 'piggyBank';
+              if (t && t.type === 'biggyEntry') t.type = 'piggyEntry';
+            });
             if (!Array.isArray(appData.trash)) appData.trash = [];
             if (typeof renderTrash === 'function') renderTrash();
 
@@ -3015,6 +3262,8 @@ render();
             rerenderFor('budget');
             rerenderFor('checklists');
             rerenderFor('progress');
+            rerenderFor('piggyBank');
+            rerenderFor('calories');
             if (typeof pqInit === 'function') pqInit();
             // ✅ ADD THESE
             if (typeof window.renderPriceTrackerList === "function") {
@@ -3054,7 +3303,7 @@ render();
 
         // ---------- Import / Export (all data + settings) ----------
         const BACKUP_APP = 'NothingReminder';
-        const BACKUP_SKIP_KEYS = ['fcmTokenSaved']; // device specific push token
+        const BACKUP_SKIP_KEYS = ['fcmTokenSaved', 'lastBackupAt']; // device specific (push token, last backup time)
 
         function backupStatus(msg, ok) {
           const el = byId('backupStatus');
@@ -3064,6 +3313,23 @@ render();
         }
 
         // Backup UI now lives inside Profile > Storage (bottom sheet)
+
+        function updateLastBackupText() {
+          const el = byId('lastBackupText');
+          if (!el) return;
+          let iso = null;
+          try { iso = localStorage.getItem('lastBackupAt'); } catch (e) { }
+          const d = iso ? new Date(iso) : null;
+          if (!d || isNaN(d)) {
+            el.textContent = '🕒 Last backup: never. Tap Export to save one.';
+            el.style.color = '#ff9800';
+            return;
+          }
+          const days = Math.floor((Date.now() - d.getTime()) / 86400000);
+          el.textContent = '🕒 Last backup: ' + formatDateDMYWithTime(d) + (days >= 30 ? ' (⚠ ' + days + ' days ago)' : '');
+          el.style.color = days >= 30 ? '#ff9800' : '';
+        }
+        window.updateLastBackupText = updateLastBackupText;
 
         function exportAllData() {
           try {
@@ -3075,7 +3341,7 @@ render();
             }
             const backup = {
               app: BACKUP_APP,
-              version: '13.8.5',
+              version: '13.8.6',
               exportedAt: new Date().toISOString(),
               appData: structuredClone(appData),
               localStorage: ls
@@ -3089,6 +3355,8 @@ render();
             a.click();
             a.remove();
             setTimeout(() => URL.revokeObjectURL(url), 2000);
+            try { localStorage.setItem('lastBackupAt', new Date().toISOString()); } catch (e) { }
+            updateLastBackupText();
             backupStatus('✅ Export completed.');
           } catch (err) {
             console.error(err);
@@ -3109,7 +3377,7 @@ render();
             backupStatus('This is not a NothingReminder backup file.', false);
             return;
           }
-          if (!confirm('Import will replace ALL current data and settings with the backup. Continue?')) return;
+          if (!(await nrConfirm('Import will replace ALL current data and settings with the backup. Continue?', 'Import'))) return;
           try {
             const restored = { ...defaultData, ...backup.appData };
             const db = await openDB();
@@ -3271,22 +3539,34 @@ render();
           container.appendChild(frag);
         }
 
-        // 🔐 SAFE table renderer (XSS-proof)
+        // date + time shown for a note (older table notes only had it inside the text)
+        function noteWhen(n) {
+          if (n && n.createdAt) return n.createdAt;
+          const m = ((n && n.text) || '').match(/^Created: ([^\n]*)/);
+          return m ? m[1] : '';
+        }
+
+        // 🔐 SAFE table renderer (XSS-proof). Empty cells in the middle are kept.
         function renderSafeTableFromText(tableText) {
           const table = document.createElement('table');
           table.style.borderCollapse = 'collapse';
           table.style.width = '100%';
 
           const lines = tableText.split('\n').filter(l => l.includes('|'));
+          let rowNo = 0;
 
-          lines.forEach((line, index) => {
+          lines.forEach(line => {
             if (line.includes('---')) return;
 
-            const tr = document.createElement('tr');
-            const cells = line.split('|').filter(c => c.trim());
+            let t = line.trim();
+            if (t.startsWith('|')) t = t.slice(1);
+            if (t.endsWith('|')) t = t.slice(0, -1);
+            const cells = t.split('|');
+            if (!cells.some(c => c.trim())) return;
 
+            const tr = document.createElement('tr');
             cells.forEach(cell => {
-              const el = index === 0 ? document.createElement('th') : document.createElement('td');
+              const el = rowNo === 0 ? document.createElement('th') : document.createElement('td');
               el.textContent = cell.trim();   // ✅ SAFE
               el.style.border = '1px solid #ddd';
               el.style.padding = '6px';
@@ -3295,6 +3575,7 @@ render();
             });
 
             table.appendChild(tr);
+            rowNo++;
           });
 
           return table;
@@ -3328,31 +3609,9 @@ render();
             const dateRow = document.createElement('b');
             dateRow.style.display = 'block';
             dateRow.style.marginBottom = '2px';
-            dateRow.textContent = '• ' + (n.createdAt || '');
+            dateRow.textContent = '• ' + noteWhen(n);
             text.appendChild(dateRow);
             if(n.isTable && n.text) {
-              // Show first few rows of table in home view
-              const lines = n.text.split('\n');
-              let tableHTML = '<table border=\"1\" style=\"border-collapse: collapse;text-align:center; width: 100%;\">';
-
-              lines.forEach((line, index) => {
-                if(line.includes('---')) {
-                  if(index > 0) tableHTML += '</tr>';
-                  tableHTML += '<tr>';
-                } else if(line.includes('|')) {
-                  const cells = line.split('|').filter(cell => cell.trim() !== '');
-                  cells.forEach(cell => {
-                    const cellContent = cell.trim();
-                    if(index === 0) {
-                      tableHTML += `<th style=\"border: 1px solid #ddd;text-align:center; padding: 4px;\">${cellContent}</th>`;
-                    } else {
-                      tableHTML += `<td style=\"border: 1px solid #ddd;text-align:center; padding: 4px;\">${cellContent}</td>`;
-                    }
-                  });
-                }
-              });
-
-              tableHTML += '</tr></table>';
               text.appendChild(renderSafeTableFromText(n.text));
             } else {
               const full = n.text || (n.file && n.file.name ? '📎 ' + n.file.name : '');
@@ -3400,30 +3659,12 @@ render();
 
             const text=document.createElement('div');
             if(note.isTable && note.text) {
-              // Convert table format to HTML table
-              const lines = note.text.split('\n');
-              let tableHTML = '<table border=\"1\" style=\"border-collapse: collapse; width: 100%;\">';
-
-              lines.forEach((line, index) => {
-                if(line.includes('---')) {
-                  // Row separator - add closing tags for previous row
-                  if(index > 0) tableHTML += '</tr>';
-                  tableHTML += '<tr>';
-                } else if(line.includes('|')) {
-                  // Table row
-                  const cells = line.split('|').filter(cell => cell.trim() !== '');
-                  cells.forEach(cell => {
-                    const cellContent = cell.trim();
-                    if(index === 0) {
-                      tableHTML += `<th style=\"border: 1px solid #ddd; padding: 8px;\">${cellContent}</th>`;
-                    } else {
-                      tableHTML += `<td style=\"border: 1px solid #ddd; padding: 8px;\">${cellContent}</td>`;
-                    }
-                  });
-                }
-              });
-
-              tableHTML += '</tr></table>';
+              const when = document.createElement('small');
+              when.style.opacity = '0.7';
+              when.style.display = 'block';
+              when.style.marginBottom = '6px';
+              when.textContent = noteWhen(note);
+              text.appendChild(when);
               text.appendChild(renderSafeTableFromText(note.text));
 
             } else {
@@ -3648,7 +3889,23 @@ render();
               renderBudgets();
             });
 
-            left.append(title, amounts, expList, expForm);
+            // --- Pie chart (tap to show / hide) ---
+            const chartBtn = document.createElement('button');
+            chartBtn.type = 'button';
+            chartBtn.className = 'secondary';
+            chartBtn.style.cssText = 'margin-top:6px;align-self:flex-start;font-size:13px;';
+            const chartBox = document.createElement('div');
+            chartBox.style.cssText = 'margin:8px 0;';
+            const showChart = open => {
+              chartBox.style.display = open ? 'block' : 'none';
+              chartBox.innerHTML = open ? budgetChartHTML(b, 170) : '';
+              chartBtn.textContent = open ? '🥧 Hide pie chart' : '🥧 Show pie chart';
+              if (open) budgetChartOpen.add(b); else budgetChartOpen.delete(b);
+            };
+            chartBtn.addEventListener('click', () => showChart(!budgetChartOpen.has(b)));
+            showChart(budgetChartOpen.has(b));
+
+            left.append(title, amounts, chartBtn, chartBox, expList, expForm);
             li.append(left, right);
             frag.appendChild(li);
           });
@@ -3665,138 +3922,171 @@ render();
           renderHomeBudgets();
          }
          
+         /* ---------- Budget pie chart helpers (used on the page and in the print sheet) ---------- */
+         const BUDGET_COLORS = ['#4caf50', '#2196f3', '#ff9800', '#e91e63', '#9c27b0', '#00bcd4', '#ffc107', '#795548'];
+         const budgetChartOpen = new Set();
+         const budgetEsc = v => String(v == null ? '' : v).replace(/[&<>"']/g,
+           c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+         const budgetMoney = n => '₹' + (Number(n) || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+
+         function budgetSlices(b) {
+           const exps = Array.isArray(b.expenses) ? b.expenses : [];
+           const map = new Map();
+           exps.forEach(e => {
+             const amt = Number(e.amount) || 0;
+             if (amt <= 0) return;
+             const name = String(e.title || 'Expense').trim() || 'Expense';
+             const k = name.toLowerCase();
+             const cur = map.get(k) || { label: name, value: 0 };
+             cur.value += amt;
+             map.set(k, cur);
+           });
+           let items = [...map.values()].sort((x, y) => y.value - x.value);
+           if (items.length > 7) {
+             const rest = items.slice(6).reduce((t, x) => t + x.value, 0);
+             items = items.slice(0, 6);
+             items.push({ label: 'Others', value: rest });
+           }
+           items.forEach((it, i) => { it.color = BUDGET_COLORS[i % BUDGET_COLORS.length]; });
+           const used = items.reduce((t, x) => t + x.value, 0);
+           const total = Number(b.amount) || 0;
+           const remaining = total - used;
+           if (remaining > 0) items.push({ label: 'Remaining', value: remaining, color: '#bdbdbd' });
+           return { items, used, total, remaining };
+         }
+
+         function budgetPieSVG(items, size) {
+           const sum = items.reduce((t, x) => t + x.value, 0);
+           if (!sum) return '';
+           const cx = 100, cy = 100, r = 90;
+           let paths = '';
+           if (items.length === 1) {
+             paths = `<circle cx="100" cy="100" r="90" fill="${items[0].color}"/>`;
+           } else {
+             let ang = -Math.PI / 2;
+             items.forEach(it => {
+               const a = it.value / sum * Math.PI * 2;
+               const x1 = cx + r * Math.cos(ang), y1 = cy + r * Math.sin(ang);
+               ang += a;
+               const x2 = cx + r * Math.cos(ang), y2 = cy + r * Math.sin(ang);
+               paths += `<path d="M${cx},${cy} L${x1.toFixed(2)},${y1.toFixed(2)} A${r},${r} 0 ${a > Math.PI ? 1 : 0} 1 ${x2.toFixed(2)},${y2.toFixed(2)} Z" fill="${it.color}" stroke="#fff" stroke-width="1.5"/>`;
+             });
+           }
+           return `<svg viewBox="0 0 200 200" width="${size}" height="${size}" role="img" aria-label="Budget pie chart" style="flex:none;">${paths}</svg>`;
+         }
+
+         function budgetLegendHTML(d) {
+           const sum = d.items.reduce((t, x) => t + x.value, 0) || 1;
+           let h = d.items.map(it => `
+             <div style="display:flex;align-items:center;gap:8px;margin:5px 0;font-size:13px;">
+               <span style="width:12px;height:12px;border-radius:3px;background:${it.color};flex:none;"></span>
+               <span style="flex:1;min-width:0;word-break:break-word;">${budgetEsc(it.label)}</span>
+               <span style="white-space:nowrap;">${budgetMoney(it.value)} (${(it.value / sum * 100).toFixed(1)}%)</span>
+             </div>`).join('');
+           if (d.remaining < 0) h += `<div style="margin-top:6px;font-size:13px;color:#e53935;font-weight:600;">Over budget by ${budgetMoney(-d.remaining)}</div>`;
+           return h;
+         }
+
+         function budgetChartHTML(b, size) {
+           const d = budgetSlices(b);
+           if (!d.items.length) return '<small style="opacity:.7;">Add expenses to see the pie chart.</small>';
+           return `<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;">${budgetPieSVG(d.items, size)}<div style="flex:1;min-width:150px;">${budgetLegendHTML(d)}</div></div>`;
+         }
+
+         /* ---------- Print: popup first, hidden-frame fallback when popups are blocked ---------- */
+         function printHtmlDocument(html) {
+           const win = window.open('', '_blank', 'width=900,height=700');
+           if (win) {
+             win.document.open();
+             win.document.write(html + '<script>window.addEventListener("load",function(){setTimeout(function(){window.focus();window.print();},300);});window.addEventListener("afterprint",function(){window.close();});<\/script>');
+             win.document.close();
+             return;
+           }
+           const fr = document.createElement('iframe');
+           fr.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
+           fr.srcdoc = html;
+           fr.onload = () => {
+             setTimeout(() => {
+               try { fr.contentWindow.focus(); fr.contentWindow.print(); } catch (e) { alert('Printing is not available in this browser.'); }
+               setTimeout(() => fr.remove(), 60000);
+             }, 300);
+           };
+           document.body.appendChild(fr);
+         }
+
          function exportBudgetPDF(index) {
           if (!appData || !appData.budget || !appData.budget[index]) return;
-        
+
           const budget = appData.budget[index];
           const expenses = Array.isArray(budget.expenses) ? budget.expenses : [];
-        
-          let expenseRows = '';
-          expenses.forEach((e, i) => {
-            expenseRows += `
-              <tr>
-                <td>${i + 1}</td>
-                <td>${e.title || '-'}</td>
-                <td>₹${e.amount || 0}</td>
-                <td>${e.date || '-'}</td>
-              </tr>
-            `;
-          });
-        
-          if (!expenseRows) {
-            expenseRows = `
-              <tr>
-                <td colspan="4" style="text-align:center;">No expenses added</td>
-              </tr>
-            `;
-          }
-        
-          const win = window.open('', '', 'width=900,height=700');
-          if (!win) return;
-          const totalBudget = Number(budget.amount) || 0;
-
-          const totalExpenses = expenses.reduce((sum, e) => {
-            return sum + (Number(e.amount) || 0);
-          }, 0);
-
+          const d = budgetSlices(budget);
+          const totalBudget = d.total;
+          const totalExpenses = expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
           const remainingAmount = totalBudget - totalExpenses;
 
-          win.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Budget PDF</title>
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              padding: 20px;
-              color: #000;
-            }
-            .header {
-              display: flex;
-              align-items: center;
-              gap: 15px;
-              border-bottom: 2px solid #4CAF50;
-              padding-bottom: 10px;
-              margin-bottom: 20px;
-            }
-            .header img {
-              width: 50px;
-              height: 50px;
-            }
-            .app-name {
-              font-size: 22px;
-              font-weight: bold;
-            }
-            .budget-info p {
-              margin: 4px 0;
-              font-weight: 600;
-            }
-            table {
-              width: 100%;
-              border-collapse: collapse;
-              margin-top: 15px;
-            }
-            th, td {
-              border: 1px solid #000;
-              padding: 8px;
-              text-align: center;
-            }
-            th {
-              background: #f3f3f3;
-            }
-            .footer {
-              margin-top: 30px;
-              font-size: 12px;
-              text-align: center;
-              opacity: 0.7;
-            }
-          </style>
-        </head>
-        <body>
-        
-          <div class="header">
-            <img src="assets/icon.png" alt="App Logo">
-            <div class="app-name">Nothing Reminder</div>
-          </div>
-        
-          <div class="budget-info">
-          <p>Budget Title : ${budget.title || '-'}</p>
-          <p>Total Amount : ₹${totalBudget}</p>
-          <p>Total Expenses : ₹${totalExpenses}</p>
-          <p>Remaining Balance : ₹${remainingAmount < 0 ? 0 : remainingAmount}</p>
-          <p>Period : ${budget.startDate || '-'} → ${budget.endDate || '-'}</p>
-        </div>
-          <table>
-            <thead>
+          let expenseRows = expenses.map((e, i) => `
               <tr>
-                <th>S.NO</th>
-                <th>Expense</th>
-                <th>Amount</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${expenseRows}
-            </tbody>
-          </table>
-        
-          <div class="footer">
-            Generated from Nothing Reminder App
-          </div>
-        
-          <script>
-            window.onload = () => {
-              window.print();
-              window.onafterprint = () => window.close();
-            };
-          <\/script>
-        
-        </body>
-        </html>
-          `);
-        
-          win.document.close();
+                <td>${i + 1}</td>
+                <td>${budgetEsc(e.title || '-')}</td>
+                <td>${budgetMoney(e.amount)}</td>
+                <td>${budgetEsc(e.date || '-')}</td>
+              </tr>`).join('');
+          if (!expenseRows) expenseRows = '<tr><td colspan="4" style="text-align:center;">No expenses added</td></tr>';
+
+          const logo = new URL('assets/icon.png', location.href).href;
+          const chart = d.items.length
+            ? `<div class="chart">${budgetPieSVG(d.items, 220)}<div class="legend">${budgetLegendHTML(d)}</div></div>`
+            : '';
+
+          const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Budget - ${budgetEsc(budget.title || '')}</title>
+<style>
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; box-sizing: border-box; }
+  body { font-family: Arial, sans-serif; padding: 20px; color: #000; background: #fff; }
+  .header { display: flex; align-items: center; gap: 15px; border-bottom: 2px solid #4CAF50; padding-bottom: 10px; margin-bottom: 20px; }
+  .header img { width: 50px; height: 50px; }
+  .app-name { font-size: 22px; font-weight: bold; }
+  .budget-info p { margin: 4px 0; font-weight: 600; }
+  .chart { display: flex; align-items: center; gap: 24px; margin: 18px 0; page-break-inside: avoid; }
+  .legend { flex: 1; }
+  table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+  th, td { border: 1px solid #000; padding: 8px; text-align: center; }
+  th { background: #f3f3f3; }
+  tr { page-break-inside: avoid; }
+  .footer { margin-top: 30px; font-size: 12px; text-align: center; opacity: 0.7; }
+  @media print { body { padding: 0; } @page { margin: 14mm; } }
+</style>
+</head>
+<body>
+  <div class="header">
+    <img src="${logo}" alt="" onerror="this.style.display='none'">
+    <div class="app-name">Nothing Reminder</div>
+  </div>
+
+  <div class="budget-info">
+    <p>Budget Title : ${budgetEsc(budget.title || '-')}</p>
+    <p>Total Amount : ${budgetMoney(totalBudget)}</p>
+    <p>Total Expenses : ${budgetMoney(totalExpenses)}</p>
+    <p>Remaining Balance : ${budgetMoney(remainingAmount < 0 ? 0 : remainingAmount)}</p>
+    <p>Period : ${budgetEsc(budget.startDate || '-')} → ${budgetEsc(budget.endDate || '-')}</p>
+  </div>
+
+  ${chart}
+
+  <table>
+    <thead><tr><th>S.NO</th><th>Expense</th><th>Amount</th><th>Date</th></tr></thead>
+    <tbody>${expenseRows}</tbody>
+  </table>
+
+  <div class="footer">Generated from Nothing Reminder App on ${budgetEsc(formatDateDMYWithTime(new Date()))}</div>
+</body>
+</html>`;
+
+          printHtmlDocument(html);
         }
 
         function renderHomeBudgets() {
@@ -3937,11 +4227,11 @@ render();
           const note = appData.notes[index];
           editingNoteIndex = index;
 
-          byId('noteText').value = note.text || '';
-          byId('tableFormatCheckbox').checked = note.isTable || false;
+          byId('noteText').value = (note.text || '').replace(/^Created: [^\n]*\n\n/, '');
 
           // Show the form
           showForm(byId('noteFormContainer'));
+          byId('showAddNoteBtn').classList.add('open');
 
           // Set the save button to update instead of create
           byId('saveNoteBtn').textContent = 'Update';
@@ -3952,7 +4242,9 @@ render();
           const text = byId('noteText').value.trim();
           const fileInput = byId('noteFile');
           const file = fileInput.files[0];
-          const isTableFormat = byId('tableFormatCheckbox').checked;
+          // a note is a table when it was made with Insert Table (| rows and a --- line)
+          const wasTable = editingNoteIndex !== null && appData.notes[editingNoteIndex] && appData.notes[editingNoteIndex].isTable;
+          const isTableFormat = text.includes('|') && (text.includes('---') || !!wasTable);
 
           if(!text && !file){
             alert('Note cannot be empty. Please add text or a file.');
@@ -3962,11 +4254,8 @@ render();
           // Format date for all notes
           const noteDate = formatDateDMYWithTime(new Date());
 
+          // date + time is kept in createdAt and shown above the table in Notes and Home
           let noteText = text;
-          if (isTableFormat && text) {
-            // Add date/time to the beginning of the table
-            noteText = `Created: ${noteDate}\n\n${text}`;
-          }
 
           const noteObj = {
             text: noteText,
@@ -3984,10 +4273,14 @@ render();
               }
               saveAll(); renderNotes(); renderHomeNotes();
               hideForm(byId('noteFormContainer'));
+              byId('showAddNoteBtn').classList.remove('open');
               byId('noteText').value='';
               fileInput.value='';
-              byId('tableFormatCheckbox').checked = false;
               byId('saveNoteBtn').textContent = 'Save';
+              // open the history so the saved note is visible straight away
+              const nl = byId('noteList');
+              if (nl && !nl.classList.contains('visible')) toggleCollapse(nl, byId('viewNotesToggle'));
+              try { nl.lastElementChild && nl.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) {}
           }
 
           if(file){
@@ -4226,14 +4519,95 @@ render();
               title.textContent = (it.title || it.text || it.name || it.result || it.url || 'Untitled');
               title.style.fontWeight = '600';
 
+              // Piggy Bank items are shown in the same layout as the Piggy Bank history
+              const money = n => '₹' + (Number(n) || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+              const entryLine = e => {
+                const stepEl = document.createElement('div');
+                stepEl.className = 'pt-step';
+                const top = document.createElement('div');
+                const amt = document.createElement('span');
+                amt.className = 'bb-amt'; amt.textContent = money(e.amount);
+                top.append('📅 ' + (formatDMY(e.date) || '-') + '  |  ', amt);
+                stepEl.appendChild(top);
+                return stepEl;
+              };
+              // Notes are shown exactly like on the Notes page (text/table, date, file)
+              let noteBits = null;
+              if (t.type === 'notes') {
+                const text = document.createElement('div');
+                if (it.isTable && it.text) {
+                  const when = document.createElement('small');
+                  when.style.cssText = 'opacity:.7;display:block;margin-bottom:6px;';
+                  when.textContent = noteWhen(it);
+                  text.append(when, renderSafeTableFromText(it.text));
+                } else {
+                  const strong = document.createElement('b');
+                  strong.textContent = it.text || '';
+                  const small = document.createElement('small');
+                  small.style.opacity = '0.7';
+                  small.textContent = it.createdAt || '';
+                  text.append(strong, document.createElement('br'), small);
+                }
+                noteBits = [text];
+                if (it.file) {
+                  const ft = String(it.file.type || '');
+                  let fileEl;
+                  if (ft.includes('image')) {
+                    fileEl = document.createElement('img');
+                    fileEl.src = it.file.data; fileEl.style.cssText = 'max-width:200px;display:block;margin-top:5px;';
+                  } else if (ft.includes('audio')) {
+                    fileEl = document.createElement('audio'); fileEl.controls = true; fileEl.src = it.file.data;
+                  } else if (ft.includes('video')) {
+                    fileEl = document.createElement('video'); fileEl.controls = true; fileEl.width = 200; fileEl.src = it.file.data;
+                  } else {
+                    fileEl = document.createElement('a');
+                    fileEl.href = it.file.data; fileEl.download = it.file.name || 'file';
+                    fileEl.textContent = '📎 ' + (it.file.name || 'file');
+                  }
+                  noteBits.push(fileEl);
+                }
+              }
+              let piggyBits = null;
+              if (t.type === 'piggyBank' || t.type === 'piggyEntry') {
+                const list2 = t.type === 'piggyBank' ? (Array.isArray(it.entries) ? it.entries : []) : (it.entry ? [it.entry] : []);
+                const heading = t.type === 'piggyBank' ? it.title : it.bankTitle;
+                title.textContent = '';
+                const head = document.createElement('div');
+                head.style.cssText = 'display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;';
+                const ts = document.createElement('span');
+                ts.textContent = heading || 'Untitled'; ts.style.fontWeight = '600'; ts.style.wordBreak = 'break-word';
+                head.appendChild(ts);
+                if (t.type === 'piggyBank') {
+                  const tot = document.createElement('span');
+                  tot.className = 'bb-total';
+                  tot.textContent = '💰 Till saved ' + money(list2.reduce((a, e) => a + (Number(e.amount) || 0), 0));
+                  head.appendChild(tot);
+                }
+                piggyBits = [head];
+                if (t.type === 'piggyBank' && it.notes) {
+                  const nt = document.createElement('small');
+                  nt.style.cssText = 'opacity:.7;white-space:pre-wrap;word-break:break-word;';
+                  nt.textContent = it.notes;
+                  piggyBits.push(nt);
+                }
+                if (list2.length) {
+                  const line = document.createElement('div');
+                  line.className = 'pt-steps';
+                  list2.map((e, k) => ({ e, k }))
+                    .sort((x, y) => String(x.e.date || '').localeCompare(String(y.e.date || '')) || x.k - y.k)
+                    .forEach(({ e }) => line.appendChild(entryLine(e)));
+                  piggyBits.push(line);
+                }
+              }
+
               const body = document.createElement('div');
               body.style.fontSize = '13px';
               body.style.opacity = '0.85';
-              body.textContent = String(t.type === 'priorityItem' ? 'priority' : t.type === 'progressStep' ? 'progress step' : (t.type || 'item')).toUpperCase() + ' | Deleted: ' + (t.deletedAt || '');
+              body.textContent = String(t.type === 'priorityItem' ? 'priority' : t.type === 'progressStep' ? 'progress step' : t.type === 'piggyBank' ? 'piggy bank' : t.type === 'piggyEntry' ? 'piggy bank entry' : (t.type || 'item')).toUpperCase() + ' | Deleted: ' + (t.deletedAt || '');
 
               const time = null;
 
-              left.append(title, body);
+              if (noteBits) left.append(...noteBits, body); else if (piggyBits) left.append(...piggyBits, body); else left.append(title, body);
               const right = document.createElement('div');
               right.style.display = 'flex';
               right.style.alignItems = 'center';
@@ -4256,20 +4630,52 @@ render();
             list.appendChild(frag);
           }
           
-          function deleteForever(i){
-            if(confirm('Delete permanently?')){
-              appData.trash.splice(i,1);
-              saveAll();
-              renderTrash();
-            }
+
+        // In-app confirm box (the browser's confirm() can be blocked, then buttons look dead)
+        function nrConfirm(msg, okText){
+          return new Promise(resolve => {
+            const back = document.createElement('div');
+            back.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100000;display:flex;align-items:center;justify-content:center;padding:20px;';
+            const box = document.createElement('div');
+            const dark = document.documentElement.classList.contains('dark');
+            box.style.cssText = 'max-width:340px;width:100%;border-radius:14px;padding:18px;box-shadow:0 8px 30px rgba(0,0,0,.35);background:' + (dark ? '#2a2a2a' : '#fff') + ';color:' + (dark ? '#eee' : '#222') + ';';
+            box.setAttribute('role', 'dialog');
+            const m = document.createElement('div');
+            m.textContent = msg; m.style.cssText = 'font-size:15px;font-weight:600;margin-bottom:16px;';
+            const row = document.createElement('div');
+            row.style.cssText = 'display:flex;gap:10px;';
+            const ok = document.createElement('button');
+            ok.type = 'button'; ok.className = 'primary'; ok.textContent = okText || 'Yes';
+            ok.style.cssText = 'flex:1;padding:10px;border-radius:10px;background:#d9534f;';
+            const no = document.createElement('button');
+            no.type = 'button'; no.className = 'secondary'; no.textContent = 'Cancel';
+            no.style.cssText = 'flex:1;padding:10px;border-radius:10px;';
+            const done = v => { back.remove(); resolve(v); };
+            ok.addEventListener('click', () => done(true));
+            no.addEventListener('click', () => done(false));
+            back.addEventListener('click', e => { if (e.target === back) done(false); });
+            row.append(ok, no); box.append(m, row); back.appendChild(box);
+            document.body.appendChild(back);
+            no.focus();
+          });
+        }
+
+          async function deleteForever(i){
+            const item = appData.trash[i];
+            if (!item) return;
+            const at = appData.trash.indexOf(item);
+            if (at < 0) return;
+            appData.trash.splice(at, 1);
+            saveAll();
+            renderTrash();
           }
-          function emptyTrashAll() {
+          async function emptyTrashAll() {
           if (!appData.trash || appData.trash.length === 0) {
             alert("Trash already empty.");
             return;
           }
 
-          if (!confirm("Clear all items from Trash?")) return;
+          if (!(await nrConfirm("Clear all items from Trash?", 'Clear all'))) return;
 
           appData.trash = [];
           saveAll();
@@ -4580,6 +4986,14 @@ render();
 
           if (pageId === 'progress') {
             renderProgress();
+          }
+
+          if (pageId === 'calories') {
+            renderCalories();
+          }
+
+          if (pageId === 'piggyBank') {
+            renderPiggyBank();
           }
 
           // Special handling for the notifications page
@@ -5273,6 +5687,16 @@ render();
                   return;
                 }
 
+                // Piggy Bank entries go back into their own title
+                if (t.type === 'piggyEntry') {
+                  bbRestoreEntry(t.item);
+                  appData.trash.splice(i, 1);
+                  saveAll();
+                  renderTrash();
+                  showPage('piggyBank');
+                  return;
+                }
+
                 // Priority Queue items go back to their own day
                 if (t.type === 'priorityItem') {
                   pqRestore(t.item);
@@ -5623,36 +6047,54 @@ render();
                   const existing = editing ? p.steps[si] : null;
 
                   const box = document.createElement('div');
-                  box.className = 'form visible';
-                  box.style.maxWidth = '100%';
+                  box.className = 'pt-form';
 
-                  const l1 = document.createElement('label');
-                  l1.append('Step text');
+                  const head = document.createElement('div');
+                  head.className = 'pf-head';
+                  head.textContent = editing ? '✏️ Edit step' : '＋ New step';
+
+                  const f1 = document.createElement('label');
+                  f1.className = 'pf-field';
+                  f1.append('Step text');
                   const ta = document.createElement('textarea');
                   ta.rows = 3; ta.placeholder = 'Write this step (optional if you attach a file)';
                   ta.value = existing ? (existing.text || '') : '';
-                  l1.appendChild(ta);
+                  f1.appendChild(ta);
 
-                  const l2 = document.createElement('label');
-                  l2.append('Attach file (image, video, audio or any file)');
+                  const f2 = document.createElement('div');
+                  f2.className = 'pf-field';
+                  f2.append('Attachment');
+                  const drop = document.createElement('label');
+                  drop.className = 'pf-file';
+                  const dropIcon = document.createElement('span'); dropIcon.textContent = '📎';
+                  const dropName = document.createElement('span');
+                  const dropDefault = 'Tap to attach an image, video, audio or file';
+                  dropName.textContent = dropDefault;
                   const fi = document.createElement('input');
-                  fi.type = 'file';
-                  l2.appendChild(fi);
+                  fi.type = 'file'; fi.style.display = 'none';
+                  fi.addEventListener('change', () => { dropName.textContent = fi.files[0] ? fi.files[0].name : dropDefault; });
+                  drop.append(dropIcon, dropName, fi);
+                  f2.appendChild(drop);
 
                   let removeBox = null;
-                  box.append(l1, l2);
+                  box.append(head, f1, f2);
                   if (existing && existing.file) {
+                    const cur = document.createElement('div');
+                    cur.className = 'pf-note';
+                    cur.textContent = 'Current file: ' + (existing.file.name || 'file');
+                    f2.appendChild(cur);
                     const l3 = document.createElement('label');
+                    l3.className = 'pf-check';
                     removeBox = document.createElement('input');
                     removeBox.type = 'checkbox';
                     const sp = document.createElement('span');
-                    sp.textContent = 'Remove current file (' + (existing.file.name || 'file') + ')';
+                    sp.textContent = 'Remove current file';
                     l3.append(removeBox, sp);
                     box.appendChild(l3);
                   }
 
                   const actions = document.createElement('div');
-                  actions.className = 'form-actions';
+                  actions.className = 'pf-actions';
                   const saveB = document.createElement('button');
                   saveB.className = 'primary'; saveB.textContent = editing ? 'Update step' : 'Save step';
                   const cancelB = document.createElement('button');
@@ -5689,6 +6131,266 @@ render();
                   });
                 }
 
+
+                // ---------------- PIGGY BANK ----------------
+                // appData.piggyBank = [{ id, title, notes, entries: [{ date, amount }] }]
+                let editingBbEntry = null;
+
+                function bbNewId(){ return 'bb' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+                function bbToday(){
+                  const d = new Date();
+                  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+                }
+                function bbMoney(n){ return '₹' + (Number(n) || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 }); }
+                function bbEnsure(){
+                  if (!Array.isArray(appData.piggyBank)) appData.piggyBank = [];
+                  appData.piggyBank.forEach(b => {
+                    if (!b.id) b.id = bbNewId();
+                    if (!Array.isArray(b.entries)) b.entries = [];
+                    if (b.notes === undefined) b.notes = (b.entries[0] && b.entries[0].notes) || '';
+                  });
+                  return appData.piggyBank;
+                }
+                function bbTotal(b){ return (b.entries || []).reduce((t, e) => t + (Number(e.amount) || 0), 0); }
+
+                function renderPiggyBank(){
+                  const list = byId('bbList');
+                  if (!list) return;
+                  list.innerHTML = '';
+                  const items = bbEnsure();
+                  if (items.length === 0) {
+                    const li = document.createElement('li');
+                    li.textContent = 'No savings yet.'; li.style.opacity = '0.7';
+                    list.appendChild(li);
+                    return;
+                  }
+                  const frag = document.createDocumentFragment();
+
+                  if (items.length > 1) {
+                    const all = document.createElement('li');
+                    const t = document.createElement('div');
+                    t.className = 'bb-total-all';
+                    t.textContent = '💰 Total saved: ' + bbMoney(items.reduce((s2, b) => s2 + bbTotal(b), 0));
+                    all.appendChild(t);
+                    frag.appendChild(all);
+                  }
+
+                  items.forEach((b, bi) => {
+                    const li = document.createElement('li');
+                    li.style.alignItems = 'flex-start';
+                    const left = document.createElement('div');
+                    left.className = 'item-left';
+                    left.style.flex = '1';
+                    left.style.minWidth = '0';
+
+                    const head = document.createElement('div');
+                    head.style.cssText = 'display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;';
+                    const title = document.createElement('span');
+                    title.textContent = b.title; title.style.fontWeight = '600';
+                    title.style.wordBreak = 'break-word';
+                    const meta = document.createElement('span');
+                    meta.className = 'bb-total';
+                    meta.textContent = '💰 Till saved ' + bbMoney(bbTotal(b));
+                    head.append(title, meta);
+                    left.appendChild(head);
+                    if (b.notes) {
+                      const nt = document.createElement('small');
+                      nt.style.cssText = 'opacity:.7;white-space:pre-wrap;word-break:break-word;';
+                      nt.textContent = b.notes;
+                      left.appendChild(nt);
+                    }
+
+                    // entries hang on a vertical line (same look as Progress Tracker)
+                    if (b.entries.length) {
+                      const line = document.createElement('div');
+                      line.className = 'pt-steps';
+                      b.entries
+                        .map((e, ei) => ({ e, ei }))
+                        .sort((x, y) => String(x.e.date || '').localeCompare(String(y.e.date || '')) || x.ei - y.ei)
+                        .forEach(({ e, ei }) => {
+                          const stepEl = document.createElement('div');
+                          stepEl.className = 'pt-step';
+                          const row = document.createElement('div');
+                          row.style.display = 'flex'; row.style.justifyContent = 'space-between'; row.style.alignItems = 'flex-start';
+                          const body = document.createElement('div');
+                          body.style.flex = '1'; body.style.minWidth = '0';
+                          const top = document.createElement('div');
+                          const amt = document.createElement('span');
+                          amt.className = 'bb-amt'; amt.textContent = bbMoney(e.amount);
+                          top.append('📅 ' + (formatDMY(e.date) || '-') + '  |  ', amt);
+                          body.appendChild(top);
+                          const btns = document.createElement('div');
+                          btns.style.display = 'flex'; btns.style.alignItems = 'center';
+                          const eb = document.createElement('button'); eb.className = 'icon-small'; eb.textContent = '✏️'; eb.title = 'Edit entry';
+                          eb.addEventListener('click', () => openBbEntryForm(holder, bi, ei));
+                          const db = document.createElement('button'); db.className = 'icon-small'; db.textContent = '🗑️'; db.title = 'Delete entry';
+                          db.addEventListener('click', () => deleteBbEntry(bi, ei));
+                          btns.append(eb, db);
+                          row.append(body, btns);
+                          stepEl.appendChild(row);
+                          line.appendChild(stepEl);
+                        });
+                      left.appendChild(line);
+                    }
+
+                    const addBtn = document.createElement('button');
+                    addBtn.className = 'secondary';
+                    addBtn.style.marginTop = '6px'; addBtn.style.alignSelf = 'flex-start';
+                    addBtn.textContent = '＋ Add savings';
+                    addBtn.title = 'Add savings';
+                    const holder = document.createElement('div');
+                    addBtn.addEventListener('click', () => openBbEntryForm(holder, bi, null));
+                    left.append(addBtn, holder);
+
+                    const right = document.createElement('div');
+                    right.style.display = 'flex'; right.style.alignItems = 'center';
+                    const editBtn = document.createElement('button'); editBtn.className = 'icon-small'; editBtn.textContent = '✏️'; editBtn.title = 'Edit title';
+                    editBtn.addEventListener('click', () => editBbTitle(bi));
+                    const delBtn = document.createElement('button'); delBtn.className = 'icon-small'; delBtn.textContent = '🗑️'; delBtn.title = 'Delete';
+                    delBtn.addEventListener('click', () => deleteBb(bi));
+                    right.append(editBtn, delBtn);
+
+                    li.append(left, right);
+                    frag.appendChild(li);
+                  });
+                  list.appendChild(frag);
+                }
+
+                function clearBbForm(){
+                  byId('bbTitle').value = '';
+                  byId('bbDate').value = '';
+                  byId('bbAmount').value = '';
+                  byId('bbNotes').value = '';
+                }
+
+                function saveBb(){
+                  const title = byId('bbTitle').value.trim();
+                  const date = byId('bbDate').value || bbToday();
+                  const amount = parseFloat(byId('bbAmount').value);
+                  const notes = byId('bbNotes').value.trim();
+                  if (!title) { alert('Title is required.'); return; }
+                  if (isNaN(amount) || amount <= 0) { alert('Enter a valid amount.'); return; }
+                  bbEnsure();
+                  appData.piggyBank.push({ id: bbNewId(), title, notes, entries: [{ date, amount }] });
+                  saveAll(); renderPiggyBank();
+                  hideForm(byId('bbFormContainer'));
+                  byId('showAddBbBtn').classList.remove('open');
+                  clearBbForm();
+                  // show the list so the new saving is visible
+                  const l = byId('bbList');
+                  if (l && !l.classList.contains('visible')) toggleCollapse(l, byId('viewBbToggle'));
+                }
+
+                function editBbTitle(i){
+                  const b = appData.piggyBank[i];
+                  if (!b) return;
+                  const t = prompt('Edit title:', b.title);
+                  if (t === null) return;
+                  const nt = t.trim();
+                  if (!nt) { alert('Title is required.'); return; }
+                  b.title = nt;
+                  saveAll(); renderPiggyBank();
+                }
+
+                function deleteBb(i){
+                  moveToTrash('piggyBank', appData.piggyBank[i], i);
+                }
+
+                function deleteBbEntry(bi, ei){
+                  const b = appData.piggyBank[bi];
+                  if (!b || !b.entries[ei]) return;
+                  const e = b.entries[ei];
+                  appData.trash.push({
+                    type: 'piggyEntry',
+                    item: { title: bbMoney(e.amount) + ' - ' + (formatDMY(e.date) || ''), entry: e, bankId: b.id, bankTitle: b.title, index: ei },
+                    deletedAt: formatDateDMYWithTime(new Date())
+                  });
+                  b.entries.splice(ei, 1);
+                  saveAll(); renderTrash(); renderPiggyBank();
+                }
+
+                // Restore a deleted entry into its Piggy Bank (a new one is made if that one is gone)
+                function bbRestoreEntry(item){
+                  if (!item || !item.entry) return;
+                  bbEnsure();
+                  let b = appData.piggyBank.find(x => x.id === item.bankId);
+                  if (!b) {
+                    b = { id: bbNewId(), title: item.bankTitle || 'Restored savings', entries: [] };
+                    appData.piggyBank.unshift(b);
+                  }
+                  const at = Math.min(Math.max(item.index || 0, 0), b.entries.length);
+                  b.entries.splice(at, 0, item.entry);
+                  renderPiggyBank();
+                }
+
+                // Add / edit one saving under a title: date, amount, notes (optional)
+                function openBbEntryForm(holder, bi, ei){
+                  holder.innerHTML = '';
+                  const b = appData.piggyBank[bi];
+                  if (!b) return;
+                  const editing = (ei !== null && ei !== undefined);
+                  const existing = editing ? b.entries[ei] : null;
+
+                  const box = document.createElement('div');
+                  box.className = 'pt-form';
+
+                  const head = document.createElement('div');
+                  head.className = 'pf-head';
+                  head.textContent = editing ? '✏️ Edit savings' : '＋ New savings';
+
+                  const f1 = document.createElement('label');
+                  f1.className = 'pf-field';
+                  f1.append('Date');
+                  const di = document.createElement('input');
+                  di.type = 'date'; di.className = 'bb-in';
+                  di.value = existing ? (existing.date || bbToday()) : bbToday();
+                  f1.appendChild(di);
+
+                  const f2 = document.createElement('label');
+                  f2.className = 'pf-field';
+                  f2.append('Amount (₹)');
+                  const ai = document.createElement('input');
+                  ai.type = 'number'; ai.className = 'bb-in';
+                  ai.min = '0'; ai.step = 'any'; ai.inputMode = 'decimal'; ai.placeholder = 'Amount';
+                  ai.value = existing ? existing.amount : '';
+                  f2.appendChild(ai);
+
+
+                  const actions = document.createElement('div');
+                  actions.className = 'pf-actions';
+                  const saveB = document.createElement('button');
+                  saveB.className = 'primary'; saveB.textContent = editing ? 'Update' : 'Save';
+                  const cancelB = document.createElement('button');
+                  cancelB.className = 'secondary'; cancelB.textContent = 'Cancel';
+                  actions.append(saveB, cancelB);
+
+                  box.append(head, f1, f2, actions);
+                  holder.appendChild(box);
+
+                  cancelB.addEventListener('click', () => { holder.innerHTML = ''; });
+                  saveB.addEventListener('click', () => {
+                    const amount = parseFloat(ai.value);
+                    if (isNaN(amount) || amount <= 0) { alert('Enter a valid amount.'); return; }
+                    const entry = { date: di.value || bbToday(), amount };
+                    if (editing) b.entries[ei] = entry; else b.entries.push(entry);
+                    saveAll(); renderPiggyBank();
+                  });
+                }
+
+                byId('showAddBbBtn').addEventListener('click', function() {
+                  if (!byId('bbDate').value) byId('bbDate').value = bbToday();
+                  toggleCollapse(byId('bbFormContainer'), byId('showAddBbBtn'));
+                });
+                byId('cancelBbBtn').addEventListener('click', function() {
+                  hideForm(byId('bbFormContainer'));
+                  byId('showAddBbBtn').classList.remove('open');
+                  clearBbForm();
+                });
+                byId('saveBbBtn').addEventListener('click', saveBb);
+                byId('viewBbToggle').addEventListener('click', function() {
+                  toggleCollapse(byId('bbList'), byId('viewBbToggle'));
+                });
+
                 byId('showAddProgressBtn').addEventListener('click', function() {
                   if (editingProgressIndex === null) byId('saveProgressBtn').textContent = 'Save';
                   toggleCollapse(byId('progressFormContainer'), byId('showAddProgressBtn'));
@@ -5707,6 +6409,655 @@ render();
                 byId('homeProgressToggle').addEventListener('click', function() {
                   toggleCollapse(byId('homeProgressContainer'), byId('homeProgressToggle'));
                 });
+                // ---------------- CALORIES ----------------
+                // appData.calories = [{ id, date, meal, cat, name, title, grams, per100, kcal, createdAt }]
+                // appData.calorieGoal = daily goal in kcal
+                const CAL_CATS = [
+                  ['south', '🍛 South Indian'],
+                  ['north', '🍲 North Indian'],
+                  ['snacks', '🍿 Snacks & Street food'],
+                  ['sweets', '🍬 Sweets & Desserts'],
+                  ['fruits', '🍎 Fruits & Nuts'],
+                  ['drinks', '🥤 Drinks'],
+                  ['custom', '✍️ Other (enter calories)']
+                ];
+                const CAL_MEALS = ['Breakfast', 'Lunch', 'Snacks', 'Dinner'];
+                const CAL_MEAL_ICON = { Breakfast: '🌅', Lunch: '🍽️', Snacks: '🍿', Dinner: '🌙' };
+                const CAL_MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                const CAL_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+                // [category, name, kcal per 100 g (ml for drinks), typical serving in g/ml, serving label, description]
+                // Values are common average estimates (home-style cooking); real calories change with oil, sugar and portion.
+                const CAL_FOODS = [
+                  // ---------- SOUTH INDIAN ----------
+                  ['south', 'Idli', 130, 40, '1 idli', 'Steamed rice & urad dal cake. Light, low fat, easy to digest.'],
+                  ['south', 'Plain Dosa', 168, 80, '1 dosa', 'Thin fermented rice-dal crepe made with little oil.'],
+                  ['south', 'Masala Dosa', 190, 160, '1 dosa', 'Dosa filled with spiced potato masala. Oil and filling add calories.'],
+                  ['south', 'Ghee Roast Dosa', 250, 100, '1 dosa', 'Crisp dosa roasted with plenty of ghee.'],
+                  ['south', 'Rava Dosa', 190, 90, '1 dosa', 'Crisp semolina dosa, usually made with more oil.'],
+                  ['south', 'Set Dosa', 165, 50, '1 piece', 'Soft, spongy small dosa, normally served as a set of 2-3.'],
+                  ['south', 'Uttapam', 170, 120, '1 uttapam', 'Thick dosa topped with onion, tomato or vegetables.'],
+                  ['south', 'Pesarattu', 165, 100, '1 pesarattu', 'Green gram (moong) dosa. Good protein and fibre.'],
+                  ['south', 'Medu Vada', 290, 45, '1 vada', 'Deep-fried urad dal doughnut. High in oil.'],
+                  ['south', 'Masala Vada (Paruppu Vada)', 320, 35, '1 vada', 'Deep-fried crispy chana dal fritter.'],
+                  ['south', 'Ven Pongal', 165, 200, '1 plate', 'Rice and moong dal cooked with ghee, pepper and cumin.'],
+                  ['south', 'Upma', 150, 200, '1 plate', 'Semolina cooked with onion, mustard and a little oil.'],
+                  ['south', 'Idiyappam (String Hoppers)', 135, 120, '2 pieces', 'Steamed rice-flour noodles. Very low in fat.'],
+                  ['south', 'Appam', 160, 70, '1 appam', 'Lacy rice-coconut pancake with a soft centre.'],
+                  ['south', 'Puttu', 170, 150, '1 piece', 'Steamed rice flour and coconut cylinder.'],
+                  ['south', 'Kuzhi Paniyaram', 200, 100, '5 pieces', 'Small pan-fried balls of dosa batter.'],
+                  ['south', 'Ragi Mudde (Kali)', 130, 200, '1 ball', 'Finger millet ball. High in fibre and calcium.'],
+                  ['south', 'Parotta', 320, 80, '1 parotta', 'Layered flaky flatbread made with maida and oil.'],
+                  ['south', 'Kothu Parotta', 250, 250, '1 plate', 'Shredded parotta stir-fried with egg or meat and spices.'],
+                  ['south', 'Plain Rice (cooked)', 130, 180, '1 cup', 'Plain steamed white rice.'],
+                  ['south', 'Sambar Rice', 140, 250, '1 plate', 'Rice mixed with sambar and vegetables.'],
+                  ['south', 'Curd Rice', 130, 250, '1 plate', 'Rice mixed with curd and tempering. Cooling and light.'],
+                  ['south', 'Lemon Rice', 160, 200, '1 plate', 'Rice tossed with lemon, peanuts and tempering.'],
+                  ['south', 'Tamarind Rice (Puliyodarai)', 175, 200, '1 plate', 'Rice mixed with tangy tamarind paste and oil.'],
+                  ['south', 'Tomato Rice', 150, 200, '1 plate', 'Rice cooked with tomato, onion and spices.'],
+                  ['south', 'Coconut Rice', 190, 200, '1 plate', 'Rice mixed with grated coconut and tempering.'],
+                  ['south', 'Bisi Bele Bath', 150, 250, '1 plate', 'Karnataka rice-lentil-vegetable dish with ghee.'],
+                  ['south', 'Sambar', 55, 150, '1 bowl', 'Toor dal and vegetable stew with tamarind.'],
+                  ['south', 'Rasam', 30, 150, '1 bowl', 'Thin pepper-tamarind soup. Very low calories.'],
+                  ['south', 'Coconut Chutney', 150, 30, '2 tbsp', 'Ground coconut with green chilli and roasted gram.'],
+                  ['south', 'Tomato / Onion Chutney', 90, 30, '2 tbsp', 'Sauteed tomato or onion ground with chilli.'],
+                  ['south', 'Veg Kurma', 130, 120, '1 serving', 'Mixed vegetables in coconut-based gravy.'],
+                  ['south', 'Kootu', 100, 100, '1 serving', 'Vegetables cooked with dal and coconut.'],
+                  ['south', 'Poriyal (Vegetable Stir-fry)', 90, 100, '1 serving', 'Dry vegetable stir-fry with coconut and mustard.'],
+                  ['south', 'Avial', 110, 100, '1 serving', 'Mixed vegetables in coconut-curd gravy.'],
+                  ['south', 'Potato Roast (Urulai Varuval)', 170, 100, '1 serving', 'Potato fried with spices and oil.'],
+                  ['south', 'Keerai Masiyal', 70, 100, '1 serving', 'Mashed spinach / greens with a little dal.'],
+                  ['south', 'Vathal / Kara Kuzhambu', 85, 120, '1 serving', 'Spicy tamarind gravy cooked in sesame oil.'],
+                  ['south', 'Fish Curry (Meen Kuzhambu)', 120, 150, '1 serving', 'Fish cooked in tangy tamarind-coconut gravy.'],
+                  ['south', 'Fish Fry', 220, 100, '1 piece', 'Shallow or deep fried marinated fish.'],
+                  ['south', 'Chicken Curry (Chettinad)', 190, 150, '1 serving', 'Spicy chicken gravy with ground masala and oil.'],
+                  ['south', 'Mutton Kuzhambu', 200, 150, '1 serving', 'Mutton in spicy South Indian gravy.'],
+                  ['south', 'Egg Omelette', 185, 70, '1 egg omelette', 'Egg fried with onion, chilli and oil.'],
+                  ['south', 'Boiled Egg', 155, 50, '1 egg', 'Plain boiled egg. Great protein.'],
+                  ['south', 'Chicken Biryani', 190, 300, '1 plate', 'Rice and chicken cooked with spices, ghee and oil.'],
+                  ['south', 'Mutton Biryani', 200, 300, '1 plate', 'Rice and mutton cooked with spices and ghee.'],
+
+                  // ---------- NORTH INDIAN ----------
+                  ['north', 'Chapati / Roti', 300, 40, '1 roti', 'Whole wheat flatbread cooked without oil.'],
+                  ['north', 'Phulka', 270, 30, '1 phulka', 'Thin puffed whole wheat roti.'],
+                  ['north', 'Tandoori Roti', 280, 50, '1 roti', 'Whole wheat roti baked in a tandoor.'],
+                  ['north', 'Missi Roti', 290, 50, '1 roti', 'Roti made with wheat and besan flour.'],
+                  ['north', 'Plain Naan', 290, 90, '1 naan', 'Leavened refined flour bread baked in a tandoor.'],
+                  ['north', 'Butter Naan', 310, 90, '1 naan', 'Naan brushed with butter.'],
+                  ['north', 'Kulcha', 300, 90, '1 kulcha', 'Soft leavened bread, plain or stuffed.'],
+                  ['north', 'Plain Paratha', 330, 80, '1 paratha', 'Layered wheat flatbread cooked with ghee or oil.'],
+                  ['north', 'Aloo Paratha', 270, 120, '1 paratha', 'Paratha stuffed with spiced potato.'],
+                  ['north', 'Paneer Paratha', 290, 120, '1 paratha', 'Paratha stuffed with spiced paneer.'],
+                  ['north', 'Gobi Paratha', 260, 120, '1 paratha', 'Paratha stuffed with spiced cauliflower.'],
+                  ['north', 'Puri', 380, 30, '1 puri', 'Deep-fried puffed wheat bread.'],
+                  ['north', 'Bhatura', 330, 90, '1 bhatura', 'Deep-fried leavened bread, usually with chole.'],
+                  ['north', 'Chole Bhature', 260, 250, '1 plate', 'Spiced chickpea curry with fried bhatura.'],
+                  ['north', 'Dal Tadka', 110, 150, '1 bowl', 'Yellow dal tempered with ghee, garlic and cumin.'],
+                  ['north', 'Dal Fry', 105, 150, '1 bowl', 'Lentils cooked with onion, tomato and spices.'],
+                  ['north', 'Dal Makhani', 140, 150, '1 bowl', 'Black lentils and kidney beans in butter and cream.'],
+                  ['north', 'Rajma', 125, 150, '1 bowl', 'Kidney beans in tomato-onion gravy.'],
+                  ['north', 'Chole (Chana Masala)', 150, 150, '1 bowl', 'Chickpeas in spicy masala gravy.'],
+                  ['north', 'Kadhi Pakora', 120, 150, '1 bowl', 'Curd-besan gravy with fried fritters.'],
+                  ['north', 'Paneer Butter Masala', 230, 150, '1 serving', 'Paneer in rich buttery tomato-cream gravy.'],
+                  ['north', 'Palak Paneer', 150, 150, '1 serving', 'Paneer cubes in spinach gravy.'],
+                  ['north', 'Kadai Paneer', 200, 150, '1 serving', 'Paneer with capsicum in spicy kadai masala.'],
+                  ['north', 'Shahi Paneer', 220, 150, '1 serving', 'Paneer in creamy nut-based gravy.'],
+                  ['north', 'Matar Paneer', 170, 150, '1 serving', 'Paneer and green peas in tomato gravy.'],
+                  ['north', 'Malai Kofta', 220, 150, '1 serving', 'Fried paneer-potato balls in creamy gravy.'],
+                  ['north', 'Aloo Gobi', 100, 150, '1 serving', 'Dry potato and cauliflower curry.'],
+                  ['north', 'Aloo Jeera', 120, 100, '1 serving', 'Potatoes tossed with cumin and oil.'],
+                  ['north', 'Aloo Matar', 100, 150, '1 serving', 'Potato and peas in light gravy.'],
+                  ['north', 'Bhindi Masala', 100, 100, '1 serving', 'Okra stir-fried with onion and spices.'],
+                  ['north', 'Baingan Bharta', 90, 150, '1 serving', 'Smoked mashed brinjal with onion and tomato.'],
+                  ['north', 'Mixed Veg Curry', 90, 150, '1 serving', 'Mixed vegetables in light gravy.'],
+                  ['north', 'Sarson Ka Saag', 90, 150, '1 serving', 'Mustard greens cooked with butter.'],
+                  ['north', 'Butter Chicken', 190, 200, '1 serving', 'Chicken in creamy tomato-butter gravy.'],
+                  ['north', 'Chicken Curry (North Indian)', 170, 150, '1 serving', 'Chicken in onion-tomato gravy.'],
+                  ['north', 'Tandoori Chicken', 150, 150, '2 pieces', 'Marinated chicken roasted in a tandoor.'],
+                  ['north', 'Chicken Tikka', 150, 100, '4 pieces', 'Marinated boneless chicken, grilled.'],
+                  ['north', 'Mutton Rogan Josh', 200, 150, '1 serving', 'Mutton in spicy Kashmiri-style gravy.'],
+                  ['north', 'Egg Curry', 130, 150, '2 eggs with gravy', 'Boiled eggs in onion-tomato gravy.'],
+                  ['north', 'Jeera Rice', 150, 180, '1 cup', 'Rice tempered with cumin and ghee.'],
+                  ['north', 'Veg Pulao', 150, 200, '1 plate', 'Rice cooked with vegetables and whole spices.'],
+                  ['north', 'Veg Biryani', 160, 300, '1 plate', 'Rice and vegetables layered with spices.'],
+                  ['north', 'Khichdi', 110, 250, '1 plate', 'Rice and moong dal cooked together. Easy on the stomach.'],
+                  ['north', 'Poha', 130, 200, '1 plate', 'Flattened rice with onion, peanuts and turmeric.'],
+                  ['north', 'Besan Chilla', 190, 80, '1 chilla', 'Savoury gram flour pancake.'],
+                  ['north', 'Dalia (Porridge)', 90, 200, '1 bowl', 'Broken wheat porridge. High in fibre.'],
+                  ['north', 'Curd / Dahi', 60, 100, '1 small bowl', 'Plain curd made from whole milk.'],
+                  ['north', 'Raita', 60, 100, '1 small bowl', 'Curd with cucumber, onion or boondi.'],
+
+                  // ---------- SNACKS & STREET FOOD ----------
+                  ['snacks', 'Samosa', 260, 60, '1 samosa', 'Deep-fried pastry filled with spiced potato.'],
+                  ['snacks', 'Kachori', 400, 60, '1 kachori', 'Deep-fried pastry with spicy dal filling.'],
+                  ['snacks', 'Onion Pakora / Bhajji', 300, 100, '5 pieces', 'Gram flour fritters fried in oil.'],
+                  ['snacks', 'Aloo Bonda', 270, 40, '1 bonda', 'Spiced potato ball coated in batter and fried.'],
+                  ['snacks', 'Vada Pav', 250, 150, '1 vada pav', 'Potato fritter in a bun with chutney.'],
+                  ['snacks', 'Pav Bhaji', 150, 250, '1 plate', 'Mashed vegetable curry served with buttered pav.'],
+                  ['snacks', 'Pani Puri', 200, 100, '6 pieces', 'Crisp puris with spiced water and filling.'],
+                  ['snacks', 'Bhel Puri', 160, 100, '1 small plate', 'Puffed rice with chutneys, onion and sev.'],
+                  ['snacks', 'Sev Puri', 220, 100, '1 small plate', 'Flat puris topped with potato, chutney and sev.'],
+                  ['snacks', 'Dahi Puri', 170, 100, '1 small plate', 'Puris filled with curd, chutney and sev.'],
+                  ['snacks', 'Samosa Chaat', 200, 150, '1 plate', 'Crushed samosa with chole, curd and chutneys.'],
+                  ['snacks', 'Aloo Tikki', 210, 60, '1 tikki', 'Shallow-fried potato patty.'],
+                  ['snacks', 'Dhokla', 170, 100, '3 pieces', 'Steamed fermented gram flour cake.'],
+                  ['snacks', 'Chickpea Sundal', 140, 100, '1 small bowl', 'Boiled chickpeas tempered with coconut.'],
+                  ['snacks', 'Boiled Sweet Corn', 100, 100, '1 cup', 'Boiled corn kernels.'],
+                  ['snacks', 'Pazham Pori (Banana Fritter)', 280, 80, '1 piece', 'Ripe banana dipped in batter and fried.'],
+                  ['snacks', 'Murukku', 490, 30, '1 piece', 'Crunchy deep-fried rice flour snack.'],
+                  ['snacks', 'Mixture / Namkeen', 500, 30, '1 handful', 'Fried savoury mix of sev, nuts and lentils.'],
+                  ['snacks', 'Banana Chips', 520, 30, '1 handful', 'Deep-fried raw banana slices.'],
+                  ['snacks', 'Potato Chips', 540, 30, '1 small pack', 'Fried potato slices.'],
+                  ['snacks', 'Roasted Peanuts', 590, 30, '1 handful', 'Dry roasted groundnuts. Calorie-dense.'],
+                  ['snacks', 'Boiled Peanuts', 320, 50, '1 small bowl', 'Boiled groundnuts.'],
+                  ['snacks', 'Popcorn (plain)', 375, 30, '1 small bowl', 'Air-popped corn, lightly salted.'],
+                  ['snacks', 'Marie Biscuit', 440, 28, '4 biscuits', 'Plain light tea biscuit.'],
+                  ['snacks', 'Cream Biscuit', 480, 30, '3 biscuits', 'Sandwich biscuit with sugar cream.'],
+                  ['snacks', 'Bread Slice (white)', 265, 25, '1 slice', 'Plain white bread.'],
+                  ['snacks', 'Bread Toast with Butter', 350, 35, '1 slice', 'Toasted bread slice with butter.'],
+                  ['snacks', 'Veg Sandwich', 200, 150, '1 sandwich', 'Bread with vegetables and chutney.'],
+                  ['snacks', 'Cheese Sandwich', 270, 150, '1 sandwich', 'Bread with cheese and butter.'],
+                  ['snacks', 'Maggi / Instant Noodles (cooked)', 130, 280, '1 pack cooked', 'Masala instant noodles cooked in water.'],
+                  ['snacks', 'French Fries', 310, 100, '1 small serving', 'Deep-fried potato sticks.'],
+                  ['snacks', 'Veg Burger', 250, 150, '1 burger', 'Bun with veg patty, sauce and salad.'],
+                  ['snacks', 'Chicken Burger', 260, 170, '1 burger', 'Bun with chicken patty, sauce and salad.'],
+                  ['snacks', 'Pizza Slice', 270, 100, '1 slice', 'Cheese pizza, regular crust.'],
+                  ['snacks', 'Veg Momos (steamed)', 150, 100, '5 pieces', 'Steamed dumplings with vegetable filling.'],
+                  ['snacks', 'Chicken Momos (steamed)', 190, 100, '5 pieces', 'Steamed dumplings with chicken filling.'],
+                  ['snacks', 'Egg Puff', 300, 80, '1 puff', 'Flaky pastry with egg masala.'],
+                  ['snacks', 'Veg Puff', 350, 80, '1 puff', 'Flaky pastry with vegetable filling.'],
+                  ['snacks', 'Veg Cutlet', 220, 60, '1 cutlet', 'Crumb-coated shallow-fried vegetable patty.'],
+                  ['snacks', 'Chicken 65', 270, 100, '5 pieces', 'Spicy deep-fried chicken bites.'],
+                  ['snacks', 'Gobi Manchurian', 200, 100, '1 small serving', 'Fried cauliflower in Indo-Chinese sauce.'],
+                  ['snacks', 'Veg Fried Rice', 165, 250, '1 plate', 'Rice stir-fried with vegetables and sauces.'],
+                  ['snacks', 'Chicken Fried Rice', 190, 250, '1 plate', 'Rice stir-fried with chicken, egg and sauces.'],
+                  ['snacks', 'Veg Noodles', 150, 250, '1 plate', 'Stir-fried noodles with vegetables.'],
+                  ['snacks', 'Egg Roll / Kathi Roll', 250, 200, '1 roll', 'Paratha wrap with egg, onion and sauce.'],
+                  ['snacks', 'Chicken Shawarma', 230, 200, '1 roll', 'Grilled chicken wrapped with veggies and sauce.'],
+
+                  // ---------- SWEETS & DESSERTS ----------
+                  ['sweets', 'Gulab Jamun', 330, 45, '1 piece', 'Fried milk-solid balls soaked in sugar syrup.'],
+                  ['sweets', 'Jalebi', 380, 30, '1 piece', 'Deep-fried spiral soaked in sugar syrup.'],
+                  ['sweets', 'Rasgulla', 190, 50, '1 piece', 'Soft cottage cheese balls in light syrup.'],
+                  ['sweets', 'Rasmalai', 200, 60, '1 piece', 'Cottage cheese discs in sweet thickened milk.'],
+                  ['sweets', 'Besan Laddu', 450, 40, '1 laddu', 'Gram flour roasted in ghee with sugar.'],
+                  ['sweets', 'Motichoor Laddu', 410, 40, '1 laddu', 'Tiny fried gram flour pearls bound with sugar syrup.'],
+                  ['sweets', 'Mysore Pak', 520, 40, '1 piece', 'Gram flour, ghee and sugar. Very rich.'],
+                  ['sweets', 'Kaju Katli', 500, 25, '1 piece', 'Cashew and sugar diamond-shaped fudge.'],
+                  ['sweets', 'Milk Barfi', 430, 30, '1 piece', 'Thickened milk and sugar fudge.'],
+                  ['sweets', 'Gajar Halwa', 250, 100, '1 small bowl', 'Carrot cooked with milk, ghee and sugar.'],
+                  ['sweets', 'Rava Kesari', 340, 80, '1 small bowl', 'Semolina cooked with sugar and ghee.'],
+                  ['sweets', 'Sweet Pongal (Sakkarai Pongal)', 200, 150, '1 bowl', 'Rice, moong dal, jaggery and ghee.'],
+                  ['sweets', 'Payasam / Kheer', 140, 150, '1 small bowl', 'Milk or coconut milk pudding with sugar.'],
+                  ['sweets', 'Adhirasam', 400, 50, '1 piece', 'Fried rice flour and jaggery sweet.'],
+                  ['sweets', 'Obbattu (Holige)', 310, 80, '1 piece', 'Sweet stuffed flatbread.'],
+                  ['sweets', 'Modak / Kozhukattai (sweet)', 250, 40, '1 piece', 'Steamed rice dumpling with coconut-jaggery.'],
+                  ['sweets', 'Peanut Chikki', 500, 25, '1 piece', 'Peanut and jaggery brittle.'],
+                  ['sweets', 'Ice Cream', 207, 100, '1 scoop', 'Regular vanilla ice cream.'],
+                  ['sweets', 'Chocolate (milk)', 535, 20, '2 squares', 'Milk chocolate.'],
+                  ['sweets', 'Cake (plain slice)', 350, 60, '1 slice', 'Plain sponge cake.'],
+                  ['sweets', 'Cream Cake (slice)', 380, 80, '1 slice', 'Cake with cream or icing.'],
+                  ['sweets', 'Brownie', 450, 50, '1 piece', 'Dense chocolate cake square.'],
+                  ['sweets', 'Doughnut', 400, 60, '1 piece', 'Fried sweet dough ring.'],
+                  ['sweets', 'Sugar', 400, 5, '1 teaspoon', 'Table sugar.'],
+                  ['sweets', 'Jaggery', 380, 10, '1 small piece', 'Unrefined cane sugar.'],
+
+                  // ---------- FRUITS & NUTS ----------
+                  ['fruits', 'Banana', 90, 100, '1 medium (peeled)', 'Quick energy, rich in potassium.'],
+                  ['fruits', 'Apple', 52, 150, '1 medium', 'Crunchy fruit with fibre.'],
+                  ['fruits', 'Orange', 47, 130, '1 orange', 'Rich in vitamin C.'],
+                  ['fruits', 'Mosambi (Sweet Lime)', 43, 130, '1 fruit', 'Citrus fruit rich in vitamin C.'],
+                  ['fruits', 'Mango', 60, 200, '1 medium', 'Sweet seasonal fruit.'],
+                  ['fruits', 'Grapes', 69, 100, '1 small bunch', 'Sweet juicy grapes.'],
+                  ['fruits', 'Papaya', 43, 150, '1 bowl', 'Soft low-calorie fruit.'],
+                  ['fruits', 'Watermelon', 30, 200, '2 slices', 'Mostly water, very low calories.'],
+                  ['fruits', 'Muskmelon', 34, 150, '1 bowl', 'Sweet and hydrating melon.'],
+                  ['fruits', 'Guava', 68, 100, '1 small', 'High in fibre and vitamin C.'],
+                  ['fruits', 'Pomegranate', 83, 100, '1 small bowl', 'Juicy seeds rich in antioxidants.'],
+                  ['fruits', 'Pineapple', 50, 100, '2 slices', 'Tangy tropical fruit.'],
+                  ['fruits', 'Jackfruit', 95, 100, '4 pieces', 'Sweet fibrous fruit.'],
+                  ['fruits', 'Sapota (Chikoo)', 83, 100, '1 fruit', 'Very sweet soft fruit.'],
+                  ['fruits', 'Dates', 282, 8, '1 date', 'Natural sweet, calorie-dense.'],
+                  ['fruits', 'Raisins (Dry Grapes)', 300, 10, '1 tbsp', 'Dried grapes.'],
+                  ['fruits', 'Almonds', 579, 10, '8-9 almonds', 'Rich in healthy fats and vitamin E.'],
+                  ['fruits', 'Cashew Nuts', 553, 10, '6-7 nuts', 'Creamy nuts, calorie-dense.'],
+                  ['fruits', 'Walnuts', 654, 10, '2 halves', 'Rich in omega-3.'],
+                  ['fruits', 'Pistachios', 560, 10, '15 nuts', 'Protein-rich nuts.'],
+                  ['fruits', 'Fresh Coconut', 354, 30, '1 small piece', 'Fresh coconut kernel.'],
+                  ['fruits', 'Sprouts (boiled)', 100, 100, '1 small bowl', 'Boiled moong or mixed sprouts. High in protein.'],
+                  ['fruits', 'Cucumber', 15, 100, '1 small', 'Very low calorie.'],
+                  ['fruits', 'Carrot', 41, 80, '1 medium', 'Crunchy vegetable rich in beta carotene.'],
+                  ['fruits', 'Tomato', 18, 100, '1 medium', 'Low calorie and watery.'],
+
+                  // ---------- DRINKS ----------
+                  ['drinks', 'Tea (milk + sugar)', 45, 150, '1 cup', 'Indian chai with milk and about 1 tsp sugar.'],
+                  ['drinks', 'Tea (milk, no sugar)', 28, 150, '1 cup', 'Milk tea without sugar.'],
+                  ['drinks', 'Black Coffee / Black Tea', 2, 150, '1 cup', 'No milk, no sugar. Almost zero calories.'],
+                  ['drinks', 'Filter Coffee (milk + sugar)', 55, 150, '1 cup', 'South Indian filter coffee with milk and sugar.'],
+                  ['drinks', 'Milk (whole / full cream)', 62, 200, '1 glass', 'Plain full cream cow milk.'],
+                  ['drinks', 'Milk (toned)', 58, 200, '1 glass', 'Toned milk with less fat.'],
+                  ['drinks', 'Buttermilk', 25, 200, '1 glass', 'Salted buttermilk. Light and cooling.'],
+                  ['drinks', 'Sweet Lassi', 110, 250, '1 glass', 'Sweetened curd drink.'],
+                  ['drinks', 'Badam Milk', 90, 200, '1 glass', 'Milk with almonds and sugar.'],
+                  ['drinks', 'Horlicks / Boost Milk', 80, 200, '1 glass', 'Malt drink powder mixed in milk.'],
+                  ['drinks', 'Milkshake', 100, 250, '1 glass', 'Milk blended with fruit or flavour and sugar.'],
+                  ['drinks', 'Orange Juice (fresh)', 45, 200, '1 glass', 'Fresh orange juice.'],
+                  ['drinks', 'Sugarcane Juice', 55, 250, '1 glass', 'Fresh pressed sugarcane juice.'],
+                  ['drinks', 'Tender Coconut Water', 19, 250, '1 coconut', 'Natural electrolyte drink.'],
+                  ['drinks', 'Lemon Juice (sweet)', 40, 250, '1 glass', 'Lime juice with sugar.'],
+                  ['drinks', 'Cola / Soft Drink', 42, 300, '1 bottle (300 ml)', 'Sweetened fizzy drink.']
+                ];
+
+                let editingCalId = null;
+                let calViewDate = calKey(new Date());
+
+                function calEsc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+                function calPad(n) { return String(n).padStart(2, '0'); }
+                function calKey(d) { return d.getFullYear() + '-' + calPad(d.getMonth() + 1) + '-' + calPad(d.getDate()); }
+                function calParse(k) { const p = String(k).split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]); }
+                function calShift(k, n) { const d = calParse(k); d.setDate(d.getDate() + n); return calKey(d); }
+                function calLabel(k) { const d = calParse(k); return calPad(d.getDate()) + '-' + CAL_MON[d.getMonth()] + '-' + d.getFullYear() + ' · ' + CAL_DAYS[d.getDay()]; }
+                function calWhen(k) {
+                  const t = calKey(new Date());
+                  if (k === t) return 'Today';
+                  if (k === calShift(t, -1)) return 'Yesterday';
+                  if (k === calShift(t, 1)) return 'Tomorrow';
+                  return '';
+                }
+                function calFmt(n) { return Math.round(Number(n) || 0).toLocaleString('en-IN'); }
+                function calGoal() { const g = Number(appData.calorieGoal); return g > 0 ? g : 2000; }
+                function calNewId() { return 'cl' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+                function calEnsure() {
+                  if (!Array.isArray(appData.calories)) appData.calories = [];
+                  appData.calories.forEach(e => { if (!e.id) e.id = calNewId(); });
+                  return appData.calories;
+                }
+                function calTotal(k) { return calEnsure().filter(e => e.date === k).reduce((s, e) => s + (Number(e.kcal) || 0), 0); }
+                function calMk(tag, cls, text) {
+                  const el = document.createElement(tag);
+                  if (cls) el.className = cls;
+                  if (text != null) el.textContent = text;
+                  return el;
+                }
+
+                // ----- the add / edit form -----
+                function calCurFood() {
+                  const cat = byId('calCat').value;
+                  if (cat === 'custom') {
+                    return { cat, name: byId('calCustomName').value.trim(), per100: parseFloat(byId('calCustomKcal').value), serveG: 0, serveLbl: '', desc: '' };
+                  }
+                  const f = CAL_FOODS[Number(byId('calFood').value)];
+                  if (!f) return null;
+                  return { cat, name: f[1], per100: f[2], serveG: f[3], serveLbl: f[4], desc: f[5] };
+                }
+
+                function calInfo() {
+                  const f = calCurFood();
+                  const box = byId('calInfo');
+                  if (!f) { box.textContent = ''; return; }
+                  if (f.cat === 'custom') {
+                    box.textContent = 'Type the food name and its calories per 100 g (the packet label shows this). Then enter the weight you ate.';
+                    return;
+                  }
+                  const u = f.cat === 'drinks' ? 'ml' : 'g';
+                  box.innerHTML = '<b>' + calEsc(f.name) + '</b><br>' + calEsc(f.desc) +
+                    '<br><small>Per 100 ' + u + ': <b>' + f.per100 + ' kcal</b> · ' + calEsc(f.serveLbl) + ' ≈ ' + f.serveG + ' ' + u +
+                    ' ≈ <b>' + Math.round(f.serveG * f.per100 / 100) + ' kcal</b></small>';
+                }
+
+                function calCalc() {
+                  const f = calCurFood();
+                  const g = parseFloat(byId('calWeight').value);
+                  const out = byId('calResult');
+                  if (!f || !(f.per100 >= 0) || !(g > 0)) { out.textContent = '🔥 Enter the weight to see the calories'; return 0; }
+                  const k = Math.round(g * f.per100 / 100);
+                  out.textContent = '🔥 ≈ ' + calFmt(k) + ' kcal';
+                  return k;
+                }
+
+                function calFoodChanged(keep) {
+                  const f = calCurFood();
+                  const hasServ = !!(f && f.serveG);
+                  byId('calServWrap').hidden = !hasServ;
+                  if (hasServ) {
+                    const u = f.cat === 'drinks' ? 'ml' : 'g';
+                    byId('calServLbl').textContent = 'How many? (' + f.serveLbl + ' ≈ ' + f.serveG + ' ' + u + ')';
+                  }
+                  if (!keep) {
+                    byId('calServ').value = hasServ ? 1 : '';
+                    byId('calWeight').value = hasServ ? f.serveG : '';
+                  }
+                  calInfo();
+                  calCalc();
+                }
+
+                function calFillFoods(keep) {
+                  const cat = byId('calCat').value;
+                  const isC = cat === 'custom';
+                  byId('calFoodWrap').hidden = isC;
+                  byId('calCustomWrap').hidden = !isC;
+                  const sel = byId('calFood');
+                  sel.innerHTML = '';
+                  if (!isC) {
+                    CAL_FOODS.map((f, i) => ({ f, i })).filter(x => x.f[0] === cat)
+                      .sort((a, b) => a.f[1].localeCompare(b.f[1]))
+                      .forEach(x => {
+                        const o = document.createElement('option');
+                        o.value = x.i; o.textContent = x.f[1];
+                        sel.appendChild(o);
+                      });
+                  }
+                  byId('calWeightLbl').textContent = cat === 'drinks' ? 'Quantity (ml)' : 'Weight eaten (grams)';
+                  calFoodChanged(keep);
+                }
+
+                function calMealNow() {
+                  const h = new Date().getHours();
+                  return h < 11 ? 'Breakfast' : h < 15 ? 'Lunch' : h < 19 ? 'Snacks' : 'Dinner';
+                }
+
+                function calResetForm() {
+                  editingCalId = null;
+                  byId('calDate').value = calKey(new Date());
+                  byId('calMeal').value = calMealNow();
+                  byId('calCustomName').value = '';
+                  byId('calCustomKcal').value = '';
+                  byId('saveCalBtn').textContent = 'Save';
+                  calFillFoods(false);
+                }
+
+                function calCloseForm() {
+                  hideForm(byId('calFormContainer'));
+                  byId('showAddCalBtn').classList.remove('open');
+                  calResetForm();
+                }
+
+                function saveCal() {
+                  const f = calCurFood();
+                  const grams = parseFloat(byId('calWeight').value);
+                  const date = byId('calDate').value || calKey(new Date());
+                  const meal = byId('calMeal').value;
+                  if (!f || !f.name) { alert('Please select or enter a food.'); return; }
+                  if (!(f.per100 >= 0)) { alert('Enter the calories per 100 g.'); return; }
+                  if (!(grams > 0)) { alert('Enter the weight you ate.'); return; }
+                  const kcal = Math.round(grams * f.per100 / 100);
+                  const entry = {
+                    id: editingCalId || calNewId(),
+                    date, meal, cat: f.cat, name: f.name, title: f.name,
+                    grams: Math.round(grams * 10) / 10, per100: f.per100, kcal,
+                    createdAt: formatDateDMYWithTime(new Date())
+                  };
+                  const list = calEnsure();
+                  const at = editingCalId ? list.findIndex(e => e.id === editingCalId) : -1;
+                  if (at >= 0) list[at] = entry; else list.push(entry);
+                  calViewDate = date;
+                  saveAll();
+                  calCloseForm();
+                  renderCalories();
+                  try { byId('viewCalProgToggle').scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) { }
+                }
+
+                function editCal(id) {
+                  const e = calEnsure().find(x => x.id === id);
+                  if (!e) return;
+                  editingCalId = id;
+                  let cat = e.cat || 'custom';
+                  let idx = -1;
+                  if (cat !== 'custom') {
+                    idx = CAL_FOODS.findIndex(f => f[0] === cat && f[1] === e.name);
+                    if (idx < 0) cat = 'custom';
+                  }
+                  byId('calCat').value = cat;
+                  calFillFoods(true);
+                  if (cat === 'custom') {
+                    byId('calCustomName').value = e.name || '';
+                    byId('calCustomKcal').value = e.per100;
+                  } else {
+                    byId('calFood').value = String(idx);
+                  }
+                  calFoodChanged(true);
+                  byId('calWeight').value = e.grams;
+                  const f = calCurFood();
+                  byId('calServ').value = (f && f.serveG) ? Math.round(e.grams / f.serveG * 100) / 100 : '';
+                  byId('calDate').value = e.date;
+                  byId('calMeal').value = e.meal || 'Snacks';
+                  byId('saveCalBtn').textContent = 'Update';
+                  calCalc();
+                  showForm(byId('calFormContainer'));
+                  byId('showAddCalBtn').classList.add('open');
+                  try { byId('calFormContainer').scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (err) { }
+                }
+
+                function deleteCal(id) {
+                  const list = calEnsure();
+                  const i = list.findIndex(e => e.id === id);
+                  if (i < 0) return;
+                  moveToTrash('calories', list[i], i);
+                }
+
+                // ----- day progress -----
+                function renderCalDay() {
+                  const box = byId('calDayBox');
+                  if (!box) return;
+                  box.innerHTML = '';
+                  const k = calViewDate, goal = calGoal();
+                  const entries = calEnsure().filter(e => e.date === k);
+                  const total = entries.reduce((s, e) => s + (Number(e.kcal) || 0), 0);
+
+                  // date navigation
+                  const nav = calMk('div');
+                  nav.style.cssText = 'display:flex;gap:6px;align-items:center;margin-bottom:10px;';
+                  const prev = calMk('button', 'secondary', '◀');
+                  const next = calMk('button', 'secondary', '▶');
+                  const di = calMk('input', 'cal-in');
+                  di.type = 'date'; di.value = k; di.style.flex = '1';
+                  const tb = calMk('button', 'secondary', 'Today');
+                  prev.addEventListener('click', () => { calViewDate = calShift(calViewDate, -1); renderCalDay(); });
+                  next.addEventListener('click', () => { calViewDate = calShift(calViewDate, 1); renderCalDay(); });
+                  di.addEventListener('change', () => { if (di.value) { calViewDate = di.value; renderCalDay(); } });
+                  tb.addEventListener('click', () => { calViewDate = calKey(new Date()); renderCalDay(); });
+                  nav.append(prev, di, next, tb);
+                  box.appendChild(nav);
+
+                  // summary + progress bar
+                  const over = total > goal;
+                  const pct = Math.min(100, Math.round(total / goal * 100));
+                  const sum = calMk('div');
+                  const when = calWhen(k);
+                  sum.innerHTML =
+                    '<div style="font-size:13px;opacity:.8;">' + calEsc((when ? when + ' · ' : '') + calLabel(k)) + '</div>' +
+                    '<div style="font-size:26px;font-weight:700;margin:2px 0 6px;">' + calFmt(total) +
+                    ' <small style="font-size:14px;font-weight:500;opacity:.8;">/ ' + calFmt(goal) + ' kcal (' + pct + '%)</small></div>' +
+                    '<div class="cal-bar' + (over ? ' over' : '') + '"><i style="width:' + pct + '%"></i></div>' +
+                    '<div style="margin-top:6px;font-size:13px;font-weight:600;">' +
+                    (!entries.length ? 'No food added for this day.' :
+                      over ? '⚠️ ' + calFmt(total - goal) + ' kcal over your goal' : '✅ ' + calFmt(goal - total) + ' kcal left for this day') + '</div>';
+                  box.appendChild(sum);
+
+                  // meal-wise totals
+                  if (entries.length) {
+                    const chips = calMk('div');
+                    chips.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;margin:10px 0;';
+                    CAL_MEALS.forEach(m => {
+                      const t = entries.filter(e => e.meal === m).reduce((s, e) => s + (Number(e.kcal) || 0), 0);
+                      if (t > 0) chips.appendChild(calMk('span', 'badge', CAL_MEAL_ICON[m] + ' ' + m + ': ' + calFmt(t)));
+                    });
+                    box.appendChild(chips);
+                  }
+
+                  // goal
+                  const gr = calMk('div');
+                  gr.style.cssText = 'display:flex;gap:6px;align-items:center;margin:10px 0 4px;';
+                  const gl = calMk('span', null, '🎯 Daily goal (kcal)');
+                  gl.style.cssText = 'font-size:13px;font-weight:600;white-space:nowrap;';
+                  const gi = calMk('input', 'cal-in');
+                  gi.type = 'number'; gi.min = '500'; gi.step = '50'; gi.value = goal; gi.style.flex = '1';
+                  const gb = calMk('button', 'primary', 'Set');
+                  gb.addEventListener('click', () => {
+                    const v = parseFloat(gi.value);
+                    if (!(v >= 500 && v <= 10000)) { alert('Enter a goal between 500 and 10000 kcal.'); return; }
+                    appData.calorieGoal = Math.round(v);
+                    saveAll();
+                    renderCalories();
+                  });
+                  gr.append(gl, gi, gb);
+                  box.appendChild(gr);
+                  const tip = calMk('small', null, 'Average adult needs about 1800-2500 kcal per day. Women usually need less than men; active people need more. Use your doctor or dietitian advice for a personal goal.');
+                  tip.style.cssText = 'display:block;opacity:.7;margin-bottom:10px;';
+                  box.appendChild(tip);
+
+                  // entries grouped by meal
+                  if (!entries.length) return;
+                  CAL_MEALS.forEach(m => {
+                    const rows = entries.filter(e => e.meal === m);
+                    if (!rows.length) return;
+                    const mt = rows.reduce((s, e) => s + (Number(e.kcal) || 0), 0);
+                    const h = calMk('h4', 'cal-meal');
+                    h.append(calMk('span', null, CAL_MEAL_ICON[m] + ' ' + m), calMk('span', 'pq-meta', calFmt(mt) + ' kcal'));
+                    box.appendChild(h);
+                    box.appendChild(document.createElement('hr'));
+                    const ul = calMk('ul', 'list');
+                    rows.forEach(e => {
+                      const li = document.createElement('li');
+                      const left = calMk('div', 'item-left');
+                      const nm = calMk('div', null, e.name);
+                      nm.style.cssText = 'font-weight:600;word-break:break-word;';
+                      const sm = calMk('small', null, calFmt(e.grams) + (e.cat === 'drinks' ? ' ml' : ' g') + ' · ' + e.per100 + ' kcal/100' + (e.cat === 'drinks' ? 'ml' : 'g'));
+                      sm.style.opacity = '.7';
+                      left.append(nm, sm);
+                      const right = calMk('div');
+                      right.style.cssText = 'display:flex;align-items:center;flex-shrink:0;';
+                      const kb = calMk('span', 'badge', calFmt(e.kcal) + ' kcal');
+                      const eb = calMk('button', 'icon-small', '✏️'); eb.title = 'Edit';
+                      eb.addEventListener('click', () => editCal(e.id));
+                      const db = calMk('button', 'icon-small', '🗑️'); db.title = 'Delete';
+                      db.addEventListener('click', () => deleteCal(e.id));
+                      right.append(kb, eb, db);
+                      li.append(left, right);
+                      ul.appendChild(li);
+                    });
+                    box.appendChild(ul);
+                  });
+                }
+
+                // ----- history -----
+                function renderCalHist() {
+                  const box = byId('calHistBox');
+                  if (!box) return;
+                  box.innerHTML = '';
+                  const goal = calGoal();
+                  const today = calKey(new Date());
+                  const all = calEnsure();
+                  if (!all.length) { box.appendChild(calMk('div', 'pq-empty', 'No food tracked yet.')); return; }
+
+                  // last 7 days chart
+                  const days = [];
+                  for (let i = 6; i >= 0; i--) { const k = calShift(today, -i); days.push({ k, t: calTotal(k) }); }
+                  const maxV = Math.max(goal, ...days.map(d => d.t), 1);
+                  const logged = days.filter(d => d.t > 0);
+                  const avg = logged.length ? Math.round(logged.reduce((s, d) => s + d.t, 0) / logged.length) : 0;
+                  const head = calMk('div', null, 'Last 7 days · average ' + calFmt(avg) + ' kcal/day' + (logged.length ? ' (' + logged.length + ' day' + (logged.length > 1 ? 's' : '') + ' tracked)' : ''));
+                  head.style.cssText = 'font-weight:600;font-size:13px;margin-bottom:8px;';
+                  box.appendChild(head);
+                  const chart = calMk('div');
+                  chart.style.cssText = 'display:flex;align-items:flex-end;gap:6px;height:130px;margin-bottom:6px;';
+                  days.forEach(d => {
+                    const col = calMk('div');
+                    col.style.cssText = 'flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;cursor:pointer;';
+                    const v = calMk('small', null, d.t ? calFmt(d.t) : '');
+                    v.style.cssText = 'font-size:10px;opacity:.8;';
+                    const bar = calMk('div');
+                    const hgt = d.t ? Math.max(4, Math.round(d.t / maxV * 80)) : 2;
+                    bar.style.cssText = 'width:100%;border-radius:4px 4px 0 0;height:' + hgt + 'px;background:' + (d.t > goal ? '#e53935' : 'var(--accent)') + ';' + (d.t ? '' : 'opacity:.3;');
+                    const dt = calParse(d.k);
+                    const lb = calMk('small', null, CAL_DAYS[dt.getDay()].slice(0, 2));
+                    lb.style.cssText = 'font-size:11px;opacity:.8;' + (d.k === today ? 'font-weight:700;' : '');
+                    col.append(v, bar, lb);
+                    col.addEventListener('click', () => calOpenDay(d.k));
+                    chart.appendChild(col);
+                  });
+                  box.appendChild(chart);
+                  const note = calMk('small', null, 'Green = within goal · Red = over goal (' + calFmt(goal) + ' kcal). Tap a day to open it.');
+                  note.style.cssText = 'display:block;opacity:.7;margin-bottom:10px;';
+                  box.appendChild(note);
+
+                  // all tracked days
+                  const dates = [...new Set(all.map(e => e.date))].sort().reverse().slice(0, 60);
+                  const ul = calMk('ul', 'list');
+                  dates.forEach(k => {
+                    const t = calTotal(k);
+                    const li = document.createElement('li');
+                    li.style.cursor = 'pointer';
+                    const left = calMk('div', 'item-left');
+                    left.style.flex = '1';
+                    const w = calWhen(k);
+                    const nm = calMk('div', null, (w ? w + ' · ' : '') + calLabel(k));
+                    nm.style.fontWeight = '600';
+                    const bar = calMk('div', 'cal-bar' + (t > goal ? ' over' : ''));
+                    bar.appendChild(document.createElement('i')).style.width = Math.min(100, Math.round(t / goal * 100)) + '%';
+                    left.append(nm, bar);
+                    const right = calMk('span', 'badge', calFmt(t) + ' kcal');
+                    right.style.marginLeft = '10px';
+                    li.append(left, right);
+                    li.addEventListener('click', () => calOpenDay(k));
+                    ul.appendChild(li);
+                  });
+                  box.appendChild(ul);
+                }
+
+                function calOpenDay(k) {
+                  calViewDate = k;
+                  renderCalDay();
+                  const wrap = byId('calDayWrap');
+                  if (!wrap.classList.contains('visible')) toggleCollapse(wrap, byId('viewCalProgToggle'));
+                  try { byId('viewCalProgToggle').scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) { }
+                }
+
+                function renderCalories() {
+                  renderCalDay();
+                  renderCalHist();
+                }
+
+                // ----- setup -----
+                (function () {
+                  const cs = byId('calCat');
+                  CAL_CATS.forEach(c => { const o = document.createElement('option'); o.value = c[0]; o.textContent = c[1]; cs.appendChild(o); });
+                  const ms = byId('calMeal');
+                  CAL_MEALS.forEach(m => { const o = document.createElement('option'); o.value = m; o.textContent = CAL_MEAL_ICON[m] + ' ' + m; ms.appendChild(o); });
+                  calResetForm();
+                })();
+
+                byId('calCat').addEventListener('change', () => calFillFoods(false));
+                byId('calFood').addEventListener('change', () => calFoodChanged(false));
+                byId('calCustomName').addEventListener('input', calCalc);
+                byId('calCustomKcal').addEventListener('input', calCalc);
+                byId('calServ').addEventListener('input', () => {
+                  const f = calCurFood();
+                  const s = parseFloat(byId('calServ').value);
+                  if (f && f.serveG && s > 0) byId('calWeight').value = Math.round(s * f.serveG * 10) / 10;
+                  calCalc();
+                });
+                byId('calWeight').addEventListener('input', () => {
+                  const f = calCurFood();
+                  const w = parseFloat(byId('calWeight').value);
+                  if (f && f.serveG && w > 0) byId('calServ').value = Math.round(w / f.serveG * 100) / 100;
+                  calCalc();
+                });
+                byId('saveCalBtn').addEventListener('click', saveCal);
+                byId('cancelCalBtn').addEventListener('click', calCloseForm);
+                byId('showAddCalBtn').addEventListener('click', function () {
+                  const open = byId('calFormContainer').classList.contains('visible');
+                  if (!open && editingCalId === null) calResetForm();
+                  toggleCollapse(byId('calFormContainer'), byId('showAddCalBtn'));
+                });
+                byId('viewCalProgToggle').addEventListener('click', function () {
+                  toggleCollapse(byId('calDayWrap'), byId('viewCalProgToggle'));
+                });
+                byId('viewCalHistToggle').addEventListener('click', function () {
+                  renderCalHist();
+                  toggleCollapse(byId('calHistWrap'), byId('viewCalHistToggle'));
+                });
+
                 function rerenderBudget() { renderBudgets(); renderHomeBudgets(); }
 
                                 // ---------- Event Listeners ----------
@@ -5772,6 +7123,7 @@ render();
 
                 byId('cancelNoteBtn').addEventListener('click', function() {
                   hideForm(byId('noteFormContainer'));
+                  byId('showAddNoteBtn').classList.remove('open');
                   editingNoteIndex = null;
                   byId('saveNoteBtn').textContent = 'Save';
                 });
@@ -6732,14 +8084,12 @@ render();
               })();
 
              /* =====================================================
-               PRICE TRACKER — FINAL CLEAN VERSION
-               Amazon: Today vs Yesterday + Chart
-               Flipkart: Today only (no fake history)
+               PRICE TRACKER — Amazon + Flipkart
+               Both: Today vs Yesterday (builds up day by day) + chart
             ===================================================== */
-            
             (function () {
               const $ = id => document.getElementById(id);
-            
+
               const toggleBtn = $("priceTrackerToggle");
               const formDiv = $("priceTrackerForm");
               const urlInput = $("trackUrl");
@@ -6748,101 +8098,124 @@ render();
               const trackBtn = $("trackNowBtn");
               const statusEl = $("trackStatus");
               const outputEl = $("trackOutput");
-            
+
+              const esc = v => String(v == null ? "" : v).replace(/[&<>"']/g,
+                c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
               /* ---------------- UI TOGGLE ---------------- */
               toggleBtn.addEventListener("click", () => {
                 formDiv.classList.toggle("visible");
                 toggleBtn.classList.toggle("open");
               });
-            
-              /* =====================================================
-                 AMAZON SHORT LINK EXPANSION
-              ===================================================== */
-              async function expandAmazonUrl(url) {
-                if (!url.includes("amzn.in")) return url;
-                try {
-                  const res = await fetch(url, { method: "HEAD", redirect: "manual" });
-                  const loc = res.headers.get("location");
-                  if (loc) return loc;
-                } catch {}
+
+              /* ---------------- LINK HELPERS ---------------- */
+              const isAmazon = u => /amazon\.|amzn\.|\/\/a\.co\//i.test(u);
+              const isFlipkart = u => /flipkart\.|fkrt\./i.test(u);
+              const platformOf = u => isFlipkart(u) ? "Flipkart" : (isAmazon(u) ? "Amazon" : "Product");
+
+              // Share messages contain extra words ("Check this out https://..."): keep only the link
+              function cleanUrl(raw) {
+                const text = String(raw || "").trim();
+                if (!text) return "";
+                const m = text.match(/https?:\/\/[^\s]+/i);
+                let u = m ? m[0] : text;
+                if (!/^https?:\/\//i.test(u)) u = "https://" + u;
+                return u.replace(/[)\].,;]+$/, "");
+              }
+
+              // Product page -> clean mobile/short page. Short share links are kept as they are
+              // (the reader service follows their redirect).
+              function normalizeUrl(url) {
+                if (isFlipkart(url)) {
+                  const m = url.match(/[?&]pid=([A-Z0-9]+)/i);
+                  return m ? `https://www.flipkart.com/product/p/itme?pid=${m[1].toUpperCase()}` : url;
+                }
+                if (isAmazon(url)) {
+                  const host = url.match(/https?:\/\/(?:www\.|m\.)?(amazon\.[a-z.]+)/i);
+                  const m = url.match(/\/(?:dp|gp\/product|gp\/aw\/d)\/([A-Z0-9]{10})/i);
+                  if (host && m) return `https://www.${host[1]}/gp/aw/d/${m[1].toUpperCase()}`;
+                }
                 return url;
               }
-            
-              /* =====================================================
-                 MOBILE PAGE NORMALIZATION
-              ===================================================== */
-              function convertAmazonToMobile(url) {
-                const m = url.match(/\/dp\/([A-Z0-9]{8,12})/i);
-                return m ? `https://www.amazon.in/gp/aw/d/${m[1]}` : url;
+
+              function safeKey(u) {
+                try { return btoa(u); } catch { return btoa(unescape(encodeURIComponent(u))); }
               }
-            
-              function convertFlipkart(url) {
-                const m = url.match(/pid=([A-Z0-9]+)/i);
-                return m ? `https://www.flipkart.com/m/item?pid=${m[1]}` : url;
-              }
-            
+
               /* =====================================================
-                 PROXY FETCH (TEXT-ONLY)
+                 PAGE FETCH (text only, through free reader services)
               ===================================================== */
+              async function getText(u, ms = 18000) {
+                const ctl = new AbortController();
+                const t = setTimeout(() => ctl.abort(), ms);
+                try {
+                  const r = await fetch(u, { cache: "no-store", signal: ctl.signal });
+                  return r.ok ? await r.text() : "";
+                } catch { return ""; }
+                finally { clearTimeout(t); }
+              }
+
               async function proxyFetch(url) {
-              // Try Jina first
-              try {
-                const jina = await fetch(
-                  "https://r.jina.ai/" + url.replace(/^https?:\/\//, ""),
-                  { cache: "no-store" }
-                ).then(r => r.text());
-            
-                // If price keywords missing → fallback
-                if (/₹|price|a-price/i.test(jina)) return jina;
-              } catch {}
-            
-              // Fallback: textise.org (Amazon works well)
-              try {
-                const textise = await fetch(
-                  "https://textise.net/showtext.aspx?strURL=" + encodeURIComponent(url),
-                  { cache: "no-store" }
-                ).then(r => r.text());
-                return textise;
-              } catch {}
-            
-              return "";
-            }
-            
+                const sources = [
+                  "https://r.jina.ai/" + url,
+                  "https://api.allorigins.win/raw?url=" + encodeURIComponent(url),
+                  "https://textise.net/showtext.aspx?strURL=" + encodeURIComponent(url)
+                ];
+                let last = "";
+                for (const src of sources) {
+                  const txt = await getText(src);
+                  if (!txt) continue;
+                  last = txt;
+                  if (extractPrice(txt)) return txt;
+                }
+                return last;
+              }
+
               /* =====================================================
-                 VERIFIED PRICE EXTRACTION
+                 PRICE + PRODUCT NAME EXTRACTION
               ===================================================== */
-                function extractPrice(html) {
-                if (!html) return null;
-              
-                // Normalize
-                html = html.replace(/\s+/g, " ");
-              
-                /* ================= AMAZON (TEXT MODE) ================= */
-              
-                // Common Amazon text patterns
-                let m =
-                  html.match(/price\s*[:\-]?\s*₹\s*([\d,]+)/i) ||
-                  html.match(/₹\s*([\d,]{3,})\s*(?:only|inclusive|free delivery)/i);
-              
-                if (m) return Number(m[1].replace(/,/g, ""));
-              
-                /* ================= FLIPKART (TEXT MODE) ================= */
-              
-                // Flipkart main selling price text
-                m =
-                  html.match(/selling price\s*[:\-]?\s*₹\s*([\d,]+)/i) ||
-                  html.match(/₹\s*([\d,]{4,})\s*(?:off|₹)/i);
-              
-                if (m) return Number(m[1].replace(/,/g, ""));
-              
-                /* ================= FALLBACK (SAFE) ================= */
-              
-                // Pick FIRST reasonable ₹ value (not EMI / delivery)
-                const all = [...html.matchAll(/₹\s*([\d,]{3,})/g)]
-                  .map(m => Number(m[1].replace(/,/g, "")))
-                  .filter(v => v > 500 && v < 500000);
-              
-                return all.length ? all[0] : null;
+              function extractPrice(raw) {
+                if (!raw) return null;
+                const t = raw.replace(/\s+/g, " ");
+                const num = v => Math.round(parseFloat(String(v).replace(/,/g, "")));
+                const ok = v => Number.isFinite(v) && v >= 1 && v < 5000000;
+
+                // 1) structured page data (Amazon price block, JSON price fields)
+                let m = t.match(/class="a-price-whole"[^>]*>\s*([\d,]+)/i) ||
+                        t.match(/"(?:priceAmount|sellingPrice|finalPrice|price)"\s*:\s*"?([\d,]+(?:\.\d+)?)"?/i);
+                if (m && ok(num(m[1]))) return num(m[1]);
+
+                // 2) labelled prices in text
+                m = t.match(/(?:deal price|selling price|price)\s*[:\-]?\s*₹\s*([\d,]+(?:\.\d+)?)/i) ||
+                    t.match(/₹\s*([\d,]{3,}(?:\.\d+)?)\s*(?:only|inclusive|free delivery)/i);
+                if (m && ok(num(m[1]))) return num(m[1]);
+
+                // 3) first ₹ amount that is not MRP / EMI / coupon / delivery
+                const skipBefore = /(m\.?r\.?p\.?|list price|was|emi|save|savings?|coupon|cashback|delivery|shipping|fee|from)\W*$/i;
+                const skipAfter = /^\s*(\/\s*mo|per\s*mo|cashback|coupon|off\b|discount|delivery|emi)/i;
+                const re = /₹\s*([\d,]+(?:\.\d+)?)/g;
+                let first = null, x;
+                while ((x = re.exec(t))) {
+                  const v = num(x[1]);
+                  if (!ok(v) || v < 10) continue;
+                  if (first === null) first = v;
+                  const before = t.slice(Math.max(0, x.index - 25), x.index);
+                  const after = t.slice(x.index + x[0].length, x.index + x[0].length + 12);
+                  if (skipBefore.test(before) || skipAfter.test(after)) continue;
+                  return v;
+                }
+                return first;
+              }
+
+              function extractTitle(raw) {
+                if (!raw) return "";
+                let m = raw.match(/^Title:\s*(.+)$/m) || raw.match(/<title[^>]*>([^<]+)<\/title>/i);
+                if (!m) return "";
+                let t = m[1].trim()
+                  .replace(/\s*[|\-:]\s*(Amazon\.[a-z.]+|Flipkart(\.com)?)[^|]*$/i, "")
+                  .replace(/^(Buy|Amazon\.[a-z.]+\s*:)\s*/i, "");
+                if (/^(amazon|flipkart|robot|captcha|just a moment|access denied)/i.test(t)) return "";
+                return t.length > 140 ? t.slice(0, 140) + "…" : t;
               }
 
               /* =====================================================
@@ -6852,183 +8225,274 @@ render();
                 const today = new Date().toISOString().slice(0, 10);
                 appData.priceSnapshots ??= {};
                 appData.priceSnapshots[today] ??= {};
-                appData.priceSnapshots[today][key] = {
-                  price,
-                  time: Date.now()
-                };
+                appData.priceSnapshots[today][key] = { price, time: Date.now() };
                 saveAll();
               }
-            
+
               function getSnapshot(key, offsetDays = 0) {
                 const d = new Date();
                 d.setDate(d.getDate() - offsetDays);
                 const k = d.toISOString().slice(0, 10);
                 return appData.priceSnapshots?.[k]?.[key]?.price ?? null;
               }
-            
+
               /* =====================================================
                  SIMPLE PRICE CHART
               ===================================================== */
               function drawChart(canvasId, prices) {
                 const c = document.getElementById(canvasId);
+                if (!c) return;
                 const ctx = c.getContext("2d");
                 c.width = c.offsetWidth;
                 c.height = 160;
-            
+
                 ctx.clearRect(0, 0, c.width, c.height);
                 if (prices.length < 2) return;
-            
+
                 const min = Math.min(...prices);
                 const max = Math.max(...prices);
                 const stepX = c.width / (prices.length - 1);
-            
+
                 ctx.beginPath();
                 ctx.strokeStyle = "#4caf50";
                 ctx.lineWidth = 2;
-            
+
                 prices.forEach((p, i) => {
                   const x = i * stepX;
                   const y = c.height - ((p - min) / (max - min || 1)) * (c.height - 20) - 10;
                   i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
                 });
-            
+
                 ctx.stroke();
               }
-            
+
               /* =====================================================
-                 TRACK PRICE (CORE)
+                 TRACK PRICE (CORE) — item = a saved product, or nothing (uses the form)
               ===================================================== */
-              async function trackPrice() {
-                let url = urlInput.value.trim();
-                const title = titleInput.value.trim();
-            
-                if (!url) return alert("Enter product URL");
-            
+              async function trackPrice(item) {
+                const saved = item && item.url ? item : null;
+                const raw = cleanUrl(saved ? saved.url : urlInput.value);
+                const title = saved ? saved.title : titleInput.value.trim();
+
+                if (!raw) return alert("Enter product URL");
+
                 try {
                   statusEl.textContent = "⏳ Fetching price…";
                   outputEl.innerHTML = "";
-            
-                  url = await expandAmazonUrl(url);
-                  if (url.includes("amazon")) url = convertAmazonToMobile(url);
-                  if (url.includes("flipkart")) url = convertFlipkart(url);
-            
-                  const key = btoa(url);
-                  const html = await proxyFetch(url);
-                  const price = extractPrice(html);
-            
+
+                  const url = normalizeUrl(raw);
+                  const platform = platformOf(url);
+                  const key = saved && saved.key ? saved.key : safeKey(url);
+
+                  let text = await proxyFetch(url);
+                  let price = extractPrice(text);
+
+                  if (!price && url !== raw) {          // normalised link failed: try the original link
+                    const text2 = await proxyFetch(raw);
+                    const p2 = extractPrice(text2);
+                    if (p2) { price = p2; text = text2; }
+                  }
+
                   if (!price) {
-                    statusEl.textContent = "❌ Price not detected";
+                    statusEl.textContent = "❌ Price not detected. Try the full product page link (or try again in a minute).";
                     return;
                   }
-            
+
                   saveSnapshot(key, price);
-            
+
                   const yesterday = getSnapshot(key, 1);
-                  const diff =
-                    yesterday != null ? price - yesterday : null;
-            
+                  const diff = yesterday != null ? price - yesterday : null;
+                  const pageName = extractTitle(text);
+
+                  let changeHtml;
+                  if (yesterday == null) {
+                    changeHtml = `<p><i>No yesterday data. Track again tomorrow to see the change.</i></p>`;
+                  } else {
+                    const color = diff < 0 ? "green" : (diff > 0 ? "red" : "inherit");
+                    const arrow = diff < 0 ? "▼ " : (diff > 0 ? "▲ " : "");
+                    changeHtml = `<p><b>Yesterday:</b> ₹${yesterday.toLocaleString("en-IN")}</p>
+                      <p><b>Change:</b> <span style="color:${color}">${diff === 0 ? "No change" : arrow + "₹" + Math.abs(diff).toLocaleString("en-IN")}</span></p>`;
+                  }
+
                   outputEl.innerHTML = `
                     <div style="border:1px solid #ddd;padding:12px;border-radius:8px;">
-                      <h3>${title || "Product"}</h3>
+                      <small style="opacity:.7;">🛒 ${esc(platform)}</small>
+                      <h3 style="margin:4px 0 6px;">${esc(title || pageName || "Product")}</h3>
+                      ${pageName && pageName !== title ? `<p style="margin:0 0 8px;font-size:13px;opacity:.8;">${esc(pageName)}</p>` : ""}
                       <p><b>Today:</b> ₹${price.toLocaleString("en-IN")}</p>
-                      ${
-                        yesterday != null
-                          ? `<p><b>Yesterday:</b> ₹${yesterday.toLocaleString("en-IN")}</p>
-                             <p><b>Change:</b> 
-                               <span style="color:${diff < 0 ? 'green' : 'red'}">
-                                 ${diff < 0 ? "▼" : "▲"} ₹${Math.abs(diff)}
-                               </span>
-                             </p>`
-                          : `<p><i>No yesterday data</i></p>`
-                      }
-                      <canvas id="priceChart"></canvas>
+                      ${changeHtml}
+                      <canvas id="priceChart" style="width:100%;"></canvas>
                     </div>
                   `;
-            
-                  const history = [yesterday, price].filter(Boolean);
-                  drawChart("priceChart", history);
-            
+
+                  drawChart("priceChart", [yesterday, price].filter(v => v != null));
+
                   statusEl.textContent = "✔ Updated";
-            
+
                 } catch (e) {
                   console.error(e);
                   statusEl.textContent = "❌ Error occurred";
                 }
               }
-            
+
               /* =====================================================
                  SAVE PRODUCT
               ===================================================== */
-              saveBtn.addEventListener("click", async () => {
-                const rawUrl = urlInput.value.trim();
+              saveBtn.addEventListener("click", () => {
+                const raw = cleanUrl(urlInput.value);
                 const title = titleInput.value.trim();
-                if (!rawUrl || !title) return alert("Enter title & URL");
-            
-                let url = await expandAmazonUrl(rawUrl);
-                if (url.includes("amazon")) url = convertAmazonToMobile(url);
-                if (url.includes("flipkart")) url = convertFlipkart(url);
-            
-                const key = btoa(url);
-                
+                if (!raw || !title) return alert("Enter title & URL");
+
+                const url = normalizeUrl(raw);
+                const key = safeKey(url);
+
                 if (appData.priceTracker.some(p => p.key === key)) {
                   alert("Product already saved");
                   return;
                 }
-                
+
                 appData.priceTracker.push({
                   title,
                   url,
                   key,
                   savedAt: formatDateDMYWithTime(new Date())
                 });
-            
+
                 saveAll();
                 renderPriceTrackerList();
               });
-            
+
               /* =====================================================
                  RENDER SAVED LIST
               ===================================================== */
               function renderPriceTrackerList() {
                 const list = $("priceTrackList");
                 list.innerHTML = "";
-            
+
                 if (!appData.priceTracker.length) {
                   list.innerHTML = `<li style="opacity:.7">No saved products</li>`;
                   return;
                 }
-            
+
                 appData.priceTracker.forEach((it, i) => {
                   const li = document.createElement("li");
                   li.innerHTML = `
                     <div class="item-left">
-                      <a href="#">${it.title}</a><br>
-                      <small>${it.savedAt}</small>
+                      <a href="#">${esc(it.title)}</a><br>
+                      <small>${esc(platformOf(it.url || ""))} • ${esc(it.savedAt)}</small>
                     </div>
                     <button class="icon-small">🗑️</button>
                   `;
-            
+
                   li.querySelector("a").onclick = async e => {
                     e.preventDefault();
                     urlInput.value = it.url;
                     titleInput.value = it.title;
-                    await trackPrice();
+                    await trackPrice(it);
                   };
-                  
+
                   li.querySelector("button").onclick = () => {
                     moveToTrash("priceTracker", it, i);
                     renderPriceTrackerList();
                   };
-            
+
                   list.appendChild(li);
                 });
               }
-              
-              window.renderPriceTrackerList = renderPriceTrackerList; 
-                trackBtn.addEventListener("click", trackPrice);
-                window.trackPrice = trackPrice;
-                renderPriceTrackerList();
-              })();
+
+              window.renderPriceTrackerList = renderPriceTrackerList;
+              trackBtn.addEventListener("click", () => trackPrice());
+              window.trackPrice = trackPrice;
+              renderPriceTrackerList();
+            })();
+
+            /* ---------------- NOTES: INSERT TABLE BUILDER ---------------- */
+            (function () {
+              const g = id => document.getElementById(id);
+              const btn = g('insertTableBtn'), box = g('tblBuilder'), rowsI = g('tblRows'), colsI = g('tblCols');
+              const grid = g('tblGrid'), apply = g('tblApply'), closeB = g('tblClose');
+              const ta = g('noteText');
+              if (!btn || !box || !ta) return;
+
+              const clamp = (v, a, b) => Math.min(b, Math.max(a, parseInt(v, 10) || a));
+
+              function build() {
+                const r = clamp(rowsI.value, 2, 30), c = clamp(colsI.value, 1, 10);
+                rowsI.value = r; colsI.value = c;
+                const old = {};
+                grid.querySelectorAll('input').forEach(i => { old[i.dataset.r + ',' + i.dataset.c] = i.value; });
+                grid.innerHTML = '';
+                const table = document.createElement('table');
+                table.style.borderCollapse = 'separate';
+                table.style.borderSpacing = '4px';
+                for (let i = 0; i < r; i++) {
+                  const tr = document.createElement('tr');
+                  for (let j = 0; j < c; j++) {
+                    const td = document.createElement('td');
+                    const inp = document.createElement('input');
+                    inp.type = 'text';
+                    inp.dataset.r = i; inp.dataset.c = j;
+                    inp.placeholder = i === 0 ? 'Heading ' + (j + 1) : '';
+                    inp.style.minWidth = '90px';
+                    inp.style.boxSizing = 'border-box';
+                    if (i === 0) inp.style.fontWeight = '700';
+                    inp.value = old[i + ',' + j] || '';
+                    td.appendChild(inp);
+                    tr.appendChild(td);
+                  }
+                  table.appendChild(tr);
+                }
+                grid.appendChild(table);
+              }
+
+              function reset() { box.hidden = true; grid.innerHTML = ''; rowsI.value = 3; colsI.value = 3; }
+
+              btn.addEventListener('click', () => {
+                box.hidden = !box.hidden;
+                if (!box.hidden) build();
+              });
+              rowsI.addEventListener('change', build);
+              colsI.addEventListener('change', build);
+              closeB.addEventListener('click', reset);
+
+              apply.addEventListener('click', () => {
+                const r = clamp(rowsI.value, 2, 30), c = clamp(colsI.value, 1, 10);
+                const rows = [];
+                let any = false;
+                for (let i = 0; i < r; i++) {
+                  const cells = [];
+                  for (let j = 0; j < c; j++) {
+                    const inp = grid.querySelector('input[data-r="' + i + '"][data-c="' + j + '"]');
+                    const v = (inp ? inp.value : '').replace(/\|/g, '/').replace(/\s+/g, ' ').trim();
+                    if (v) any = true;
+                    cells.push(v);
+                  }
+                  rows.push(cells);
+                }
+                if (!any) { alert('Fill at least one cell.'); return; }
+                const fmt = cells => '| ' + cells.join(' | ') + ' |';
+                const lines = [fmt(rows[0]), fmt(new Array(c).fill('---'))];
+                rows.slice(1).forEach(cells => lines.push(fmt(cells)));
+                const tableText = lines.join('\n');
+                const saveBtn = g('saveNoteBtn');
+                if (saveBtn && saveBtn.textContent.trim() === 'Save') {
+                  // new note: the table is saved straight into the notes history
+                  const typed = ta.value;
+                  ta.value = tableText;
+                  reset();
+                  saveBtn.click();
+                  ta.value = typed;      // keep anything already typed in the box
+                } else {
+                  // editing a note: add the table to that note's text
+                  const cur = ta.value.replace(/\s+$/, '');
+                  ta.value = (cur ? cur + '\n\n' : '') + tableText;
+                  reset();
+                  ta.focus();
+                }
+              });
+
+              ['saveNoteBtn', 'cancelNoteBtn'].forEach(id => { const b = g(id); if (b) b.addEventListener('click', () => setTimeout(reset, 0)); });
+            })();
 
             // ========= GOOGLE TRENDS ================
             const TRENDS_REGION_KEY = "trends_region";
@@ -7135,7 +8599,7 @@ render();
     // ================= BOTTOM NAV + MINI SHEET =================
     (function () {
       const $ = id => document.getElementById(id);
-      const HUB_PAGES = ['reminders', 'notes', 'budget', 'Check', 'priority', 'progress'];
+      const HUB_PAGES = ['reminders', 'notes', 'budget', 'Check', 'priority', 'progress', 'piggyBank', 'calories'];
       const PROFILE_PAGES = ['trash', 'notifications', 'terms', 'how', 'other', 'updateLog'];
       const TITLES = { hub: 'Reminder Hub', utilities: 'Utilities', profile: 'Profile', settings: 'Settings', storage: 'Storage' };
       const MODE_KEY = 'nr_viewMode';
@@ -7180,7 +8644,7 @@ render();
         $('sheetTitle').textContent = TITLES[v] || '';
         $('sheetBack').hidden = (v === 'hub' || v === 'utilities' || v === 'profile');
         body.scrollTop = 0;
-        if (v === 'storage') { const st = $('backupStatus'); if (st) st.textContent = ''; }
+        if (v === 'storage') { const st = $('backupStatus'); if (st) st.textContent = ''; if (typeof window.updateLastBackupText === 'function') window.updateLastBackupText(); }
       }
 
       function openSheet(root, v) {
@@ -7288,7 +8752,7 @@ render();
       // where each full page's back button returns to: [sheet root, view inside it]
       const BACK_TO = {
         reminders: ['hub', 'hub'], notes: ['hub', 'hub'], budget: ['hub', 'hub'], Check: ['hub', 'hub'],
-        priority: ['hub', 'hub'], progress: ['hub', 'hub'], utilities: ['utilities', 'utilities'],
+        priority: ['hub', 'hub'], progress: ['hub', 'hub'], piggyBank: ['hub', 'hub'], calories: ['hub', 'hub'], utilities: ['utilities', 'utilities'],
         notifications: ['profile', 'settings'], trash: ['profile', 'storage'],
         other: ['profile', 'profile'], updateLog: ['profile', 'profile'],
         how: ['profile', 'profile'], terms: ['profile', 'profile']
@@ -7320,7 +8784,7 @@ render();
 
       // page headings get the same rich icon as their popup tile
       [['reminders','Reminders'], ['notes','Notes'], ['budget','Budget Tracker'],
-       ['Check','Check List'], ['priority','Priority Queue'], ['progress','Progress Tracker'],
+       ['Check','Check List'], ['priority','Priority Queue'], ['progress','Progress Tracker'], ['piggyBank','Piggy Bank'], ['calories','Calories'],
        ['notifications','Notification Settings'], ['trash','Trash Bin'],
        ['other','More Apps'], ['updateLog','Update Blog'], ['how','How to Use'], ['terms','Privacy Policy!']
       ].forEach(([id, t]) => setPageHeading($(id), t));

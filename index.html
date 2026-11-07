@@ -1536,13 +1536,13 @@
 
 
     /* ===== CALORIES ===== */
-    #showAddCalBtn, #viewCalProgToggle, #viewCalHistToggle {
+    #showAddCalBtn, #viewCalProgToggle, #viewCalHistToggle, #showAddBurnBtn, #calProfileToggle {
       position: relative; user-select: none; display: flex; justify-content: space-between; align-items: center;
       font-weight: 600; font-size: 15px; cursor: pointer; padding: 10px; border: none; background: #888; color: #fff;
       border-radius: 6px; text-align: left;
     }
-    #showAddCalBtn:hover, #viewCalProgToggle:hover, #viewCalHistToggle:hover { background: #aaa; }
-    #showAddCalBtn.open .arrow, #viewCalProgToggle.open .arrow, #viewCalHistToggle.open .arrow { transform: rotate(180deg); }
+    #showAddCalBtn:hover, #viewCalProgToggle:hover, #viewCalHistToggle:hover, #showAddBurnBtn:hover, #calProfileToggle:hover { background: #aaa; }
+    #showAddCalBtn.open .arrow, #viewCalProgToggle.open .arrow, #viewCalHistToggle.open .arrow, #showAddBurnBtn.open .arrow, #calProfileToggle.open .arrow { transform: rotate(180deg); }
     .cal-in {
       width: 100%; height: 36px; box-sizing: border-box; margin: 0; padding: 8px; border-radius: 6px;
       border: 1px solid #ccc; font: inherit; font-size: 14px;
@@ -1561,6 +1561,17 @@
     #calDayBox hr { margin: 4px 0 8px; border: 0; border-top: 1px solid #bbb; width: 100%; }
     .dark #calDayBox hr { border-top-color: #666; }
     .dark .cal-in { background: #333 !important; color: #fff !important; border: 1px solid #444 !important; }
+    .cal-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .cal-chip { padding: 4px 10px; border-radius: 14px; border: 1px solid rgba(128,128,128,.5); background: transparent; color: inherit; font: inherit; font-size: 12.5px; cursor: pointer; }
+    .cal-chip:hover { background: rgba(128,128,128,.2); }
+    .cal-note { display: block; font-size: 12px; line-height: 1.45; opacity: .7; }
+    .cal-stats { display: flex; gap: 8px; margin: 8px 0; }
+    .cal-stat { flex: 1; padding: 8px 4px; border-radius: 10px; background: rgba(128,128,128,.12); text-align: center; min-width: 0; }
+    .cal-stat b { display: block; font-size: 17px; }
+    .cal-stat small { font-size: 11px; opacity: .75; }
+    .cal-pos { color: #e53935; }
+    .cal-neg { color: #2e9d4f; }
+    select.cal-in[size] { height: auto; }
 
     @media (prefers-reduced-motion: reduce) {
       #sheet, #sheetBackdrop, .nav-tab .ni, .sw, .sw::after { transition: none !important; }
@@ -1615,7 +1626,7 @@
           <button type="button" class="hub-tile" data-go="priority"><span class="ri g-red"><svg aria-hidden="true"><use href="#i-target"/></svg></span><b>Priority Queue</b><small>What's next</small></button>
           <button type="button" class="hub-tile" data-go="progress"><span class="ri g-purple"><svg aria-hidden="true"><use href="#i-trend"/></svg></span><b>Progress Tracker</b><small>Track your goals</small></button>
           <button type="button" class="hub-tile" data-go="piggyBank"><span class="ri g-pink"><svg aria-hidden="true"><use href="#i-bank"/></svg></span><b>Piggy Bank</b><small>Daily savings</small></button>
-          <button type="button" class="hub-tile" data-go="calories"><span class="ri g-red"><svg aria-hidden="true"><use href="#i-flame"/></svg></span><b>Calories</b><small>Food &amp; daily kcal</small></button>
+          <button type="button" class="hub-tile" data-go="calories"><span class="ri g-red"><svg aria-hidden="true"><use href="#i-flame"/></svg></span><b>Calories</b><small>Food, burn &amp; weight</small></button>
         </div>
       </section>
 
@@ -2045,7 +2056,7 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.8.6 </p>
+          <p>Version 13.8.7</p>
           <p>Last Updated: 07-Nov-2026</p>
           <p>Project Mode: Open source</p>
           <p>App Size : 7.0KB </p>
@@ -2112,9 +2123,12 @@
       <h3>Calories</h3>
       <hr />
       <ul>
-        <li>Reminder Hub → Calories → ＋ Add Food. Choose the meal, the food type (South Indian, North Indian, Snacks, Sweets, Fruits, Drinks) and the food.</li>
-        <li>Enter how many pieces / servings or the weight you ate. The calories are calculated automatically. Use "Other" to enter your own calories per 100 g.</li>
-        <li>Day Progress shows your total against your daily goal. Track History shows the last 7 days and every tracked day. Edit with ✏️, delete with 🗑️ (restore from the Trash Bin).</li>
+        <li><strong>Step 1 – Enter your weight:</strong> Calories page → ⚖️ MY WEIGHT &amp; PROFILE. Enter your weight (kg) and Save. Weight alone is enough to calculate calories burned. Add height, age, gender and your daily routine to get your BMR (calories your body needs at rest), your maintenance calories and the weight estimate.</li>
+        <li><strong>Add food:</strong> ＋ ADD FOOD → choose the meal and food type (South Indian, North Indian, Snacks, Sweets, Fruits &amp; Nuts, Drinks – 60+ foods in each). Type in 🔍 Search to find a food across all types, then enter <em>how many</em> you ate (1 idli, 2 cups, ½ …). The calories are calculated for you. Use "Other" to enter your own food with the calories of one serving.</li>
+        <li><strong>Add exercise:</strong> 🏃 ADD EXERCISE → pick the activity (100 activities: walking, running, cycling, gym, yoga, sports, dance, daily work) or search for it, then enter the minutes. Calories burned = activity MET × your weight × hours. Use "Other" to type calories from your watch or band.</li>
+        <li><strong>Day Progress:</strong> shows eaten, burned and net calories. Your limit for the day is your goal plus the calories you burned. Use the ◀ ▶ buttons to see other days. The day balance shows how much weight that day adds or removes (about 7,700 kcal = 1 kg).</li>
+        <li><strong>Weight estimate:</strong> after you finish at least one full day of food, ⚖️ MY WEIGHT &amp; PROFILE shows your estimated weight: your last weighed weight + (calories eaten − maintenance − exercise) of every tracked day. Today is counted from tomorrow. Weigh yourself every week or two and Save the new weight to keep it accurate. It is an estimate, not medical advice.</li>
+        <li><strong>Track History:</strong> last 7 days chart plus every tracked day (food and exercise). Edit with ✏️, delete with 🗑️ (restore from the Trash Bin).</li>
       </ul>
 
       <h3>Trash Bin</h3>
@@ -2226,6 +2240,31 @@
 
     <div id="calories" class="page hidden">
       <h2>🔥 Calories</h2>
+
+      <div class="add-area">
+        <button id="calProfileToggle" class="add-btn" aria-expanded="false">
+          ⚖️ MY WEIGHT &amp; PROFILE <span class="arrow">▼</span>
+        </button>
+        <div id="calProfileWrap" class="form">
+          <div id="calProfileOut"></div>
+          <label>Your weight (kg)<input id="calPWeight" type="number" class="cal-in" min="20" max="300" step="0.1" inputmode="decimal" placeholder="e.g. 68.5" /></label>
+          <label>Weighed on<input id="calPDate" type="date" class="cal-in" /></label>
+          <label>Height (cm)<input id="calPHeight" type="number" class="cal-in" min="100" max="250" step="0.5" inputmode="decimal" placeholder="e.g. 165" /></label>
+          <label>Age (years)<input id="calPAge" type="number" class="cal-in" min="10" max="100" step="1" inputmode="numeric" placeholder="e.g. 30" /></label>
+          <label>Gender<select id="calPGender" class="cal-in">
+            <option value="">Select</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other / prefer not to say</option>
+          </select></label>
+          <label>Daily routine (without workouts)<select id="calPLife" class="cal-in"></select></label>
+          <div class="form-actions">
+            <button id="saveCalProfileBtn" class="primary">Save</button>
+          </div>
+          <small class="cal-note">Weight alone is enough to calculate calories burned. Height, age and gender are used for your daily calorie need and the weight estimate. Weigh yourself again after a week or two and save it here to keep the estimate accurate. This is a guide only, not medical advice.</small>
+        </div>
+      </div>
+
       <div class="add-area">
         <button id="showAddCalBtn" class="add-btn" aria-expanded="false">
           ＋ ADD FOOD <span class="arrow">▼</span>
@@ -2235,23 +2274,23 @@
           <label>Meal<select id="calMeal" class="cal-in"></select></label>
           <label>Food type<select id="calCat" class="cal-in"></select></label>
           <div id="calFoodWrap" class="cal-field">
+            <span>🔍 Search food (all types)</span>
+            <input id="calSearch" type="search" class="cal-in" maxlength="40" autocomplete="off" placeholder="e.g. dosa, mango, chai" />
             <span>Select food</span>
             <select id="calFood" class="cal-in"></select>
+            <small id="calSearchNote" class="cal-note"></small>
           </div>
           <div id="calCustomWrap" class="cal-field" hidden>
             <span>Food name</span>
             <input id="calCustomName" type="text" class="cal-in" maxlength="80" placeholder="Food name" />
-            <span>Calories per 100 g (kcal)</span>
+            <span>Calories in 1 serving / piece (kcal)</span>
             <input id="calCustomKcal" type="number" class="cal-in" min="0" step="any" inputmode="decimal" placeholder="e.g. 250" />
           </div>
           <div id="calInfo" class="cal-info"></div>
-          <div id="calServWrap" class="cal-field">
+          <div class="cal-field">
             <span id="calServLbl">How many?</span>
             <input id="calServ" type="number" class="cal-in" min="0" step="any" inputmode="decimal" placeholder="1" />
-          </div>
-          <div class="cal-field">
-            <span id="calWeightLbl">Weight eaten (grams)</span>
-            <input id="calWeight" type="number" class="cal-in" min="0" step="any" inputmode="decimal" placeholder="Weight" />
+            <div id="calQChips" class="cal-chips"></div>
           </div>
           <div id="calResult" class="cal-result"></div>
           <div class="form-actions">
@@ -2260,6 +2299,42 @@
           </div>
         </div>
       </div>
+
+      <div class="add-area">
+        <button id="showAddBurnBtn" class="add-btn" aria-expanded="false">
+          🏃 ADD EXERCISE (CALORIES BURNED) <span class="arrow">▼</span>
+        </button>
+        <div id="calBurnFormContainer" class="form">
+          <div id="calBNeedW" class="cal-info" hidden>⚠️ Enter your weight in <b>MY WEIGHT &amp; PROFILE</b> first. Calories burned depend on your body weight.</div>
+          <label>Date<input id="calBDate" type="date" class="cal-in" /></label>
+          <label>Activity type<select id="calBCat" class="cal-in"></select></label>
+          <div id="calBActWrap" class="cal-field">
+            <span>🔍 Search activity (all types)</span>
+            <input id="calBSearch" type="search" class="cal-in" maxlength="40" autocomplete="off" placeholder="e.g. running, yoga, cycling" />
+            <span>Select activity</span>
+            <select id="calBAct" class="cal-in"></select>
+            <small id="calBSearchNote" class="cal-note"></small>
+          </div>
+          <div id="calBCustomWrap" class="cal-field" hidden>
+            <span>Activity name</span>
+            <input id="calBCustomName" type="text" class="cal-in" maxlength="80" placeholder="Activity name" />
+            <span>Calories burned (kcal)</span>
+            <input id="calBCustomKcal" type="number" class="cal-in" min="0" step="any" inputmode="decimal" placeholder="e.g. 200" />
+          </div>
+          <div id="calBInfo" class="cal-info"></div>
+          <div id="calBDurWrap" class="cal-field">
+            <span>Duration (minutes)</span>
+            <input id="calBMins" type="number" class="cal-in" min="0" step="any" inputmode="decimal" placeholder="30" />
+            <div id="calBChips" class="cal-chips"></div>
+          </div>
+          <div id="calBResult" class="cal-result"></div>
+          <div class="form-actions">
+            <button id="saveCalBurnBtn" class="primary">Save</button>
+            <button id="cancelCalBurnBtn" class="secondary">Cancel</button>
+          </div>
+        </div>
+      </div>
+
       <div class="add-area">
         <button id="viewCalProgToggle" class="add-btn open" aria-expanded="true">
           📊 DAY PROGRESS <span class="arrow">▼</span>
@@ -3065,6 +3140,7 @@ render();
           case 'piggyBank':
             renderPiggyBank(); break;
           case 'calories':
+          case 'calBurn':
             renderCalories(); break;
           case 'calculationHistoryList':
           targetPageId = 'utilities';
@@ -3201,6 +3277,8 @@ render();
           progress: [],
           piggyBank: [],
           calories: [],
+          calBurn: [],
+          calProfile: null,
           calorieGoal: 2000,
           // NEW: Calculation History
           calculationHistory: [],
@@ -3239,6 +3317,8 @@ render();
             }
             if (!Array.isArray(appData.piggyBank)) appData.piggyBank = [];
             if (!Array.isArray(appData.calories)) appData.calories = [];
+            if (!Array.isArray(appData.calBurn)) appData.calBurn = [];
+            if (!appData.calProfile || typeof appData.calProfile !== 'object') appData.calProfile = null;
             if (!(Number(appData.calorieGoal) > 0)) appData.calorieGoal = 2000;
             if (Array.isArray(appData.trash)) appData.trash.forEach(t => {
               if (t && t.type === 'biggyBank') t.type = 'piggyBank';
@@ -3341,7 +3421,7 @@ render();
             }
             const backup = {
               app: BACKUP_APP,
-              version: '13.8.6',
+              version: '13.8.7',
               exportedAt: new Date().toISOString(),
               appData: structuredClone(appData),
               localStorage: ls
@@ -4989,7 +5069,7 @@ render();
           }
 
           if (pageId === 'calories') {
-            renderCalories();
+            renderCalories(true);
           }
 
           if (pageId === 'piggyBank') {
@@ -5726,7 +5806,8 @@ render();
                   priceTracker: 'utilities',
                   checklists: 'Check',
                   notes: 'notes',
-                  reminders: 'reminders'
+                  reminders: 'reminders',
+                  calBurn: 'calories'
                 };
 
                 const targetPage = jumpMap[t.type] || t.type;
@@ -6410,7 +6491,9 @@ render();
                   toggleCollapse(byId('homeProgressContainer'), byId('homeProgressToggle'));
                 });
                 // ---------------- CALORIES ----------------
-                // appData.calories = [{ id, date, meal, cat, name, title, grams, per100, kcal, createdAt }]
+                // appData.calories = [{ id, date, meal, cat, name, title, qty, serveLbl, serveG, grams, per100, perServ, kcal, createdAt }]
+                // appData.calBurn = [{ id, date, cat, name, title, met, mins, kcal, wt, createdAt }]   (burned = MET x kg x hours)
+                // appData.calProfile = { weight, weightDate, height, age, gender, life, log }
                 // appData.calorieGoal = daily goal in kcal
                 const CAL_CATS = [
                   ['south', '🍛 South Indian'],
@@ -6645,10 +6728,325 @@ render();
                   ['drinks', 'Sugarcane Juice', 55, 250, '1 glass', 'Fresh pressed sugarcane juice.'],
                   ['drinks', 'Tender Coconut Water', 19, 250, '1 coconut', 'Natural electrolyte drink.'],
                   ['drinks', 'Lemon Juice (sweet)', 40, 250, '1 glass', 'Lime juice with sugar.'],
-                  ['drinks', 'Cola / Soft Drink', 42, 300, '1 bottle (300 ml)', 'Sweetened fizzy drink.']
+                  ['drinks', 'Cola / Soft Drink', 42, 300, '1 bottle (300 ml)', 'Sweetened fizzy drink.'],
+                  // ---------- MORE FOODS (60+ in every type) ----------
+                  ['south', "Neer Dosa", 140, 60, "1 dosa", "Thin, soft rice crepe from Karnataka. Very little oil."],
+                  ['south', "Onion Dosa", 175, 90, "1 dosa", "Dosa topped with chopped onions. Slightly more oil."],
+                  ['south', "Adai", 180, 90, "1 adai", "Mixed rice and dal pancake. High in protein."],
+                  ['south', "Ragi Dosa", 150, 80, "1 dosa", "Finger millet dosa. Fibre-rich."],
+                  ['south', "Rava Idli", 135, 50, "1 idli", "Semolina idli with curd and seasoning."],
+                  ['south', "Oats Idli", 120, 45, "1 idli", "Idli made with oats. Light and filling."],
+                  ['south', "Lemon Sevai", 150, 150, "1 plate", "Rice noodles tossed with lemon and tempering."],
+                  ['south', "Rasam Rice", 110, 200, "1 plate", "Rice mixed with pepper rasam."],
+                  ['south', "Kuska (Plain Biryani Rice)", 150, 200, "1 plate", "Flavoured rice without meat."],
+                  ['south', "Kambu Koozh (Pearl Millet Porridge)", 55, 250, "1 glass", "Fermented pearl millet drink-porridge."],
+                  ['south', "Ragi Koozh", 60, 250, "1 glass", "Finger millet porridge with buttermilk."],
+                  ['south', "Mor Kuzhambu", 60, 150, "1 bowl", "Curd-based gravy with vegetables."],
+                  ['south', "Thakkali Kuzhambu", 80, 150, "1 bowl", "Tomato tamarind gravy."],
+                  ['south', "Beans Poriyal", 85, 100, "1 small bowl", "Beans stir-fried with coconut."],
+                  ['south', "Cabbage Poriyal", 80, 100, "1 small bowl", "Cabbage stir-fried with coconut."],
+                  ['south', "Thayir Vadai (Curd Vada)", 150, 120, "2 vadas", "Vada soaked in curd. Cooling."],
+                  ['south', "Sambar Vada", 140, 150, "2 vadas", "Medu vada soaked in sambar."],
+                  ['south', "Chettinad Egg Curry", 140, 120, "1 bowl (2 eggs)", "Spicy egg gravy."],
+                  ['south', "Chicken Pepper Fry", 190, 100, "1 serving", "Dry chicken fry with black pepper."],
+                  ['south', "Mutton Sukka", 220, 100, "1 serving", "Dry roasted spicy mutton."],
+                  ['south', "Prawn Masala", 130, 100, "1 serving", "Prawns cooked in onion-tomato masala."],
+                  ['north', "Rumali Roti", 280, 45, "1 roti", "Very thin handkerchief bread."],
+                  ['north', "Lachha Paratha", 330, 90, "1 paratha", "Flaky layered paratha. High in ghee."],
+                  ['north', "Methi Thepla", 290, 40, "1 thepla", "Gujarati fenugreek flatbread."],
+                  ['north', "Garlic Naan", 300, 90, "1 naan", "Naan topped with garlic and butter."],
+                  ['north', "Pyaaz Paratha", 290, 90, "1 paratha", "Paratha stuffed with onion."],
+                  ['north', "Mooli Paratha", 270, 85, "1 paratha", "Paratha stuffed with radish."],
+                  ['north', "Dal Palak", 100, 150, "1 bowl", "Lentils cooked with spinach."],
+                  ['north', "Moong Dal", 105, 150, "1 bowl", "Yellow moong dal. Easy to digest."],
+                  ['north', "Masoor Dal", 100, 150, "1 bowl", "Red lentil dal."],
+                  ['north', "Chana Dal", 120, 150, "1 bowl", "Split chickpea dal."],
+                  ['north', "Lobia Curry (Black-eyed Peas)", 120, 150, "1 bowl", "Black-eyed peas in gravy."],
+                  ['north', "Kala Chana Curry", 130, 150, "1 bowl", "Black chickpeas in spicy gravy."],
+                  ['north', "Aloo Palak", 80, 150, "1 bowl", "Potato and spinach sabzi."],
+                  ['north', "Paneer Bhurji", 210, 100, "1 serving", "Scrambled paneer with onion and tomato."],
+                  ['north', "Paneer Tikka", 250, 100, "4-5 pieces", "Grilled paneer cubes with spices."],
+                  ['north', "Mushroom Masala", 85, 150, "1 bowl", "Mushrooms in onion-tomato gravy."],
+                  ['north', "Gobi Matar", 90, 150, "1 bowl", "Cauliflower and peas sabzi."],
+                  ['north', "Lauki (Bottle Gourd) Sabzi", 50, 150, "1 bowl", "Very light bottle gourd curry."],
+                  ['north', "Methi Aloo", 100, 150, "1 bowl", "Potato with fenugreek leaves."],
+                  ['north', "Dum Aloo", 150, 150, "1 bowl", "Baby potatoes in rich gravy."],
+                  ['north', "Chicken Korma", 190, 150, "1 bowl", "Chicken in creamy nut-yogurt gravy."],
+                  ['north', "Keema Matar", 200, 150, "1 bowl", "Minced mutton with peas."],
+                  ['north', "Seekh Kebab", 230, 80, "2 kebabs", "Minced meat kebabs grilled on skewers."],
+                  ['north', "Fish Tikka", 170, 100, "4-5 pieces", "Grilled marinated fish."],
+                  ['north', "Egg Bhurji", 190, 100, "1 serving (2 eggs)", "Indian-style scrambled eggs."],
+                  ['north', "Basmati Rice (cooked)", 130, 150, "1 cup", "Plain cooked basmati rice."],
+                  ['north', "Kashmiri Pulao", 160, 150, "1 cup", "Sweet-savoury pulao with dry fruits."],
+                  ['snacks', "Mirchi Bajji", 250, 40, "1 bajji", "Chilli dipped in gram flour and fried."],
+                  ['snacks', "Bread Pakora", 270, 60, "1 piece", "Bread slice with filling, deep fried."],
+                  ['snacks', "Paneer Pakora", 290, 50, "2 pieces", "Paneer fritters, deep fried."],
+                  ['snacks', "Corn Chaat", 120, 100, "1 cup", "Boiled corn with lemon and masala."],
+                  ['snacks', "Masala Peanuts", 520, 30, "1 handful", "Peanuts coated in spiced gram flour."],
+                  ['snacks', "Roasted Chana", 360, 30, "1 handful", "Dry roasted chickpeas. Good protein snack."],
+                  ['snacks', "Makhana (roasted)", 360, 25, "1 cup", "Roasted fox nuts. Light and crunchy."],
+                  ['snacks', "Khakhra", 420, 25, "1 piece", "Thin roasted Gujarati cracker."],
+                  ['snacks', "Thattai", 500, 30, "2 pieces", "Crisp rice-flour disc from Tamil Nadu."],
+                  ['snacks', "Ribbon Pakoda", 520, 30, "1 handful", "Fried ribbon-shaped gram flour snack."],
+                  ['snacks', "Kara Sev", 520, 30, "1 handful", "Spicy fried gram flour strands."],
+                  ['snacks', "Mysore Bonda", 260, 50, "1 bonda", "Fluffy deep-fried maida-curd bonda."],
+                  ['snacks', "Tomato Soup", 40, 250, "1 bowl", "Plain tomato soup."],
+                  ['snacks', "Chicken Nuggets", 290, 80, "4 pieces", "Breaded fried chicken pieces."],
+                  ['snacks', "Chicken Lollipop", 250, 100, "2 pieces", "Fried chicken wing lollipops."],
+                  ['snacks', "Grilled Sandwich", 270, 120, "1 sandwich", "Vegetable and cheese grilled sandwich."],
+                  ['snacks', "Garlic Bread", 350, 50, "2 slices", "Bread with garlic butter."],
+                  ['snacks', "Pasta (white sauce)", 170, 200, "1 plate", "Creamy white sauce pasta."],
+                  ['snacks', "Pasta (red sauce)", 140, 200, "1 plate", "Tomato sauce pasta."],
+                  ['snacks', "Veg Spring Roll", 250, 60, "1 roll", "Fried roll filled with vegetables."],
+                  ['snacks', "Digestive Biscuit", 480, 15, "1 biscuit", "Whole-wheat style biscuit."],
+                  ['snacks', "Glucose Biscuit (Parle-G type)", 450, 20, "4 biscuits", "Plain sweet biscuit."],
+                  ['snacks', "Rusk", 410, 10, "1 piece", "Twice-baked dry toast."],
+                  ['snacks', "Corn Flakes (dry)", 375, 30, "1 bowl (dry)", "Breakfast cereal without milk."],
+                  ['snacks', "Oats (cooked with water)", 70, 200, "1 bowl", "Plain cooked oats porridge."],
+                  ['sweets', "Soan Papdi", 480, 30, "1 piece", "Flaky gram flour and sugar sweet."],
+                  ['sweets', "Peda", 350, 25, "1 piece", "Milk-based sweet."],
+                  ['sweets', "Kalakand", 330, 40, "1 piece", "Soft milk cake sweet."],
+                  ['sweets', "Sandesh", 280, 30, "1 piece", "Bengali sweet made from fresh paneer."],
+                  ['sweets', "Cham Cham", 310, 40, "1 piece", "Bengali milk sweet."],
+                  ['sweets', "Balushahi", 420, 50, "1 piece", "Fried flaky sugar-coated sweet."],
+                  ['sweets', "Imarti", 400, 40, "1 piece", "Urad dal jalebi-like sweet."],
+                  ['sweets', "Malpua", 330, 60, "1 piece", "Sweet pancake soaked in syrup."],
+                  ['sweets', "Boondi Laddu", 400, 35, "1 laddu", "Fried gram flour pearls in sugar syrup."],
+                  ['sweets', "Rava Laddu", 420, 35, "1 laddu", "Semolina and coconut laddu."],
+                  ['sweets', "Coconut Laddu", 420, 30, "1 laddu", "Coconut and condensed milk laddu."],
+                  ['sweets', "Til (Sesame) Laddu", 480, 30, "1 laddu", "Sesame and jaggery laddu."],
+                  ['sweets', "Dry Fruit Laddu", 450, 35, "1 laddu", "Dates, nuts and seeds laddu."],
+                  ['sweets', "Kulfi", 190, 70, "1 stick", "Traditional Indian frozen milk dessert."],
+                  ['sweets', "Falooda", 140, 250, "1 glass", "Rose milk, vermicelli, basil seeds and ice cream."],
+                  ['sweets', "Shrikhand", 190, 80, "1 small bowl", "Sweetened strained curd."],
+                  ['sweets', "Basundi", 170, 100, "1 small bowl", "Thickened sweetened milk."],
+                  ['sweets', "Rabri", 250, 80, "1 small bowl", "Thick reduced sweetened milk."],
+                  ['sweets', "Moong Dal Halwa", 400, 60, "1 small bowl", "Rich halwa made with ghee and sugar."],
+                  ['sweets', "Badam Halwa", 430, 50, "1 small bowl", "Almond halwa with ghee."],
+                  ['sweets', "Coconut Barfi", 400, 30, "1 piece", "Coconut and sugar fudge."],
+                  ['sweets', "Palkova", 360, 30, "1 piece", "Reduced milk and sugar sweet."],
+                  ['sweets', "Tirunelveli Halwa", 380, 60, "1 piece", "Wheat halwa with ghee."],
+                  ['sweets', "Neyyappam", 350, 40, "1 piece", "Kerala sweet fritter with jaggery."],
+                  ['sweets', "Unniyappam", 340, 30, "2 pieces", "Small fried banana-rice sweet balls."],
+                  ['sweets', "Semiya Payasam", 150, 100, "1 small bowl", "Vermicelli milk pudding."],
+                  ['sweets', "Ada Pradhaman", 150, 100, "1 small bowl", "Kerala rice-flake jaggery payasam."],
+                  ['sweets', "Sesame Chikki", 480, 25, "1 piece", "Sesame and jaggery brittle."],
+                  ['sweets', "Dark Chocolate", 540, 20, "2 squares", "70% cocoa dark chocolate."],
+                  ['sweets', "Cupcake", 390, 50, "1 cupcake", "Frosted small cake."],
+                  ['sweets', "Pastry (cream)", 360, 80, "1 pastry", "Bakery cream pastry."],
+                  ['sweets', "Butter Cookies", 480, 15, "2 cookies", "Crisp butter biscuits."],
+                  ['sweets', "Choco Chip Cookie", 490, 25, "1 cookie", "Cookie with chocolate chips."],
+                  ['sweets', "Waffle (with syrup)", 290, 75, "1 waffle", "Waffle with sweet syrup."],
+                  ['sweets', "Pancake (with honey)", 230, 80, "1 pancake", "Fluffy pancake with honey."],
+                  ['sweets', "Custard", 120, 120, "1 small bowl", "Milk custard dessert."],
+                  ['sweets', "Ghevar", 480, 50, "1 piece", "Rajasthani disc-shaped syrup soaked sweet."],
+                  ['sweets', "Honey", 304, 21, "1 tablespoon", "Natural honey."],
+                  ['sweets', "Jaggery Tea Sweet (Karupatti)", 380, 10, "1 small piece", "Palm jaggery, a less refined sweetener."],
+                  ['fruits', "Pear", 57, 180, "1 medium", "Juicy fibre-rich fruit."],
+                  ['fruits', "Peach", 39, 150, "1 medium", "Soft sweet stone fruit."],
+                  ['fruits', "Plum", 46, 65, "1 plum", "Tangy-sweet stone fruit."],
+                  ['fruits', "Cherries", 63, 80, "1 handful", "Sweet red cherries."],
+                  ['fruits', "Strawberry", 32, 100, "6 medium", "Low-calorie berry."],
+                  ['fruits', "Blueberries", 57, 75, "1/2 cup", "Antioxidant-rich berries."],
+                  ['fruits', "Kiwi", 61, 70, "1 kiwi", "Vitamin C rich fruit."],
+                  ['fruits', "Litchi (Lychee)", 66, 100, "8-10 pieces", "Sweet juicy summer fruit."],
+                  ['fruits', "Fig (fresh)", 74, 50, "1 fig", "Soft sweet fig."],
+                  ['fruits', "Dried Fig (Anjeer)", 249, 20, "2 figs", "Concentrated dried figs."],
+                  ['fruits', "Custard Apple (Seetaphal)", 94, 150, "1 fruit", "Creamy sweet fruit."],
+                  ['fruits', "Jamun (Java Plum)", 62, 100, "1 small bowl", "Purple tangy-sweet fruit."],
+                  ['fruits', "Ber (Indian Jujube)", 79, 50, "5 pieces", "Small sweet-sour fruit."],
+                  ['fruits', "Amla (Indian Gooseberry)", 44, 50, "2 pieces", "Very high in vitamin C."],
+                  ['fruits', "Dragon Fruit", 60, 200, "1/2 fruit", "Mild sweet fruit with seeds."],
+                  ['fruits', "Avocado", 160, 100, "1/2 fruit", "Healthy fats, calorie-dense."],
+                  ['fruits', "Passion Fruit", 97, 20, "1 fruit pulp", "Tangy aromatic pulp."],
+                  ['fruits', "Star Fruit", 31, 100, "1 fruit", "Crunchy low-calorie fruit."],
+                  ['fruits', "Nungu (Ice Apple)", 25, 100, "3 pieces", "Cooling palm fruit."],
+                  ['fruits', "Red Banana", 90, 100, "1 small", "Sweeter, slightly creamy banana."],
+                  ['fruits', "Ripe Plantain (Nendran)", 122, 150, "1 plantain", "Cooked or steamed ripe plantain."],
+                  ['fruits', "Mulberry", 43, 100, "1 small bowl", "Sweet-tart berries."],
+                  ['fruits', "Raw Peanuts", 567, 30, "1 handful", "Raw groundnuts."],
+                  ['fruits', "Pumpkin Seeds", 559, 20, "2 tablespoons", "Protein and zinc rich seeds."],
+                  ['fruits', "Sunflower Seeds", 584, 20, "2 tablespoons", "Vitamin E rich seeds."],
+                  ['fruits', "Flax Seeds", 534, 10, "1 tablespoon", "Omega-3 rich seeds."],
+                  ['fruits', "Chia Seeds", 486, 12, "1 tablespoon", "Fibre-rich seeds."],
+                  ['fruits', "Hazelnuts", 628, 20, "1 handful", "Rich buttery nuts."],
+                  ['fruits', "Pecans", 691, 20, "1 handful", "High-fat sweet nuts."],
+                  ['fruits', "Dried Apricot", 241, 30, "4 pieces", "Sweet dried fruit."],
+                  ['fruits', "Prunes (Dried Plum)", 240, 30, "3-4 pieces", "Fibre-rich dried plums."],
+                  ['fruits', "Dried Cranberries", 308, 20, "2 tablespoons", "Sweetened dried berries."],
+                  ['fruits', "Dry Coconut (Copra)", 660, 20, "1 small piece", "Dried coconut, calorie-dense."],
+                  ['fruits', "Beetroot", 43, 100, "1 medium", "Boiled or raw beetroot."],
+                  ['fruits', "Radish", 16, 50, "1 small", "Very low-calorie root."],
+                  ['fruits', "Capsicum", 20, 100, "1 medium", "Green or red bell pepper."],
+                  ['fruits', "Boiled Sweet Potato", 86, 130, "1 medium", "Fibre-rich boiled sweet potato."],
+                  ['fruits', "Boiled Potato", 87, 100, "1 medium", "Plain boiled potato."],
+                  ['fruits', "Spinach (raw)", 23, 50, "1 cup", "Leafy green, very low calorie."],
+                  ['fruits', "Broccoli", 34, 100, "1 cup", "Fibre and vitamin rich vegetable."],
+                  ['fruits', "Cabbage", 25, 100, "1 cup", "Raw shredded cabbage."],
+                  ['drinks', "Green Tea (no sugar)", 1, 200, "1 cup", "Plain green tea."],
+                  ['drinks', "Masala Chai", 55, 150, "1 cup", "Spiced milk tea with sugar."],
+                  ['drinks', "Lemon Tea (with sugar)", 25, 200, "1 cup", "Black tea with lemon and sugar."],
+                  ['drinks', "Iced Tea (bottled)", 30, 250, "1 glass", "Sweetened bottled iced tea."],
+                  ['drinks', "Cappuccino", 45, 200, "1 cup", "Espresso with steamed milk foam."],
+                  ['drinks', "Cafe Latte", 55, 250, "1 cup", "Espresso with lots of steamed milk."],
+                  ['drinks', "Cold Coffee", 75, 250, "1 glass", "Sweetened milk coffee, served cold."],
+                  ['drinks', "Espresso", 2, 30, "1 shot", "Strong black coffee shot."],
+                  ['drinks', "Instant Coffee (milk + sugar)", 55, 150, "1 cup", "Instant coffee with milk and sugar."],
+                  ['drinks', "Hot Chocolate", 85, 200, "1 cup", "Cocoa with milk and sugar."],
+                  ['drinks', "Turmeric Milk (Golden Milk)", 70, 200, "1 glass", "Warm milk with turmeric."],
+                  ['drinks', "Ragi Malt", 60, 200, "1 glass", "Finger millet malt drink."],
+                  ['drinks', "Nannari Sarbath", 60, 250, "1 glass", "Cooling sarsaparilla syrup drink."],
+                  ['drinks', "Rose Milk", 85, 200, "1 glass", "Milk flavoured with rose syrup."],
+                  ['drinks', "Jigarthanda", 110, 250, "1 glass", "Madurai cold milk-ice cream drink."],
+                  ['drinks', "Mango Lassi", 90, 250, "1 glass", "Curd blended with mango and sugar."],
+                  ['drinks', "Salted Lassi", 50, 250, "1 glass", "Plain curd drink with salt."],
+                  ['drinks', "Jaljeera", 25, 200, "1 glass", "Spicy tangy cumin drink."],
+                  ['drinks', "Aam Panna", 60, 200, "1 glass", "Raw mango summer cooler."],
+                  ['drinks', "Thandai", 120, 200, "1 glass", "Milk with nuts, seeds and sugar."],
+                  ['drinks', "Kokum Sherbet", 50, 200, "1 glass", "Sweet-sour kokum cooler."],
+                  ['drinks', "Panakam", 50, 150, "1 glass", "Jaggery-ginger-cardamom drink."],
+                  ['drinks', "Apple Juice", 46, 200, "1 glass", "Packaged or fresh apple juice."],
+                  ['drinks', "Mango Juice", 60, 200, "1 glass", "Sweet mango juice."],
+                  ['drinks', "Pineapple Juice", 50, 200, "1 glass", "Pineapple juice."],
+                  ['drinks', "Grape Juice", 60, 200, "1 glass", "Sweet grape juice."],
+                  ['drinks', "Pomegranate Juice", 54, 200, "1 glass", "Pomegranate juice."],
+                  ['drinks', "Mosambi Juice", 43, 200, "1 glass", "Sweet lime juice."],
+                  ['drinks', "Watermelon Juice", 30, 250, "1 glass", "Fresh watermelon juice."],
+                  ['drinks', "Carrot Juice", 40, 200, "1 glass", "Fresh carrot juice."],
+                  ['drinks', "Tomato Juice", 17, 200, "1 glass", "Plain tomato juice."],
+                  ['drinks', "Beetroot Juice", 43, 200, "1 glass", "Fresh beetroot juice."],
+                  ['drinks', "Lemon Water (no sugar)", 3, 250, "1 glass", "Water with lemon juice only."],
+                  ['drinks', "Soda Water", 0, 300, "1 bottle", "Plain fizzy water."],
+                  ['drinks', "Sprite / 7Up", 40, 300, "1 bottle (300 ml)", "Lemon-lime soft drink."],
+                  ['drinks', "Orange Soft Drink (Fanta)", 45, 300, "1 bottle (300 ml)", "Orange-flavoured fizzy drink."],
+                  ['drinks', "Energy Drink", 45, 250, "1 can", "Caffeinated sweetened drink."],
+                  ['drinks', "Packaged Fruit Drink (Frooti type)", 55, 200, "1 small pack", "Sweetened packaged mango drink."],
+                  ['drinks', "Soy Milk", 33, 200, "1 glass", "Plant milk from soy."],
+                  ['drinks', "Almond Milk (unsweetened)", 15, 200, "1 glass", "Light plant milk."],
+                  ['drinks', "Oat Milk", 45, 200, "1 glass", "Plant milk from oats."],
+                  ['drinks', "Coconut Milk", 190, 50, "1/4 cup", "Thick cooking coconut milk."],
+                  ['drinks', "Chocolate Milk", 83, 200, "1 glass", "Flavoured milk with chocolate."],
+                  ['drinks', "Banana Shake", 90, 250, "1 glass", "Banana blended with milk and sugar."],
+                  ['drinks', "Mango Milkshake", 110, 250, "1 glass", "Mango blended with milk and sugar."],
+                  ['drinks', "Protein Shake", 80, 300, "1 shaker", "Whey protein with milk or water."],
+                  ['drinks', "Beer", 43, 330, "1 bottle (330 ml)", "Regular beer."],
+                  ['drinks', "Red Wine", 85, 150, "1 glass (150 ml)", "Dry red wine."],
+                  ['drinks', "Whisky / Rum / Vodka", 250, 30, "1 peg (30 ml)", "Spirits without any mixer."]
                 ];
 
+                // ---------- exercises: [category, name, MET value] ----------
+                // calories burned = MET x body weight (kg) x hours
+                const CAL_EX_CATS = [["walk", "🚶 Walking & Running"], ["cycle", "🚴 Cycling"], ["gym", "🏋️ Gym & Home workout"], ["yoga", "🧘 Yoga & Stretching"], ["sports", "🏸 Sports & Swimming"], ["dance", "💃 Dance & Aerobics"], ["daily", "🏠 Daily activities"], ["custom", "✍️ Other (enter calories)"]];
+                const CAL_EX = [
+                  ["walk", "Slow walking (3 km/h)", 2.3],
+                  ["walk", "Walking (4 km/h)", 3.0],
+                  ["walk", "Brisk walking (5 km/h)", 3.8],
+                  ["walk", "Fast walking (6 km/h)", 5.0],
+                  ["walk", "Walking uphill / slope", 6.0],
+                  ["walk", "Treadmill walking", 3.5],
+                  ["walk", "Walking the dog", 3.0],
+                  ["walk", "Strolling with family", 2.5],
+                  ["walk", "Hiking / Trekking", 6.0],
+                  ["walk", "Jogging (slow)", 7.0],
+                  ["walk", "Running (8 km/h)", 8.3],
+                  ["walk", "Running (10 km/h)", 9.8],
+                  ["walk", "Running (12 km/h)", 11.8],
+                  ["walk", "Running (14 km/h)", 13.5],
+                  ["walk", "Stair climbing (fast)", 8.8],
+                  ["walk", "Walking up stairs (slow)", 4.0],
+                  ["cycle", "Cycling leisure (under 16 km/h)", 4.0],
+                  ["cycle", "Cycling (16-19 km/h)", 6.0],
+                  ["cycle", "Cycling (19-22 km/h)", 8.0],
+                  ["cycle", "Cycling fast (above 22 km/h)", 10.0],
+                  ["cycle", "Cycling to work / errands", 6.8],
+                  ["cycle", "Stationary bike (light)", 5.5],
+                  ["cycle", "Stationary bike (moderate)", 7.0],
+                  ["cycle", "Stationary bike (vigorous)", 10.5],
+                  ["cycle", "Mountain biking", 8.5],
+                  ["gym", "Weight lifting (light)", 3.5],
+                  ["gym", "Weight lifting (vigorous)", 6.0],
+                  ["gym", "Push-ups", 3.8],
+                  ["gym", "Sit-ups / Crunches", 3.8],
+                  ["gym", "Squats (bodyweight)", 5.0],
+                  ["gym", "Lunges", 4.0],
+                  ["gym", "Plank", 3.0],
+                  ["gym", "Pull-ups / Light calisthenics", 3.8],
+                  ["gym", "Burpees", 8.0],
+                  ["gym", "Jumping jacks", 8.0],
+                  ["gym", "Jump rope (skipping)", 11.8],
+                  ["gym", "Circuit training", 8.0],
+                  ["gym", "HIIT workout", 8.5],
+                  ["gym", "Elliptical trainer", 5.0],
+                  ["gym", "Rowing machine (moderate)", 7.0],
+                  ["gym", "Kettlebell training", 9.8],
+                  ["gym", "Stair machine", 9.0],
+                  ["gym", "CrossFit / Functional training", 8.0],
+                  ["yoga", "Hatha yoga", 2.5],
+                  ["yoga", "Power / Vinyasa yoga", 4.0],
+                  ["yoga", "Surya Namaskar (Sun Salutation)", 3.3],
+                  ["yoga", "Pilates", 3.0],
+                  ["yoga", "Stretching", 2.3],
+                  ["yoga", "Tai chi", 3.0],
+                  ["yoga", "Pranayama / Breathing exercise", 1.3],
+                  ["yoga", "Warm-up / Cool-down", 2.5],
+                  ["sports", "Badminton (recreational)", 4.5],
+                  ["sports", "Badminton (competitive)", 7.0],
+                  ["sports", "Cricket (batting / bowling)", 4.8],
+                  ["sports", "Football / Soccer (casual)", 7.0],
+                  ["sports", "Football / Soccer (match)", 10.0],
+                  ["sports", "Basketball (casual)", 6.0],
+                  ["sports", "Basketball (game)", 8.0],
+                  ["sports", "Volleyball (casual)", 3.0],
+                  ["sports", "Tennis (doubles)", 6.0],
+                  ["sports", "Tennis (singles)", 8.0],
+                  ["sports", "Table tennis", 4.0],
+                  ["sports", "Kabaddi", 7.0],
+                  ["sports", "Kho-kho", 6.0],
+                  ["sports", "Hockey", 7.8],
+                  ["sports", "Squash", 7.3],
+                  ["sports", "Golf (walking)", 4.8],
+                  ["sports", "Swimming (leisure)", 6.0],
+                  ["sports", "Swimming laps (moderate)", 8.3],
+                  ["sports", "Swimming (fast)", 9.8],
+                  ["sports", "Water aerobics", 5.5],
+                  ["sports", "Roller skating", 7.0],
+                  ["sports", "Boxing (punching bag)", 5.5],
+                  ["sports", "Boxing (sparring)", 7.8],
+                  ["sports", "Karate / Martial arts", 10.3],
+                  ["sports", "Rock climbing", 8.0],
+                  ["sports", "Bowling", 3.0],
+                  ["dance", "Zumba", 6.5],
+                  ["dance", "Aerobics (general)", 7.3],
+                  ["dance", "Dance (general / party)", 5.0],
+                  ["dance", "Bharatanatyam / Classical dance", 4.5],
+                  ["dance", "Folk dance / Garba", 5.5],
+                  ["dance", "Hip-hop dance", 6.0],
+                  ["dance", "Ballroom dance (slow)", 3.0],
+                  ["daily", "Cooking", 1.8],
+                  ["daily", "Washing dishes", 1.8],
+                  ["daily", "Sweeping / Mopping", 3.5],
+                  ["daily", "Cleaning house", 3.3],
+                  ["daily", "Washing clothes by hand", 3.0],
+                  ["daily", "Ironing clothes", 1.8],
+                  ["daily", "Gardening", 3.8],
+                  ["daily", "Carrying heavy loads", 7.5],
+                  ["daily", "Shopping (walking)", 2.3],
+                  ["daily", "Playing with children", 3.5],
+                  ["daily", "Farm / Manual labour (moderate)", 4.5],
+                  ["daily", "Construction work", 5.5],
+                  ["daily", "Standing (light work)", 1.8],
+                  ["daily", "Sitting / Desk work", 1.3],
+                  ["daily", "Driving a car", 1.3],
+                  ["daily", "Sleeping", 0.95]
+                ];
+                const CAL_LIFE = {
+                  sed:   ['Mostly sitting (desk work / home)', 1.2],
+                  light: ['Light movement (on your feet some of the day)', 1.375],
+                  mod:   ['Active (standing / walking most of the day)', 1.55]
+                };
+
                 let editingCalId = null;
+                let editingBurnId = null;
                 let calViewDate = calKey(new Date());
 
                 function calEsc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
@@ -6665,6 +7063,9 @@ render();
                   return '';
                 }
                 function calFmt(n) { return Math.round(Number(n) || 0).toLocaleString('en-IN'); }
+                function calQty(n) { return String(Math.round((Number(n) || 0) * 100) / 100); }
+                function calSigned(n) { const r = Math.round(n); return (r > 0 ? '+' : r < 0 ? '−' : '') + Math.abs(r).toLocaleString('en-IN'); }
+                function calKg(n) { return (Math.round(n * 100) / 100).toFixed(2); }
                 function calGoal() { const g = Number(appData.calorieGoal); return g > 0 ? g : 2000; }
                 function calNewId() { return 'cl' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
                 function calEnsure() {
@@ -6672,23 +7073,171 @@ render();
                   appData.calories.forEach(e => { if (!e.id) e.id = calNewId(); });
                   return appData.calories;
                 }
+                function calBurnEnsure() {
+                  if (!Array.isArray(appData.calBurn)) appData.calBurn = [];
+                  appData.calBurn.forEach(e => { if (!e.id) e.id = calNewId(); });
+                  return appData.calBurn;
+                }
                 function calTotal(k) { return calEnsure().filter(e => e.date === k).reduce((s, e) => s + (Number(e.kcal) || 0), 0); }
+                function calBurnTotal(k) { return calBurnEnsure().filter(e => e.date === k).reduce((s, e) => s + (Number(e.kcal) || 0), 0); }
                 function calMk(tag, cls, text) {
                   const el = document.createElement(tag);
                   if (cls) el.className = cls;
                   if (text != null) el.textContent = text;
                   return el;
                 }
+                function calCatName(list, key) { const c = list.find(x => x[0] === key); return c ? c[1].replace(/^\S+\s/, '') : ''; }
+                function calSetSize(sel, n) { if (n > 1) sel.size = Math.min(6, n); else sel.removeAttribute('size'); }
+                function calMatch(list, q, nameIdx) {
+                  q = String(q || '').trim().toLowerCase();
+                  if (!q) return null;
+                  const words = q.split(/\s+/);
+                  const out = [];
+                  list.forEach((f, i) => {
+                    const n = f[nameIdx].toLowerCase();
+                    if (!words.every(w => n.indexOf(w) > -1)) return;
+                    const rank = n.startsWith(q) ? 0 : n.split(/[\s(\/-]+/).some(w => w.startsWith(q)) ? 1 : 2;
+                    out.push({ f, i, rank });
+                  });
+                  out.sort((a, b) => a.rank - b.rank || a.f[nameIdx].localeCompare(b.f[nameIdx]));
+                  return out;
+                }
 
-                // ----- the add / edit form -----
+                // ----- profile: weight, BMR, maintenance, weight estimate -----
+                function calProf() { const p = appData.calProfile; return (p && Number(p.weight) > 0) ? p : null; }
+                function calProfFull() {
+                  const p = calProf();
+                  return (p && Number(p.height) > 0 && Number(p.age) > 0 && p.gender) ? p : null;
+                }
+                function calBMR(p) {
+                  const base = 10 * p.weight + 6.25 * p.height - 5 * p.age;
+                  return Math.round(base + (p.gender === 'male' ? 5 : p.gender === 'female' ? -161 : -78));
+                }
+                function calMaint(p) { return Math.round(calBMR(p) * (CAL_LIFE[p.life] || CAL_LIFE.sed)[1]); }
+                // 7700 kcal ≈ 1 kg of body weight. Only completed days (before today) with food added are counted.
+                function calEstimate() {
+                  const p = calProfFull();
+                  if (!p) return null;
+                  const today = calKey(new Date());
+                  const from = p.weightDate || today;
+                  const m = calMaint(p);
+                  const days = [...new Set(calEnsure().filter(e => e.date >= from && e.date < today).map(e => e.date))].sort();
+                  let total = 0;
+                  days.forEach(k => { total += calTotal(k) - m - calBurnTotal(k); });
+                  const last7 = days.slice(-7);
+                  const avg7 = last7.length ? last7.reduce((s, k) => s + (calTotal(k) - m - calBurnTotal(k)), 0) / last7.length : 0;
+                  return { p, m, days: days.length, total, kg: total / 7700, est: p.weight + total / 7700, from, avg7 };
+                }
+
+                function calLoadProfileForm() {
+                  const p = appData.calProfile || {};
+                  byId('calPWeight').value = p.weight || '';
+                  byId('calPDate').value = p.weightDate || calKey(new Date());
+                  byId('calPHeight').value = p.height || '';
+                  byId('calPAge').value = p.age || '';
+                  byId('calPGender').value = p.gender || '';
+                  byId('calPLife').value = p.life || 'sed';
+                }
+
+                function saveCalProfile() {
+                  const w = parseFloat(byId('calPWeight').value);
+                  const h = parseFloat(byId('calPHeight').value);
+                  const a = parseFloat(byId('calPAge').value);
+                  const g = byId('calPGender').value;
+                  const life = byId('calPLife').value || 'sed';
+                  const d = byId('calPDate').value || calKey(new Date());
+                  if (!(w >= 20 && w <= 300)) { alert('Enter your weight in kg (20 to 300).'); return; }
+                  if (byId('calPHeight').value && !(h >= 100 && h <= 250)) { alert('Height must be between 100 and 250 cm.'); return; }
+                  if (byId('calPAge').value && !(a >= 10 && a <= 100)) { alert('Age must be between 10 and 100 years.'); return; }
+                  const old = appData.calProfile || {};
+                  const p = {
+                    weight: Math.round(w * 10) / 10,
+                    weightDate: d,
+                    height: h > 0 ? h : 0,
+                    age: a > 0 ? Math.round(a) : 0,
+                    gender: g,
+                    life,
+                    log: Array.isArray(old.log) ? old.log.slice() : []
+                  };
+                  if (old.weight !== p.weight || old.weightDate !== p.weightDate) {
+                    p.log = p.log.filter(x => x.date !== d);
+                    p.log.push({ date: d, kg: p.weight });
+                    p.log.sort((x, y) => x.date < y.date ? -1 : 1);
+                    p.log = p.log.slice(-60);
+                  } else {
+                    p.weightDate = old.weightDate;
+                  }
+                  appData.calProfile = p;
+                  saveAll();
+                  renderCalories();
+                }
+
+                function renderCalProfile() {
+                  const out = byId('calProfileOut');
+                  if (!out) return;
+                  out.innerHTML = '';
+                  const p = calProf();
+                  byId('calProfileToggle').innerHTML = (p ? '⚖️ MY WEIGHT &amp; PROFILE' : '⚠️ ENTER YOUR WEIGHT') + ' <span class="arrow">▼</span>';
+                  if (!p) {
+                    const i = calMk('div', 'cal-info');
+                    i.innerHTML = '👋 <b>Enter your weight below.</b> It is used to calculate the calories you burn, and (with your height, age and gender) to estimate how your weight changes from the food and exercise you add.';
+                    out.appendChild(i);
+                    return;
+                  }
+                  const full = calProfFull();
+                  const stats = calMk('div', 'cal-stats');
+                  const cell = (v, l) => { const c = calMk('div', 'cal-stat'); c.appendChild(calMk('b', null, v)); c.appendChild(calMk('small', null, l)); return c; };
+                  stats.appendChild(cell(p.weight + ' kg', 'Last weigh-in'));
+                  if (full) {
+                    stats.appendChild(cell(calFmt(calBMR(p)), 'BMR kcal/day'));
+                    stats.appendChild(cell(calFmt(calMaint(p)), 'Maintenance kcal/day'));
+                  }
+                  out.appendChild(stats);
+                  const when = calMk('small', 'cal-note', 'Weighed on ' + calLabel(p.weightDate || calKey(new Date())) + '.');
+                  out.appendChild(when);
+                  if (!full) {
+                    const i = calMk('div', 'cal-info', 'Add your height, age and gender to see your daily calorie need and the weight estimate.');
+                    i.style.margin = '8px 0';
+                    out.appendChild(i);
+                    return;
+                  }
+                  const est = calEstimate();
+                  const box = calMk('div', 'cal-info');
+                  box.style.margin = '8px 0';
+                  if (!est.days) {
+                    box.innerHTML = '⚖️ <b>Estimated weight: ' + p.weight + ' kg</b><br>Add your food for at least one full day. Your estimate appears once that day is over (today is counted from tomorrow).';
+                  } else {
+                    const cls = est.kg > 0.004 ? 'cal-pos' : est.kg < -0.004 ? 'cal-neg' : '';
+                    box.innerHTML = '⚖️ <b>Estimated weight now: ' + (Math.round(est.est * 10) / 10) + ' kg</b><br>' +
+                      'Since your weigh-in: <b class="' + cls + '">' + (est.kg >= 0 ? '+' : '−') + calKg(Math.abs(est.kg)) + ' kg</b> ' +
+                      '(' + calSigned(est.total) + ' kcal over ' + est.days + ' tracked day' + (est.days > 1 ? 's' : '') + ')<br>' +
+                      '<small>Recent daily balance: ' + calSigned(est.avg7) + ' kcal/day. Calories eaten − maintenance − exercise. About 7,700 kcal = 1 kg.</small>';
+                  }
+                  out.appendChild(box);
+                  const gb = calMk('button', 'secondary', 'Use maintenance (' + calFmt(calMaint(p)) + ' kcal) as daily goal');
+                  gb.addEventListener('click', () => { appData.calorieGoal = calMaint(p); saveAll(); renderCalories(); });
+                  out.appendChild(gb);
+                  const log = (p.log || []).slice(-5).reverse();
+                  if (log.length > 1) {
+                    const h = calMk('div', null, 'Recent weigh-ins');
+                    h.style.cssText = 'font-size:13px;font-weight:600;margin:10px 0 4px;';
+                    out.appendChild(h);
+                    const t = calMk('small', 'cal-note', log.map(x => calLabel(x.date).split(' · ')[0] + ': ' + x.kg + ' kg').join('  |  '));
+                    out.appendChild(t);
+                  }
+                }
+
+                // ----- food form -----
                 function calCurFood() {
                   const cat = byId('calCat').value;
                   if (cat === 'custom') {
-                    return { cat, name: byId('calCustomName').value.trim(), per100: parseFloat(byId('calCustomKcal').value), serveG: 0, serveLbl: '', desc: '' };
+                    return { cat, name: byId('calCustomName').value.trim(), perServ: parseFloat(byId('calCustomKcal').value), per100: 0, serveG: 0, serveLbl: 'serving', desc: '' };
                   }
-                  const f = CAL_FOODS[Number(byId('calFood').value)];
+                  const v = byId('calFood').value;
+                  if (v === '') return null;
+                  const f = CAL_FOODS[Number(v)];
                   if (!f) return null;
-                  return { cat, name: f[1], per100: f[2], serveG: f[3], serveLbl: f[4], desc: f[5] };
+                  return { cat: f[0], name: f[1], per100: f[2], serveG: f[3], serveLbl: f[4], desc: f[5], perServ: f[2] * f[3] / 100 };
                 }
 
                 function calInfo() {
@@ -6696,37 +7245,29 @@ render();
                   const box = byId('calInfo');
                   if (!f) { box.textContent = ''; return; }
                   if (f.cat === 'custom') {
-                    box.textContent = 'Type the food name and its calories per 100 g (the packet label shows this). Then enter the weight you ate.';
+                    box.textContent = 'Type the food name and the calories in ONE serving or piece (the packet label shows this). Then enter how many you ate.';
                     return;
                   }
                   const u = f.cat === 'drinks' ? 'ml' : 'g';
-                  box.innerHTML = '<b>' + calEsc(f.name) + '</b><br>' + calEsc(f.desc) +
-                    '<br><small>Per 100 ' + u + ': <b>' + f.per100 + ' kcal</b> · ' + calEsc(f.serveLbl) + ' ≈ ' + f.serveG + ' ' + u +
-                    ' ≈ <b>' + Math.round(f.serveG * f.per100 / 100) + ' kcal</b></small>';
+                  box.innerHTML = '<b>' + calEsc(f.name) + '</b> · ' + calEsc(calCatName(CAL_CATS, f.cat)) + '<br>' + calEsc(f.desc) +
+                    '<br><small>1 serving = ' + calEsc(f.serveLbl) + ' ≈ ' + f.serveG + ' ' + u + ' ≈ <b>' + Math.round(f.perServ) + ' kcal</b> · ' + f.per100 + ' kcal per 100 ' + u + '</small>';
                 }
 
                 function calCalc() {
                   const f = calCurFood();
-                  const g = parseFloat(byId('calWeight').value);
+                  const q = parseFloat(byId('calServ').value);
                   const out = byId('calResult');
-                  if (!f || !(f.per100 >= 0) || !(g > 0)) { out.textContent = '🔥 Enter the weight to see the calories'; return 0; }
-                  const k = Math.round(g * f.per100 / 100);
+                  if (!f || !(f.perServ >= 0) || !(q > 0)) { out.textContent = '🔥 Enter how many to see the calories'; return 0; }
+                  const k = Math.round(q * f.perServ);
                   out.textContent = '🔥 ≈ ' + calFmt(k) + ' kcal';
                   return k;
                 }
 
                 function calFoodChanged(keep) {
                   const f = calCurFood();
-                  const hasServ = !!(f && f.serveG);
-                  byId('calServWrap').hidden = !hasServ;
-                  if (hasServ) {
-                    const u = f.cat === 'drinks' ? 'ml' : 'g';
-                    byId('calServLbl').textContent = 'How many? (' + f.serveLbl + ' ≈ ' + f.serveG + ' ' + u + ')';
-                  }
-                  if (!keep) {
-                    byId('calServ').value = hasServ ? 1 : '';
-                    byId('calWeight').value = hasServ ? f.serveG : '';
-                  }
+                  if (f && f.cat !== 'custom') byId('calServLbl').textContent = 'How many? (1 = ' + f.serveLbl + ')';
+                  else byId('calServLbl').textContent = 'How many servings / pieces?';
+                  if (!keep) byId('calServ').value = f ? 1 : '';
                   calInfo();
                   calCalc();
                 }
@@ -6737,17 +7278,23 @@ render();
                   byId('calFoodWrap').hidden = isC;
                   byId('calCustomWrap').hidden = !isC;
                   const sel = byId('calFood');
+                  const note = byId('calSearchNote');
                   sel.innerHTML = '';
+                  let rows = [];
                   if (!isC) {
-                    CAL_FOODS.map((f, i) => ({ f, i })).filter(x => x.f[0] === cat)
-                      .sort((a, b) => a.f[1].localeCompare(b.f[1]))
-                      .forEach(x => {
-                        const o = document.createElement('option');
-                        o.value = x.i; o.textContent = x.f[1];
-                        sel.appendChild(o);
-                      });
+                    const m = calMatch(CAL_FOODS, byId('calSearch').value, 1);
+                    if (m) {
+                      rows = m.map(x => ({ f: x.f, i: x.i, label: x.f[1] + '  ·  ' + calCatName(CAL_CATS, x.f[0]) }));
+                      note.textContent = rows.length ? rows.length + ' result' + (rows.length > 1 ? 's' : '') + ' from all food types.' : 'No food found. Clear the search or use ✍️ Other to add your own.';
+                    } else {
+                      rows = CAL_FOODS.map((f, i) => ({ f, i, label: f[1] })).filter(x => x.f[0] === cat)
+                        .sort((a, b) => a.f[1].localeCompare(b.f[1]));
+                      note.textContent = rows.length + ' foods in this type. Use search to look in all types.';
+                    }
+                    rows.forEach(x => { const o = document.createElement('option'); o.value = x.i; o.textContent = x.label; sel.appendChild(o); });
+                    calSetSize(sel, rows.length);
+                    if (rows.length) sel.selectedIndex = 0;
                   }
-                  byId('calWeightLbl').textContent = cat === 'drinks' ? 'Quantity (ml)' : 'Weight eaten (grams)';
                   calFoodChanged(keep);
                 }
 
@@ -6762,6 +7309,7 @@ render();
                   byId('calMeal').value = calMealNow();
                   byId('calCustomName').value = '';
                   byId('calCustomKcal').value = '';
+                  byId('calSearch').value = '';
                   byId('saveCalBtn').textContent = 'Save';
                   calFillFoods(false);
                 }
@@ -6774,17 +7322,19 @@ render();
 
                 function saveCal() {
                   const f = calCurFood();
-                  const grams = parseFloat(byId('calWeight').value);
+                  const qty = parseFloat(byId('calServ').value);
                   const date = byId('calDate').value || calKey(new Date());
                   const meal = byId('calMeal').value;
                   if (!f || !f.name) { alert('Please select or enter a food.'); return; }
-                  if (!(f.per100 >= 0)) { alert('Enter the calories per 100 g.'); return; }
-                  if (!(grams > 0)) { alert('Enter the weight you ate.'); return; }
-                  const kcal = Math.round(grams * f.per100 / 100);
+                  if (!(f.perServ >= 0)) { alert('Enter the calories in one serving.'); return; }
+                  if (!(qty > 0)) { alert('Enter how many you ate.'); return; }
+                  const kcal = Math.round(qty * f.perServ);
                   const entry = {
                     id: editingCalId || calNewId(),
                     date, meal, cat: f.cat, name: f.name, title: f.name,
-                    grams: Math.round(grams * 10) / 10, per100: f.per100, kcal,
+                    qty: Math.round(qty * 100) / 100, serveLbl: f.serveLbl, serveG: f.serveG,
+                    grams: f.serveG ? Math.round(qty * f.serveG * 10) / 10 : 0,
+                    per100: f.per100, perServ: f.cat === 'custom' ? f.perServ : undefined, kcal,
                     createdAt: formatDateDMYWithTime(new Date())
                   };
                   const list = calEnsure();
@@ -6807,18 +7357,22 @@ render();
                     idx = CAL_FOODS.findIndex(f => f[0] === cat && f[1] === e.name);
                     if (idx < 0) cat = 'custom';
                   }
+                  byId('calSearch').value = '';
                   byId('calCat').value = cat;
                   calFillFoods(true);
+                  let qty;
                   if (cat === 'custom') {
                     byId('calCustomName').value = e.name || '';
-                    byId('calCustomKcal').value = e.per100;
+                    const each = e.perServ != null ? e.perServ : e.kcal;
+                    byId('calCustomKcal').value = Math.round(each * 100) / 100;
+                    qty = e.perServ != null && e.qty ? e.qty : 1;
                   } else {
                     byId('calFood').value = String(idx);
+                    const f = CAL_FOODS[idx];
+                    qty = e.qty ? e.qty : (f[3] ? Math.round(e.grams / f[3] * 100) / 100 : 1);
                   }
                   calFoodChanged(true);
-                  byId('calWeight').value = e.grams;
-                  const f = calCurFood();
-                  byId('calServ').value = (f && f.serveG) ? Math.round(e.grams / f.serveG * 100) / 100 : '';
+                  byId('calServ').value = qty;
                   byId('calDate').value = e.date;
                   byId('calMeal').value = e.meal || 'Snacks';
                   byId('saveCalBtn').textContent = 'Update';
@@ -6835,6 +7389,174 @@ render();
                   moveToTrash('calories', list[i], i);
                 }
 
+                // ----- exercise (calories burned) form -----
+                function calBCur() {
+                  const cat = byId('calBCat').value;
+                  if (cat === 'custom') return { cat, name: byId('calBCustomName').value.trim(), met: 0 };
+                  const v = byId('calBAct').value;
+                  if (v === '') return null;
+                  const x = CAL_EX[Number(v)];
+                  return x ? { cat: x[0], name: x[1], met: x[2] } : null;
+                }
+                function calIntensity(m) { return m < 3 ? 'Light' : m < 6 ? 'Moderate' : 'Vigorous'; }
+
+                function calBInfo() {
+                  const a = calBCur();
+                  const box = byId('calBInfo');
+                  const p = calProf();
+                  byId('calBNeedW').hidden = !!p;
+                  if (!a) { box.textContent = ''; return; }
+                  if (a.cat === 'custom') {
+                    box.textContent = 'Type the activity name and the calories you burned (from your watch or fitness band).';
+                    return;
+                  }
+                  let t = '<b>' + calEsc(a.name) + '</b> · ' + calEsc(calCatName(CAL_EX_CATS, a.cat)) + '<br>' + calIntensity(a.met) + ' intensity · MET ' + a.met;
+                  if (p) t += '<br><small>At ' + p.weight + ' kg: ≈ <b>' + Math.round(a.met * p.weight * 0.5) + ' kcal</b> in 30 minutes, ≈ <b>' + Math.round(a.met * p.weight) + ' kcal</b> in 1 hour.</small>';
+                  box.innerHTML = t;
+                }
+
+                function calBCalc() {
+                  const a = calBCur();
+                  const out = byId('calBResult');
+                  const durWrap = byId('calBDurWrap');
+                  if (!a) { out.textContent = ''; return 0; }
+                  if (a.cat === 'custom') {
+                    const k = parseFloat(byId('calBCustomKcal').value);
+                    if (!(k > 0)) { out.textContent = '🔥 Enter the calories burned'; return 0; }
+                    out.textContent = '🔥 ≈ ' + calFmt(k) + ' kcal burned';
+                    return Math.round(k);
+                  }
+                  const p = calProf();
+                  const mins = parseFloat(byId('calBMins').value);
+                  if (!p) { out.textContent = '⚖️ Enter your weight first'; return 0; }
+                  if (!(mins > 0)) { out.textContent = '🔥 Enter the duration to see calories burned'; return 0; }
+                  const k = Math.round(a.met * p.weight * mins / 60);
+                  out.textContent = '🔥 ≈ ' + calFmt(k) + ' kcal burned';
+                  return k;
+                }
+
+                function calBChanged(keep) {
+                  const isC = byId('calBCat').value === 'custom';
+                  if (!keep) byId('calBMins').value = isC ? '' : 30;
+                  calBInfo();
+                  calBCalc();
+                }
+
+                function calBFill(keep) {
+                  const cat = byId('calBCat').value;
+                  const isC = cat === 'custom';
+                  byId('calBActWrap').hidden = isC;
+                  byId('calBCustomWrap').hidden = !isC;
+                  byId('calBDurWrap').hidden = isC;
+                  const sel = byId('calBAct');
+                  const note = byId('calBSearchNote');
+                  sel.innerHTML = '';
+                  if (!isC) {
+                    let rows;
+                    const m = calMatch(CAL_EX, byId('calBSearch').value, 1);
+                    if (m) {
+                      rows = m.map(x => ({ f: x.f, i: x.i, label: x.f[1] + '  ·  ' + calCatName(CAL_EX_CATS, x.f[0]) }));
+                      note.textContent = rows.length ? rows.length + ' result' + (rows.length > 1 ? 's' : '') + ' from all activity types.' : 'No activity found. Clear the search or use ✍️ Other to add your own.';
+                    } else {
+                      rows = CAL_EX.map((f, i) => ({ f, i, label: f[1] })).filter(x => x.f[0] === cat);
+                      note.textContent = rows.length + ' activities in this type. Use search to look in all types.';
+                    }
+                    rows.forEach(x => { const o = document.createElement('option'); o.value = x.i; o.textContent = x.label; sel.appendChild(o); });
+                    calSetSize(sel, rows.length);
+                    if (rows.length) sel.selectedIndex = 0;
+                  }
+                  calBChanged(keep);
+                }
+
+                function calBResetForm() {
+                  editingBurnId = null;
+                  byId('calBDate').value = calKey(new Date());
+                  byId('calBCustomName').value = '';
+                  byId('calBCustomKcal').value = '';
+                  byId('calBSearch').value = '';
+                  byId('saveCalBurnBtn').textContent = 'Save';
+                  calBFill(false);
+                }
+
+                function calBCloseForm() {
+                  hideForm(byId('calBurnFormContainer'));
+                  byId('showAddBurnBtn').classList.remove('open');
+                  calBResetForm();
+                }
+
+                function calOpenProfile() {
+                  showForm(byId('calProfileWrap'));
+                  byId('calProfileToggle').classList.add('open');
+                  try { byId('calProfileToggle').scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) { }
+                }
+
+                function saveBurn() {
+                  const a = calBCur();
+                  const date = byId('calBDate').value || calKey(new Date());
+                  if (!a || !a.name) { alert('Please select or enter an activity.'); return; }
+                  const p = calProf();
+                  let kcal, mins = 0;
+                  if (a.cat === 'custom') {
+                    kcal = parseFloat(byId('calBCustomKcal').value);
+                    if (!(kcal > 0)) { alert('Enter the calories burned.'); return; }
+                    kcal = Math.round(kcal);
+                  } else {
+                    if (!p) { alert('Enter your weight first (MY WEIGHT & PROFILE).'); calOpenProfile(); return; }
+                    mins = parseFloat(byId('calBMins').value);
+                    if (!(mins > 0)) { alert('Enter the duration in minutes.'); return; }
+                    kcal = Math.round(a.met * p.weight * mins / 60);
+                  }
+                  const entry = {
+                    id: editingBurnId || calNewId(),
+                    date, cat: a.cat, name: a.name, title: a.name,
+                    met: a.met, mins: Math.round(mins * 10) / 10, kcal, wt: p ? p.weight : 0,
+                    createdAt: formatDateDMYWithTime(new Date())
+                  };
+                  const list = calBurnEnsure();
+                  const at = editingBurnId ? list.findIndex(e => e.id === editingBurnId) : -1;
+                  if (at >= 0) list[at] = entry; else list.push(entry);
+                  calViewDate = date;
+                  saveAll();
+                  calBCloseForm();
+                  renderCalories();
+                  try { byId('viewCalProgToggle').scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) { }
+                }
+
+                function editBurn(id) {
+                  const e = calBurnEnsure().find(x => x.id === id);
+                  if (!e) return;
+                  editingBurnId = id;
+                  let cat = e.cat || 'custom';
+                  let idx = -1;
+                  if (cat !== 'custom') {
+                    idx = CAL_EX.findIndex(x => x[0] === cat && x[1] === e.name);
+                    if (idx < 0) cat = 'custom';
+                  }
+                  byId('calBSearch').value = '';
+                  byId('calBCat').value = cat;
+                  calBFill(true);
+                  if (cat === 'custom') {
+                    byId('calBCustomName').value = e.name || '';
+                    byId('calBCustomKcal').value = e.kcal;
+                  } else {
+                    byId('calBAct').value = String(idx);
+                    byId('calBMins').value = e.mins;
+                  }
+                  calBChanged(true);
+                  byId('calBDate').value = e.date;
+                  byId('saveCalBurnBtn').textContent = 'Update';
+                  showForm(byId('calBurnFormContainer'));
+                  byId('showAddBurnBtn').classList.add('open');
+                  try { byId('calBurnFormContainer').scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (err) { }
+                }
+
+                function deleteBurn(id) {
+                  const list = calBurnEnsure();
+                  const i = list.findIndex(e => e.id === id);
+                  if (i < 0) return;
+                  moveToTrash('calBurn', list[i], i);
+                }
+
                 // ----- day progress -----
                 function renderCalDay() {
                   const box = byId('calDayBox');
@@ -6842,7 +7564,10 @@ render();
                   box.innerHTML = '';
                   const k = calViewDate, goal = calGoal();
                   const entries = calEnsure().filter(e => e.date === k);
-                  const total = entries.reduce((s, e) => s + (Number(e.kcal) || 0), 0);
+                  const burns = calBurnEnsure().filter(e => e.date === k);
+                  const eaten = entries.reduce((s, e) => s + (Number(e.kcal) || 0), 0);
+                  const burned = burns.reduce((s, e) => s + (Number(e.kcal) || 0), 0);
+                  const budget = goal + burned;
 
                   // date navigation
                   const nav = calMk('div');
@@ -6860,19 +7585,40 @@ render();
                   box.appendChild(nav);
 
                   // summary + progress bar
-                  const over = total > goal;
-                  const pct = Math.min(100, Math.round(total / goal * 100));
+                  const over = eaten > budget;
+                  const pct = Math.min(100, Math.round(eaten / budget * 100));
                   const sum = calMk('div');
                   const when = calWhen(k);
+                  const net = eaten - burned;
                   sum.innerHTML =
                     '<div style="font-size:13px;opacity:.8;">' + calEsc((when ? when + ' · ' : '') + calLabel(k)) + '</div>' +
-                    '<div style="font-size:26px;font-weight:700;margin:2px 0 6px;">' + calFmt(total) +
-                    ' <small style="font-size:14px;font-weight:500;opacity:.8;">/ ' + calFmt(goal) + ' kcal (' + pct + '%)</small></div>' +
+                    '<div class="cal-stats">' +
+                    '<div class="cal-stat"><b>' + calFmt(eaten) + '</b><small>🍽️ Eaten kcal</small></div>' +
+                    '<div class="cal-stat"><b>' + calFmt(burned) + '</b><small>🔥 Burned kcal</small></div>' +
+                    '<div class="cal-stat"><b>' + calFmt(net) + '</b><small>⚖️ Net kcal</small></div></div>' +
                     '<div class="cal-bar' + (over ? ' over' : '') + '"><i style="width:' + pct + '%"></i></div>' +
                     '<div style="margin-top:6px;font-size:13px;font-weight:600;">' +
-                    (!entries.length ? 'No food added for this day.' :
-                      over ? '⚠️ ' + calFmt(total - goal) + ' kcal over your goal' : '✅ ' + calFmt(goal - total) + ' kcal left for this day') + '</div>';
+                    (!entries.length && !burns.length ? 'Nothing added for this day.' :
+                      over ? '⚠️ ' + calFmt(eaten - budget) + ' kcal over your limit' : '✅ ' + calFmt(budget - eaten) + ' kcal left for this day') + '</div>' +
+                    '<small class="cal-note">Limit = daily goal ' + calFmt(goal) + (burned ? ' + exercise ' + calFmt(burned) : '') + ' = ' + calFmt(budget) + ' kcal</small>';
                   box.appendChild(sum);
+
+                  // weight effect of the day
+                  const full = calProfFull();
+                  if (full && entries.length) {
+                    const bal = eaten - calMaint(full) - burned;
+                    const wb = calMk('div', 'cal-info');
+                    wb.style.margin = '8px 0';
+                    wb.innerHTML = '⚖️ Day balance' + (k === calKey(new Date()) ? ' so far' : '') + ': <b class="' + (bal > 0 ? 'cal-pos' : 'cal-neg') + '">' + calSigned(bal) + ' kcal</b> ≈ ' +
+                      (bal >= 0 ? '+' : '−') + calKg(Math.abs(bal) / 7700) + ' kg' +
+                      '<br><small>Eaten ' + calFmt(eaten) + ' − maintenance ' + calFmt(calMaint(full)) + ' − exercise ' + calFmt(burned) + '.' +
+                      (k === calKey(new Date()) ? ' Today is not finished yet.' : '') + '</small>';
+                    box.appendChild(wb);
+                  } else if (!calProf() && (entries.length || burns.length)) {
+                    const wb = calMk('div', 'cal-info', '⚖️ Enter your weight in MY WEIGHT & PROFILE to see how your weight changes.');
+                    wb.style.margin = '8px 0';
+                    box.appendChild(wb);
+                  }
 
                   // meal-wise totals
                   if (entries.length) {
@@ -6902,12 +7648,13 @@ render();
                   });
                   gr.append(gl, gi, gb);
                   box.appendChild(gr);
-                  const tip = calMk('small', null, 'Average adult needs about 1800-2500 kcal per day. Women usually need less than men; active people need more. Use your doctor or dietitian advice for a personal goal.');
+                  const tip = calMk('small', null, full
+                    ? 'Your maintenance is about ' + calFmt(calMaint(full)) + ' kcal/day. Eat less than this to lose weight and more to gain.'
+                    : 'Average adult needs about 1800-2500 kcal per day. Add your profile above for a personal number.');
                   tip.style.cssText = 'display:block;opacity:.7;margin-bottom:10px;';
                   box.appendChild(tip);
 
-                  // entries grouped by meal
-                  if (!entries.length) return;
+                  // food entries grouped by meal
                   CAL_MEALS.forEach(m => {
                     const rows = entries.filter(e => e.meal === m);
                     if (!rows.length) return;
@@ -6922,7 +7669,13 @@ render();
                       const left = calMk('div', 'item-left');
                       const nm = calMk('div', null, e.name);
                       nm.style.cssText = 'font-weight:600;word-break:break-word;';
-                      const sm = calMk('small', null, calFmt(e.grams) + (e.cat === 'drinks' ? ' ml' : ' g') + ' · ' + e.per100 + ' kcal/100' + (e.cat === 'drinks' ? 'ml' : 'g'));
+                      let detail;
+                      if (e.qty) {
+                        detail = calQty(e.qty) + ' × ' + (e.serveLbl || 'serving') + ' · ' + calFmt(e.kcal / e.qty) + ' kcal each';
+                      } else {
+                        detail = calFmt(e.grams) + (e.cat === 'drinks' ? ' ml' : ' g') + ' · ' + e.per100 + ' kcal/100' + (e.cat === 'drinks' ? 'ml' : 'g');
+                      }
+                      const sm = calMk('small', null, detail);
                       sm.style.opacity = '.7';
                       left.append(nm, sm);
                       const right = calMk('div');
@@ -6938,6 +7691,35 @@ render();
                     });
                     box.appendChild(ul);
                   });
+
+                  // exercise entries
+                  if (burns.length) {
+                    const h = calMk('h4', 'cal-meal');
+                    h.append(calMk('span', null, '🏃 Exercise'), calMk('span', 'pq-meta', calFmt(burned) + ' kcal burned'));
+                    box.appendChild(h);
+                    box.appendChild(document.createElement('hr'));
+                    const ul = calMk('ul', 'list');
+                    burns.forEach(e => {
+                      const li = document.createElement('li');
+                      const left = calMk('div', 'item-left');
+                      const nm = calMk('div', null, e.name);
+                      nm.style.cssText = 'font-weight:600;word-break:break-word;';
+                      const sm = calMk('small', null, e.mins ? calQty(e.mins) + ' min · MET ' + e.met + (e.wt ? ' · ' + e.wt + ' kg' : '') : 'Entered manually');
+                      sm.style.opacity = '.7';
+                      left.append(nm, sm);
+                      const right = calMk('div');
+                      right.style.cssText = 'display:flex;align-items:center;flex-shrink:0;';
+                      const kb = calMk('span', 'badge', '🔥 ' + calFmt(e.kcal) + ' kcal');
+                      const eb = calMk('button', 'icon-small', '✏️'); eb.title = 'Edit';
+                      eb.addEventListener('click', () => editBurn(e.id));
+                      const db = calMk('button', 'icon-small', '🗑️'); db.title = 'Delete';
+                      db.addEventListener('click', () => deleteBurn(e.id));
+                      right.append(kb, eb, db);
+                      li.append(left, right);
+                      ul.appendChild(li);
+                    });
+                    box.appendChild(ul);
+                  }
                 }
 
                 // ----- history -----
@@ -6948,19 +7730,21 @@ render();
                   const goal = calGoal();
                   const today = calKey(new Date());
                   const all = calEnsure();
-                  if (!all.length) { box.appendChild(calMk('div', 'pq-empty', 'No food tracked yet.')); return; }
+                  const burnAll = calBurnEnsure();
+                  if (!all.length && !burnAll.length) { box.appendChild(calMk('div', 'pq-empty', 'No food or exercise tracked yet.')); return; }
 
                   // last 7 days chart
                   const days = [];
-                  for (let i = 6; i >= 0; i--) { const k = calShift(today, -i); days.push({ k, t: calTotal(k) }); }
+                  for (let i = 6; i >= 0; i--) { const k = calShift(today, -i); days.push({ k, t: calTotal(k), b: calBurnTotal(k) }); }
                   const maxV = Math.max(goal, ...days.map(d => d.t), 1);
                   const logged = days.filter(d => d.t > 0);
                   const avg = logged.length ? Math.round(logged.reduce((s, d) => s + d.t, 0) / logged.length) : 0;
-                  const head = calMk('div', null, 'Last 7 days · average ' + calFmt(avg) + ' kcal/day' + (logged.length ? ' (' + logged.length + ' day' + (logged.length > 1 ? 's' : '') + ' tracked)' : ''));
+                  const burnSum = days.reduce((s, d) => s + d.b, 0);
+                  const head = calMk('div', null, 'Last 7 days · average ' + calFmt(avg) + ' kcal/day eaten' + (logged.length ? ' (' + logged.length + ' day' + (logged.length > 1 ? 's' : '') + ' tracked)' : '') + (burnSum ? ' · ' + calFmt(burnSum) + ' kcal burned' : ''));
                   head.style.cssText = 'font-weight:600;font-size:13px;margin-bottom:8px;';
                   box.appendChild(head);
                   const chart = calMk('div');
-                  chart.style.cssText = 'display:flex;align-items:flex-end;gap:6px;height:130px;margin-bottom:6px;';
+                  chart.style.cssText = 'display:flex;align-items:flex-end;gap:6px;height:140px;margin-bottom:6px;';
                   days.forEach(d => {
                     const col = calMk('div');
                     col.style.cssText = 'flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;cursor:pointer;';
@@ -6968,24 +7752,26 @@ render();
                     v.style.cssText = 'font-size:10px;opacity:.8;';
                     const bar = calMk('div');
                     const hgt = d.t ? Math.max(4, Math.round(d.t / maxV * 80)) : 2;
-                    bar.style.cssText = 'width:100%;border-radius:4px 4px 0 0;height:' + hgt + 'px;background:' + (d.t > goal ? '#e53935' : 'var(--accent)') + ';' + (d.t ? '' : 'opacity:.3;');
+                    bar.style.cssText = 'width:100%;border-radius:4px 4px 0 0;height:' + hgt + 'px;background:' + (d.t > goal + d.b ? '#e53935' : 'var(--accent)') + ';' + (d.t ? '' : 'opacity:.3;');
                     const dt = calParse(d.k);
                     const lb = calMk('small', null, CAL_DAYS[dt.getDay()].slice(0, 2));
                     lb.style.cssText = 'font-size:11px;opacity:.8;' + (d.k === today ? 'font-weight:700;' : '');
-                    col.append(v, bar, lb);
+                    const bn = calMk('small', null, d.b ? '🔥' + calFmt(d.b) : ' ');
+                    bn.style.cssText = 'font-size:9px;opacity:.8;min-height:11px;';
+                    col.append(v, bar, lb, bn);
                     col.addEventListener('click', () => calOpenDay(d.k));
                     chart.appendChild(col);
                   });
                   box.appendChild(chart);
-                  const note = calMk('small', null, 'Green = within goal · Red = over goal (' + calFmt(goal) + ' kcal). Tap a day to open it.');
+                  const note = calMk('small', null, 'Green = within limit · Red = over limit (goal ' + calFmt(goal) + ' kcal + exercise burned). 🔥 = calories burned. Tap a day to open it.');
                   note.style.cssText = 'display:block;opacity:.7;margin-bottom:10px;';
                   box.appendChild(note);
 
                   // all tracked days
-                  const dates = [...new Set(all.map(e => e.date))].sort().reverse().slice(0, 60);
+                  const dates = [...new Set(all.map(e => e.date).concat(burnAll.map(e => e.date)))].sort().reverse().slice(0, 60);
                   const ul = calMk('ul', 'list');
                   dates.forEach(k => {
-                    const t = calTotal(k);
+                    const t = calTotal(k), b = calBurnTotal(k);
                     const li = document.createElement('li');
                     li.style.cursor = 'pointer';
                     const left = calMk('div', 'item-left');
@@ -6993,10 +7779,10 @@ render();
                     const w = calWhen(k);
                     const nm = calMk('div', null, (w ? w + ' · ' : '') + calLabel(k));
                     nm.style.fontWeight = '600';
-                    const bar = calMk('div', 'cal-bar' + (t > goal ? ' over' : ''));
-                    bar.appendChild(document.createElement('i')).style.width = Math.min(100, Math.round(t / goal * 100)) + '%';
+                    const bar = calMk('div', 'cal-bar' + (t > goal + b ? ' over' : ''));
+                    bar.appendChild(document.createElement('i')).style.width = Math.min(100, Math.round(t / (goal + b) * 100)) + '%';
                     left.append(nm, bar);
-                    const right = calMk('span', 'badge', calFmt(t) + ' kcal');
+                    const right = calMk('span', 'badge', '🍽️ ' + calFmt(t) + (b ? ' · 🔥 ' + calFmt(b) : '') + ' kcal');
                     right.style.marginLeft = '10px';
                     li.append(left, right);
                     li.addEventListener('click', () => calOpenDay(k));
@@ -7013,9 +7799,13 @@ render();
                   try { byId('viewCalProgToggle').scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) { }
                 }
 
-                function renderCalories() {
+                function renderCalories(fromPage) {
+                  if (!byId('calProfileWrap').contains(document.activeElement)) calLoadProfileForm();
+                  renderCalProfile();
                   renderCalDay();
                   renderCalHist();
+                  calBInfo();
+                  calBCalc();
                 }
 
                 // ----- setup -----
@@ -7024,31 +7814,57 @@ render();
                   CAL_CATS.forEach(c => { const o = document.createElement('option'); o.value = c[0]; o.textContent = c[1]; cs.appendChild(o); });
                   const ms = byId('calMeal');
                   CAL_MEALS.forEach(m => { const o = document.createElement('option'); o.value = m; o.textContent = CAL_MEAL_ICON[m] + ' ' + m; ms.appendChild(o); });
+                  const bs = byId('calBCat');
+                  CAL_EX_CATS.forEach(c => { const o = document.createElement('option'); o.value = c[0]; o.textContent = c[1]; bs.appendChild(o); });
+                  const ls = byId('calPLife');
+                  Object.keys(CAL_LIFE).forEach(k => { const o = document.createElement('option'); o.value = k; o.textContent = CAL_LIFE[k][0]; ls.appendChild(o); });
+                  const chip = (wrap, vals, input, after) => {
+                    vals.forEach(v => {
+                      const b = calMk('button', 'cal-chip', String(v[1]));
+                      b.type = 'button';
+                      b.addEventListener('click', () => { input.value = v[0]; after(); });
+                      wrap.appendChild(b);
+                    });
+                  };
+                  chip(byId('calQChips'), [[0.5, '½'], [1, '1'], [2, '2'], [3, '3'], [4, '4']], byId('calServ'), calCalc);
+                  chip(byId('calBChips'), [[10, '10 min'], [15, '15 min'], [30, '30 min'], [45, '45 min'], [60, '1 hr'], [90, '1½ hr']], byId('calBMins'), calBCalc);
+                  calLoadProfileForm();
                   calResetForm();
+                  calBResetForm();
                 })();
 
-                byId('calCat').addEventListener('change', () => calFillFoods(false));
+                byId('calCat').addEventListener('change', () => { byId('calSearch').value = ''; calFillFoods(false); });
+                byId('calSearch').addEventListener('input', () => calFillFoods(false));
                 byId('calFood').addEventListener('change', () => calFoodChanged(false));
                 byId('calCustomName').addEventListener('input', calCalc);
                 byId('calCustomKcal').addEventListener('input', calCalc);
-                byId('calServ').addEventListener('input', () => {
-                  const f = calCurFood();
-                  const s = parseFloat(byId('calServ').value);
-                  if (f && f.serveG && s > 0) byId('calWeight').value = Math.round(s * f.serveG * 10) / 10;
-                  calCalc();
-                });
-                byId('calWeight').addEventListener('input', () => {
-                  const f = calCurFood();
-                  const w = parseFloat(byId('calWeight').value);
-                  if (f && f.serveG && w > 0) byId('calServ').value = Math.round(w / f.serveG * 100) / 100;
-                  calCalc();
-                });
+                byId('calServ').addEventListener('input', calCalc);
                 byId('saveCalBtn').addEventListener('click', saveCal);
                 byId('cancelCalBtn').addEventListener('click', calCloseForm);
                 byId('showAddCalBtn').addEventListener('click', function () {
                   const open = byId('calFormContainer').classList.contains('visible');
                   if (!open && editingCalId === null) calResetForm();
                   toggleCollapse(byId('calFormContainer'), byId('showAddCalBtn'));
+                });
+
+                byId('calBCat').addEventListener('change', () => { byId('calBSearch').value = ''; calBFill(false); });
+                byId('calBSearch').addEventListener('input', () => calBFill(false));
+                byId('calBAct').addEventListener('change', () => calBChanged(false));
+                byId('calBMins').addEventListener('input', calBCalc);
+                byId('calBCustomName').addEventListener('input', calBCalc);
+                byId('calBCustomKcal').addEventListener('input', calBCalc);
+                byId('saveCalBurnBtn').addEventListener('click', saveBurn);
+                byId('cancelCalBurnBtn').addEventListener('click', calBCloseForm);
+                byId('showAddBurnBtn').addEventListener('click', function () {
+                  const open = byId('calBurnFormContainer').classList.contains('visible');
+                  if (!open && editingBurnId === null) calBResetForm();
+                  toggleCollapse(byId('calBurnFormContainer'), byId('showAddBurnBtn'));
+                });
+
+                byId('saveCalProfileBtn').addEventListener('click', saveCalProfile);
+                byId('calProfileToggle').addEventListener('click', function () {
+                  calLoadProfileForm();
+                  toggleCollapse(byId('calProfileWrap'), byId('calProfileToggle'));
                 });
                 byId('viewCalProgToggle').addEventListener('click', function () {
                   toggleCollapse(byId('calDayWrap'), byId('viewCalProgToggle'));

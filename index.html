@@ -1404,6 +1404,45 @@
     #utilities > [data-util][hidden] { display: none !important; }
     .util-tgl-hidden { display: none !important; }
 
+    /* ---------- desktop only (wide screens, 900px+): centred + wider layout. Phones are untouched ---------- */
+    @media (min-width: 900px) {
+      /* page content: centred column, ~60% wider than before (520px -> 832px) */
+      .page > * { max-width: 832px; margin-left: auto; margin-right: auto; }
+      .add-area { max-width: 832px; }
+      .add-area .form { max-width: none; }
+      .add-btn { padding: 16px 16px; font-size: 16px; border-radius: 12px; }
+      .form { border-radius: 14px; }
+      #other .menu-btn { width: 260px !important; border-radius: 12px; padding: 16px 14px; text-align: center; }
+      #other > div { justify-content: center; }
+
+      /* bottom bar: centred, wider, rounded buttons */
+      #navBar .nav-in { max-width: 860px; justify-content: center; gap: 10px; padding: 0 12px; }
+      .nav-tab { flex: 1 1 0; max-width: 200px; margin: 6px 0; border-radius: 22px; gap: 4px; font-size: 12.5px; }
+      .nav-tab:hover, .nav-tab.active { background: var(--sh-card); }
+      .nav-tab.active::before { width: 36px; top: -6px; }
+      .nav-tab:focus-visible { border-radius: 22px; }
+
+      /* popup menu: wide half-screen panel, view-mode option removed */
+      #sheet { max-width: 1000px; border-radius: 26px 26px 0 0; }
+      #sheetHead { padding: 4px 20px 10px 22px; }
+      #sheetHead h3 { font-size: 20px; }
+      #sheetHead button { width: 38px; height: 38px; }
+      #sheetBody { padding: 6px 22px 22px; }
+      section[data-view="settings"] .sh-label,
+      section[data-view="settings"] .seg,
+      section[data-view="settings"] .seg-hint { display: none; }
+      .hub-grid,
+      #sheet:not([data-mode="compact"]) .hub-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; }
+      #sheet:not([data-mode="compact"]) .hub-grid > .hub-tile:last-child:nth-child(odd) { grid-column: auto; }
+      .hub-tile { padding: 16px 18px; border-radius: 16px; gap: 3px; }
+      .hub-tile b { font-size: 15.5px; }
+      .hub-tile small { font-size: 12.5px; }
+      .hub-tile .ri { --s: 42px; margin-bottom: 8px; }
+      .sh-list { gap: 8px; }
+      .sh-row { padding: 12px 16px; border-radius: 14px; font-size: 15.5px; }
+      .sh-row .ri { --s: 36px; }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       #sheet, #sheetBackdrop, .nav-tab .ni, .sw, .sw::after { transition: none !important; }
     }
@@ -7128,7 +7167,8 @@ render();
       // ---------- view mode ----------
       function applyMode(m, persist) {
         mode = m;
-        sheet.dataset.mode = m;
+        // wide (desktop) screens always use the half-screen popup; the saved choice is kept for phones
+        sheet.dataset.mode = window.matchMedia('(min-width: 900px)').matches ? 'half' : m;
         document.querySelectorAll('[data-mode-set]').forEach(b => b.classList.toggle('on', b.dataset.modeSet === m));
         if (persist) { try { localStorage.setItem(MODE_KEY, m); } catch (e) { } }
       }
@@ -7306,6 +7346,7 @@ render();
 
       // ---------- init ----------
       applyMode(mode, false);
+      try { window.matchMedia('(min-width: 900px)').addEventListener('change', () => applyMode(mode, false)); } catch (e) { }
       syncDark();
       syncAvatar();
       renderTabs();

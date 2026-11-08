@@ -959,32 +959,33 @@
     }
 
 
-    /* ===== INSTALL BAR (swipe up/down) ===== */
+    /* ===== INSTALL BAR (top, swipe down to show / up to hide) ===== */
     #installBar {
       position: fixed;
+      top: 0;
       left: 50%;
-      bottom: calc(var(--nav-h) + var(--by-h) + env(safe-area-inset-bottom, 0px));
       width: min(92%, 420px);
       margin-left: calc(min(92%, 420px) / -2);
-      z-index: 999;
+      z-index: 1500;
       background: var(--sh-bg);
       color: var(--sh-text);
       border: 1px solid var(--sh-line);
-      border-bottom: none;
-      border-radius: 18px 18px 0 0;
-      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.25);
-      transform: translateY(100%);
+      border-top: none;
+      border-radius: 0 0 18px 18px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      padding-top: env(safe-area-inset-top, 0px);
+      transform: translateY(-100%);
       transition: transform .35s ease;
       touch-action: none;
       display: none;
     }
     #installBar.show { display: block; }
     #installBar.open { transform: translateY(0); }
-    #installBar.peek { transform: translateY(calc(100% - 16px)); }
-    #installBar .ib-grab { height: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-    #installBar .ib-grab span { width: 40px; height: 4px; border-radius: 4px; background: var(--sh-mute); opacity: .7; }
-    #installBar .ib-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 4px 14px 12px; }
-    #installBar .ib-txt { font-weight: 700; font-size: 14px; }
+    #installBar.peek { transform: translateY(calc(-100% + 18px)); }
+    #installBar .ib-grab { height: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    #installBar .ib-grab span { width: 40px; height: 4px; border-radius: 4px; background: var(--sh-mute); opacity: .8; }
+    #installBar .ib-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px 2px; }
+    #installBar .ib-txt { font-weight: 700; font-size: 14px; letter-spacing: .04em; }
     #installBar .ib-btn { border: none; border-radius: 10px; padding: 8px 16px; font-weight: 700; font-size: 14px; background: #2f7bff; color: #fff; cursor: pointer; }
 
     #installBtn {
@@ -1656,11 +1657,11 @@
     INSTALL APP 🐒
     </button>
   <div id="installBar" role="region" aria-label="Install app">
-    <div class="ib-grab" id="ibGrab" title="Swipe up / down"><span></span></div>
     <div class="ib-row">
-      <div class="ib-txt">🐒 Install Nothing Reminder</div>
+      <div class="ib-txt">INSTALL APP 🐒</div>
       <button type="button" class="ib-btn" id="ibInstall">Install</button>
     </div>
+    <div class="ib-grab" id="ibGrab" title="Swipe down to show, up to hide"><span></span></div>
   </div>
   <!-- ============ BOTTOM NAV ============ -->
   <nav id="navBar" aria-label="Main navigation">
@@ -3238,8 +3239,8 @@ render();
           b.addEventListener("touchend", (e) => {
             if (y0 === null) return;
             const dy = e.changedTouches[0].clientY - y0; y0 = null;
-            if (dy > 25) setState("peek");       // swipe down -> hide, small bar stays
-            else if (dy < -25) setState("open"); // swipe up -> show
+            if (dy > 25) setState("open");        // swipe down -> show
+            else if (dy < -25) setState("peek");  // swipe up -> hide, small handle stays
           }, { passive: true });
         });
       })();
@@ -9681,7 +9682,7 @@ render();
       const $ = id => document.getElementById(id);
       const HUB_PAGES = ['reminders', 'notes', 'budget', 'Check', 'priority', 'progress', 'piggyBank', 'calories'];
       const PROFILE_PAGES = ['trash', 'notifications', 'terms', 'how', 'other', 'updateLog'];
-      const TITLES = { hub: 'REMINDERS HUB', utilities: 'UTILITIES', profile: 'Profile', settings: 'Settings', storage: 'Storage', weightProfile: 'Weight & Profile' };
+      const TITLES = { hub: 'REMINDERS HUB', utilities: 'UTILITIES', profile: 'PROFILE', settings: 'Settings', storage: 'Storage', weightProfile: 'Weight & Profile' };
       const MODE_KEY = 'nr_viewMode';
       const FALLBACK_AVATAR = 'data:image/svg+xml;utf8,' + encodeURIComponent(
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#9e9e9e"/>' +

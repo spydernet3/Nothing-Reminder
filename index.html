@@ -966,14 +966,13 @@
       left: 50%;
       width: min(92%, 420px);
       margin-left: calc(min(92%, 420px) / -2);
-      z-index: 1500;
+      z-index: 850;
       background: var(--sh-bg);
       color: var(--sh-text);
       border: 1px solid var(--sh-line);
       border-top: none;
       border-radius: 0 0 18px 18px;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-      padding-top: env(safe-area-inset-top, 0px);
       transform: translateY(-100%);
       transition: transform .35s ease;
       touch-action: none;
@@ -3203,11 +3202,21 @@ render();
         const bar = () => document.getElementById("installBar");
         let autoTimer = null;
         const isInstalled = () => window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
-        function setState(st) { const b = bar(); if (!b) return; b.classList.remove("open", "peek"); b.classList.add(st); }
+        function place() {
+          const b = bar(); if (!b) return;
+          const h = document.querySelector("#home .home-top");
+          const r = (h && h.offsetParent !== null) ? h.getBoundingClientRect() : null;
+          b.style.top = r ? (r.bottom - 1) + "px" : "0px";
+          b.style.paddingTop = r ? "0px" : "env(safe-area-inset-top, 0px)";
+        }
+        window.addEventListener("resize", place);
+        document.addEventListener("click", () => setTimeout(place, 80));
+        function setState(st) { const b = bar(); if (!b) return; place(); b.classList.remove("open", "peek"); b.classList.add(st); }
         function hideBar() { clearTimeout(autoTimer); const b = bar(); if (b) b.classList.remove("show", "open", "peek"); }
         function showBar() {
           if (isInstalled()) return;
           const b = bar(); if (!b) return;
+          place();
           b.classList.add("show");
           b.classList.add("peek");
           // slide up after a moment, then auto-hide (leaves small handle) after a few seconds

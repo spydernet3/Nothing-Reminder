@@ -1205,6 +1205,36 @@
       line-height: 1;
     }
 
+    /* ---------- Home top bar (DASHBOARD) - same look as the bottom bar, no "By Spydernet" strip ---------- */
+    #home .home-top {
+      position: sticky;
+      top: 0;
+      z-index: 900;
+      margin: -20px -20px 24px;
+      padding: calc(env(safe-area-inset-top, 0px) + 17px) 16px 17px;
+      text-align: center;
+      background: var(--sh-bg);
+      border-bottom: 1px solid var(--sh-line);
+      border-radius: 0 0 26px 26px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    }
+    .dark #home .home-top { box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4); }
+    #home .home-top span {
+      font-size: 22px;
+      line-height: 1.2;
+      font-weight: 700;
+      font-style: italic;
+      letter-spacing: 0.08em;
+      color: var(--sh-text);
+    }
+    .set-default-wrap { margin-top: 8px; }
+    .set-default-wrap .set-lbl { margin: 14px 2px 6px; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--sh-mute); font-weight: 600; }
+    #defaultPageSelect {
+      width: 100%; padding: 11px 12px; border-radius: 11px; border: 1px solid var(--sh-line);
+      background: var(--sh-card); color: var(--sh-text); font: inherit; font-size: 14px;
+    }
+    .set-default-wrap .set-hint { font-size: 12px; color: var(--sh-mute); margin: 6px 2px 0; }
+
     /* ---------- light polish ---------- */
     #navBar { box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06); }
     .dark #navBar { box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.4); }
@@ -1709,6 +1739,12 @@
         <div class="sh-list">
           <button type="button" class="sh-row" id="darkModeBtn"><span class="ri g-night"><svg aria-hidden="true"><use href="#i-moon"/></svg></span><span class="sh-lbl">Dark Mode</span><span class="sw" id="darkSw"></span></button>
           <button type="button" class="sh-row" id="notificationBtn" data-go="notifications"><span class="ri g-red"><svg aria-hidden="true"><use href="#i-bell"/></svg></span><span class="sh-lbl">Notifications<small>Alerts &amp; permission</small></span><span class="sh-chev">›</span></button>
+          <button type="button" class="sh-row" id="saveLastBtn" role="switch" aria-checked="false"><span class="ri g-blue"><svg aria-hidden="true"><use href="#i-history"/></svg></span><span class="sh-lbl">Save last changes<small>Remember hidden / expanded buttons</small></span><span class="sw" id="saveLastSw"></span></button>
+        </div>
+        <div class="set-default-wrap">
+          <div class="set-lbl">Default page</div>
+          <select id="defaultPageSelect" aria-label="Default page"></select>
+          <p class="set-hint">The page the app opens on at start.</p>
         </div>
         <div class="sh-label">View mode</div>
         <div class="seg" role="group" aria-label="Popup view mode">
@@ -1748,7 +1784,7 @@
 
   <div id="main" class="main">
     <div id="home" class="page">
-      <h2>Home</h2>
+      <div class="home-top" role="banner"><span>DASHBOARD</span></div>
       <div class="add-area">
         <button
             id="homeRemindersToggle"
@@ -2088,8 +2124,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.8.7</p>
-          <p>Last Updated: 07-Nov-2026</p>
+          <p>Version 13.8.8</p>
+          <p>Last Updated: 08-Nov-2026</p>
           <p>Project Mode: Open source</p>
           <p>App Size : 7.0KB </p>
         </ul>
@@ -3439,7 +3475,7 @@ render();
             }
             const backup = {
               app: BACKUP_APP,
-              version: '13.8.7',
+              version: '13.8.8',
               exportedAt: new Date().toISOString(),
               appData: structuredClone(appData),
               localStorage: ls
@@ -9783,6 +9819,83 @@ render();
       });
       if (pf) new MutationObserver(syncAvatar).observe(pf, { attributes: true, attributeFilter: ['src'] });
       pf && pf.addEventListener('load', syncAvatar);
+
+
+      // ---------- Save last changes + Default page (Home only) ----------
+      const SAVE_KEY = 'nr_saveLast', STATE_KEY = 'nr_homeState', DEF_KEY = 'nr_defaultPage';
+      const HOME_SECTIONS = [
+        ['homeRemindersToggle', 'homeRemindersContainer'], ['homeNotesToggle', 'homeNotesContainer'],
+        ['homeBudgetsToggle', 'homeBudgetsContainer'], ['homeCheckToggle', 'homeCheckContainer'],
+        ['homePriorityToggle', 'homePriorityContainer'], ['homeProgressToggle', 'homeProgressContainer'],
+        ['homeOverviewToggle', 'homeOverviewContainer']
+      ];
+      const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+      const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { } };
+      const saveOn = () => lsGet(SAVE_KEY) === '1';
+
+      function saveHomeState() {
+        if (!saveOn()) return;
+        const st = {};
+        HOME_SECTIONS.forEach(([t, c]) => { const b = $(t), box = $(c); if (b && box) st[t] = box.classList.contains('visible'); });
+        lsSet(STATE_KEY, JSON.stringify(st));
+      }
+      function restoreHomeState() {
+        if (!saveOn()) return;
+        let st = null;
+        try { st = JSON.parse(lsGet(STATE_KEY) || 'null'); } catch (e) { }
+        if (!st) return;
+        HOME_SECTIONS.forEach(([t, c]) => {
+          const b = $(t), box = $(c);
+          if (!b || !box || typeof st[t] !== 'boolean') return;
+          box.classList.toggle('visible', st[t]);
+          b.classList.toggle('open', st[t]);
+          b.setAttribute('aria-expanded', String(st[t]));
+        });
+      }
+      HOME_SECTIONS.forEach(([t]) => { const b = $(t); if (b) b.addEventListener('click', () => setTimeout(saveHomeState, 0)); });
+
+      const saveBtn = $('saveLastBtn'), saveSw = $('saveLastSw');
+      function syncSave() { const on = saveOn(); if (saveSw) saveSw.classList.toggle('on', on); if (saveBtn) saveBtn.setAttribute('aria-checked', String(on)); }
+      if (saveBtn) saveBtn.addEventListener('click', () => {
+        lsSet(SAVE_KEY, saveOn() ? '0' : '1');
+        syncSave();
+        saveHomeState();   // turning it on stores the current layout straight away
+      });
+      syncSave();
+
+      // Default page list: Dashboard, hub pages and every utility
+      const DEFAULT_PAGES = [
+        ['home', 'Dashboard'], ['reminders', 'Reminders'], ['notes', 'Notes'], ['budget', 'Budget Tracker'],
+        ['Check', 'Check List'], ['priority', 'Priority Queue'], ['progress', 'Progress Tracker'],
+        ['piggyBank', 'Piggy Bank'], ['calories', 'Calories']
+      ];
+      const defSel = $('defaultPageSelect');
+      if (defSel) {
+        const mk = (v, t) => { const o = document.createElement('option'); o.value = v; o.textContent = t; return o; };
+        DEFAULT_PAGES.forEach(([v, t]) => defSel.appendChild(mk(v, t)));
+        const grp = document.createElement('optgroup'); grp.label = 'Utilities';
+        grp.appendChild(mk('util:*', 'Utilities (all tools)'));
+        Object.keys(UTILS).forEach(k => grp.appendChild(mk('util:' + k, UTILS[k].t)));
+        defSel.appendChild(grp);
+        const cur = lsGet(DEF_KEY) || 'home';
+        defSel.value = [...defSel.options].some(o => o.value === cur) ? cur : 'home';
+        defSel.addEventListener('change', () => lsSet(DEF_KEY, defSel.value));
+      }
+
+      function openDefaultPage() {
+        const d = lsGet(DEF_KEY) || 'home';
+        if (d === 'home') return;
+        if (d.indexOf('util:') === 0) {
+          const k = d.slice(5);
+          if (k !== '*' && UTILS[k]) showUtil(k);
+          go('utilities');
+        } else go(d);
+      }
+
+      // run after the app's own start-up code (home visible first, then restore + default page)
+      function startup() { restoreHomeState(); openDefaultPage(); }
+      if (document.readyState === 'complete') setTimeout(startup, 0);
+      else window.addEventListener('load', () => setTimeout(startup, 0));
 
       // ---------- init ----------
       applyMode(mode, false);

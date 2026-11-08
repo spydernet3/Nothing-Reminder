@@ -9876,11 +9876,12 @@ render();
         const mk = (v, t) => { const o = document.createElement('option'); o.value = v; o.textContent = t; return o; };
         DEFAULT_PAGES.forEach(([v, t]) => defSel.appendChild(mk(v, t)));
         const grp = document.createElement('optgroup'); grp.label = 'Utilities';
-        grp.appendChild(mk('util:*', 'Utilities (all tools)'));
         Object.keys(UTILS).forEach(k => grp.appendChild(mk('util:' + k, UTILS[k].t)));
         defSel.appendChild(grp);
         const cur = lsGet(DEF_KEY) || 'home';
-        defSel.value = [...defSel.options].some(o => o.value === cur) ? cur : 'home';
+        const okCur = [...defSel.options].some(o => o.value === cur);
+        defSel.value = okCur ? cur : 'home';
+        if (!okCur && cur !== 'home') lsSet(DEF_KEY, 'home');   // old/removed choice (e.g. "all tools") -> Dashboard
         defSel.addEventListener('change', () => lsSet(DEF_KEY, defSel.value));
       }
 
@@ -9889,9 +9890,11 @@ render();
         if (d === 'home') return;
         if (d.indexOf('util:') === 0) {
           const k = d.slice(5);
-          if (k !== '*' && UTILS[k]) showUtil(k);
+          if (!UTILS[k]) { lsSet(DEF_KEY, 'home'); return; }   // unknown / removed tool -> stay on Dashboard
+          showUtil(k);
           go('utilities');
-        } else go(d);
+        } else if (DEFAULT_PAGES.some(p => p[0] === d) && $(d)) go(d);
+        else lsSet(DEF_KEY, 'home');
       }
 
       // run after the app's own start-up code (home visible first, then restore + default page)

@@ -1210,8 +1210,8 @@
       position: sticky;
       top: 0;
       z-index: 900;
-      margin: -20px -20px 24px;
-      padding: calc(env(safe-area-inset-top, 0px) + 17px) 16px 17px;
+      margin: -20px -20px 32px;
+      padding: calc(env(safe-area-inset-top, 0px) + 16px) 16px 16px;
       text-align: center;
       background: var(--sh-bg);
       border-bottom: 1px solid var(--sh-line);
@@ -1540,6 +1540,8 @@
       .form { border-radius: 14px; }
       #other .menu-btn { width: 260px !important; border-radius: 12px; padding: 16px 14px; text-align: center; }
       #other > div { justify-content: center; }
+      /* Home top bar: always full width (the centred-column rule above must not shrink it) */
+      #home .home-top { max-width: none; margin-left: -20px; margin-right: -20px; width: auto; }
 
       /* bottom bar: centred, wider, rounded buttons */
       #navBar .nav-in { max-width: 860px; justify-content: center; gap: 10px; padding: 0 12px; }

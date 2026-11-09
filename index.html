@@ -991,6 +991,10 @@
 
     button, input, select, textarea { font-family: inherit; }
 
+    /* Price Tracker links follow the text colour of the current theme (light or dark) */
+    #priceTrackList a, #priceTrackList a:visited, #priceTrackList a:hover { color: inherit; text-decoration: none; font-weight: 600; }
+    #trackOutput a, #trackOutput a:visited { color: inherit; text-decoration: underline; }
+
     /* ===== INSTALL BAR (top, swipe down to show / up to hide) ===== */
     #installBar {
       position: fixed;
@@ -9243,20 +9247,42 @@ render();
                 return u.replace(/[)\].,;]+$/, "");
               }
 
-              // Product page -> clean mobile/short page. Short share links are kept as they are
-              // (the reader service follows their redirect).
-              function normalizeUrl(url) {
-                if (isFlipkart(url)) {
-                  const m = url.match(/[?&]pid=([A-Z0-9]+)/i);
-                  return m ? `https://www.flipkart.com/product/p/itme?pid=${m[1].toUpperCase()}` : url;
-                }
+              // Ordered list of links to try for one product. The clean product page comes first,
+              // then the original link; short share links (amzn.in, dl.flipkart.com, fkrt.it ...) are kept as they are.
+              function urlVariants(url) {
+                const out = [];
+                const add = u => { if (u && out.indexOf(u) < 0) out.push(u); };
                 if (isAmazon(url)) {
-                  const host = url.match(/https?:\/\/(?:www\.|m\.)?(amazon\.[a-z.]+)/i);
-                  const m = url.match(/\/(?:dp|gp\/product|gp\/aw\/d)\/([A-Z0-9]{10})/i);
-                  if (host && m) return `https://www.${host[1]}/gp/aw/d/${m[1].toUpperCase()}`;
+                  const host = url.match(/https?:\/\/(?:www\.|m\.|smile\.)?(amazon\.[a-z.]+)/i);
+                  const m = url.match(/\/(?:dp|gp\/product|gp\/aw\/d|product)\/([A-Z0-9]{10})/i);
+                  if (host && m) {
+                    const A = m[1].toUpperCase();
+                    add(`https://www.${host[1]}/dp/${A}`);
+                    add(url);
+                    add(`https://www.${host[1]}/gp/aw/d/${A}`);
+                    return out;
+                  }
+                } else if (isFlipkart(url)) {
+                  const pid = url.match(/[?&]pid=([A-Z0-9]+)/i);
+                  try {
+                    const U = new URL(url);
+                    if (/\/p\/itm/i.test(U.pathname)) {
+                      add(U.origin + U.pathname + (pid ? "?pid=" + pid[1].toUpperCase() : ""));   // tracking params removed
+                    }
+                  } catch (e) { }
+                  add(url);
+                  if (pid) {
+                    const P = pid[1].toUpperCase();
+                    add(`https://dl.flipkart.com/dl/product/p/itme?pid=${P}`);
+                    add(`https://www.flipkart.com/product/p/itme?pid=${P}`);
+                    add(`https://m.flipkart.com/product/p/itme?pid=${P}`);
+                  }
+                  return out;
                 }
-                return url;
+                add(url);
+                return out;
               }
+              const normalizeUrl = url => urlVariants(url)[0] || url;
 
               function safeKey(u) {
                 try { return btoa(u); } catch { return btoa(unescape(encodeURIComponent(u))); }
@@ -9275,20 +9301,33 @@ render();
                 finally { clearTimeout(t); }
               }
 
-              async function proxyFetch(url) {
+              // All reader services are asked at the same time; the first one that returns a price wins.
+              function proxyFetch(url) {
+                const q = encodeURIComponent(url);
                 const sources = [
                   "https://r.jina.ai/" + url,
-                  "https://api.allorigins.win/raw?url=" + encodeURIComponent(url),
-                  "https://textise.net/showtext.aspx?strURL=" + encodeURIComponent(url)
+                  "https://api.allorigins.win/raw?url=" + q,
+                  "https://api.allorigins.win/get?url=" + q,
+                  "https://corsproxy.io/?url=" + q,
+                  "https://thingproxy.freeboard.io/fetch/" + url,
+                  "https://api.codetabs.com/v1/proxy?quest=" + q,
+                  "https://textise.net/showtext.aspx?strURL=" + q
                 ];
-                let last = "";
-                for (const src of sources) {
-                  const txt = await getText(src);
-                  if (!txt) continue;
-                  last = txt;
-                  if (extractPrice(txt)) return txt;
-                }
-                return last;
+                return new Promise(resolve => {
+                  let pending = sources.length, last = "", done = false;
+                  sources.forEach(async src => {
+                    let txt = await getText(src, 20000);
+                    if (txt && src.indexOf("allorigins.win/get") > -1) {
+                      try { txt = (JSON.parse(txt).contents) || ""; } catch (e) { txt = ""; }
+                    }
+                    if (done) return;
+                    if (txt) {
+                      last = txt;
+                      if (extractPrice(txt)) { done = true; return resolve(txt); }
+                    }
+                    if (--pending === 0) { done = true; resolve(last); }
+                  });
+                });
               }
 
               /* =====================================================
@@ -9400,22 +9439,32 @@ render();
                   statusEl.textContent = "⏳ Fetching price…";
                   outputEl.innerHTML = "";
 
-                  const url = normalizeUrl(raw);
+                  const variants = urlVariants(raw);
+                  const url = variants[0] || raw;
                   const platform = platformOf(url);
                   const key = saved && saved.key ? saved.key : safeKey(url);
 
-                  let text = await proxyFetch(url);
-                  let price = extractPrice(text);
-
-                  if (!price && url !== raw) {          // normalised link failed: try the original link
-                    const text2 = await proxyFetch(raw);
-                    const p2 = extractPrice(text2);
-                    if (p2) { price = p2; text = text2; }
+                  let text = "", price = null, usedUrl = url;
+                  for (const v of variants) {
+                    statusEl.textContent = "⏳ Fetching price…" + (variants.length > 1 ? " (" + (variants.indexOf(v) + 1) + "/" + variants.length + ")" : "");
+                    const t = await proxyFetch(v);
+                    const pr = extractPrice(t);
+                    if (!text) text = t;
+                    if (pr) { price = pr; text = t; usedUrl = v; break; }
                   }
 
+                  let manual = false;
                   if (!price) {
-                    statusEl.textContent = "❌ Price not detected. Try the full product page link (or try again in a minute).";
-                    return;
+                    // The shop blocked the automatic read (Flipkart does this to every free reader service):
+                    // let the user type today's price so the daily history and the price-change still work.
+                    const typed = prompt(platform + " did not allow the app to read the price automatically.\n\nOpen the product in the " + platform + " app / website and type today's price (numbers only):", "");
+                    const n = typed == null ? NaN : Math.round(parseFloat(String(typed).replace(/[^\d.]/g, "")));
+                    if (!Number.isFinite(n) || n < 1 || n >= 5000000) {
+                      statusEl.textContent = "❌ Price not read automatically. Tap TRACK PRICE again and type the price when asked.";
+                      outputEl.innerHTML = `<p style="margin:0;"><a href="${esc(url)}" target="_blank" rel="noopener">🔗 Open product page</a></p>`;
+                      return;
+                    }
+                    price = n; manual = true; usedUrl = url;
                   }
 
                   saveSnapshot(key, price);
@@ -9440,6 +9489,7 @@ render();
                       <h3 style="margin:4px 0 6px;">${esc(title || pageName || "Product")}</h3>
                       ${pageName && pageName !== title ? `<p style="margin:0 0 8px;font-size:13px;opacity:.8;">${esc(pageName)}</p>` : ""}
                       <p><b>Today:</b> ₹${price.toLocaleString("en-IN")}</p>
+                      <p style="margin:0 0 6px;"><a href="${esc(usedUrl)}" target="_blank" rel="noopener">🔗 Open product page</a></p>
                       ${changeHtml}
                       <canvas id="priceChart" style="width:100%;"></canvas>
                     </div>
@@ -9447,7 +9497,7 @@ render();
 
                   drawChart("priceChart", [yesterday, price].filter(v => v != null));
 
-                  statusEl.textContent = "✔ Updated";
+                  statusEl.textContent = manual ? "✔ Saved (price typed by you)" : "✔ Updated";
 
                 } catch (e) {
                   console.error(e);

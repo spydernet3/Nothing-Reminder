@@ -1296,7 +1296,7 @@
     }
     .set-default-wrap { margin-top: 8px; }
     .set-default-wrap .set-lbl { margin: 14px 2px 6px; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--sh-mute); font-weight: 600; }
-    #defaultPageSelect {
+    #defaultPageSelect, #languageSelect, #animSelect {
       width: 100%; padding: 11px 12px; border-radius: 11px; border: 1px solid var(--sh-line);
       background: var(--sh-card); color: var(--sh-text); font: inherit; font-size: 14px;
     }
@@ -1685,6 +1685,22 @@
     @media (prefers-reduced-motion: reduce) {
       #sheet, #sheetBackdrop, .nav-tab .ni, .sw, .sw::after { transition: none !important; }
     }
+
+    /* ===== Home list icons (replace bullets) ===== */
+    #home .form > li { list-style: none; position: relative; padding-left: 24px; }
+    #home .form > li::before { content: none; position: absolute; left: 0; top: 0.05em; font-size: 14px; line-height: 1.5; }
+    #home #homeRemindersContainer > li::before { content: "\23F0"; }
+    #home #homeNotesContainer > li::before { content: "\1F4CC"; }
+    #home #homeBudgetsContainer > li::before { content: "\1FA99"; }
+    #home #homeCheckContainer > li::before { content: "\2611\FE0F"; }
+    #home #homeProgressContainer > li::before { content: "\1F680"; }
+    #home .form > li.pq-day-home { padding-left: 0; }
+    /* ===== Animation setting ===== */
+    html.no-anim *, html.no-anim *::before, html.no-anim *::after {
+      animation: none !important; transition: none !important; scroll-behavior: auto !important;
+    }
+    #feedbackPanel[hidden] { display: none; }
+    #feedbackPanel textarea { width: 100%; box-sizing: border-box; }
   </style>
 </head>
 
@@ -1822,6 +1838,37 @@
           <div class="set-lbl">Default page</div>
           <select id="defaultPageSelect" aria-label="Default page"></select>
           <p class="set-hint">The page the app opens on at start.</p>
+        </div>
+        <div class="set-default-wrap">
+          <div class="set-lbl">Language</div>
+          <select id="languageSelect" aria-label="Language">
+            <option value="device">Device default</option>
+            <option value="en">English</option>
+            <option value="ta">தமிழ்</option>
+            <option value="ml">മലയാളം</option>
+            <option value="kn">ಕನ್ನಡ</option>
+            <option value="hi">हिन्दी</option>
+            <option value="te">తెలుగు</option>
+            <option value="bn">বাংলা</option>
+            <option value="mr">मराठी</option>
+          </select>
+          <p class="set-hint">Default follows your device language. Menu and section labels change; your own notes stay as you wrote them.</p>
+        </div>
+        <div class="set-default-wrap">
+          <div class="set-lbl">Animations</div>
+          <select id="animSelect" aria-label="Animations">
+            <option value="device">Device default</option>
+            <option value="on">Animations on</option>
+            <option value="off">Animations off</option>
+          </select>
+          <p class="set-hint">Default follows your device's reduce-motion setting.</p>
+        </div>
+        <div class="sh-list">
+          <button type="button" class="sh-row" id="feedbackBtn" aria-expanded="false"><span class="sh-lbl">Provide Feedback</span><span class="sh-chev">›</span></button>
+        </div>
+        <div id="feedbackPanel" class="set-default-wrap" hidden>
+          <textarea id="feedbackText" class="cal-in" rows="4" placeholder="Write your feedback here"></textarea>
+          <div class="form-actions"><button type="button" id="feedbackSend" class="primary">Send Feedback</button></div>
         </div>
         <div class="sh-label">View mode</div>
         <div class="seg" role="group" aria-label="Popup view mode">
@@ -2207,8 +2254,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.8.9</p>
-          <p>Last Updated: 08-Nov-2026</p>
+          <p>Version 13.9.0</p>
+          <p>Last Updated: 12-Nov-2026</p>
           <p>Project Mode: Open source</p>
           <p>App Size : 7.0KB </p>
         </ul>
@@ -2291,7 +2338,7 @@
       <h3>Settings</h3>
       <hr />
       <ul>
-        <li>Edit Name, Dark Mode and Notification Settings are inside ⚙️ Settings.</li>
+        <li>Edit Name, Dark Mode, Language, Animations, Notification Settings and Provide Feedback are inside ⚙️ Settings.</li>
         <li>Click the profile picture to change it.</li>
         <li>Notifications can be turned on or off for each feature. Allow notifications for this site in your browser.</li>
       </ul>
@@ -3620,7 +3667,7 @@ render();
             }
             const backup = {
               app: BACKUP_APP,
-              version: '13.8.9',
+              version: '13.9.0',
               exportedAt: new Date().toISOString(),
               appData: structuredClone(appData),
               localStorage: ls
@@ -3888,7 +3935,7 @@ render();
             const dateRow = document.createElement('b');
             dateRow.style.display = 'block';
             dateRow.style.marginBottom = '2px';
-            dateRow.textContent = '• ' + noteWhen(n);
+            dateRow.textContent = noteWhen(n);
             text.appendChild(dateRow);
             if(n.isTable && n.text) {
               text.appendChild(renderSafeTableFromText(n.text));
@@ -10302,6 +10349,104 @@ render();
     try {                                                   // permission granted later (button / prompt)
       navigator.permissions.query({ name: 'notifications' }).then(st => { st.onchange = initFCM; });
     } catch (e) {}
+  
+  // ================= Language, animation & feedback settings =================
+  (function () {
+    var APP_VERSION = '13.9.0', FEEDBACK_TO = 'mersalmgblog@gmail.com';
+    function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+    function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+
+    // ---- animations ----
+    function animApply() {
+      var m = lsGet('nrAnim') || 'device', off = m === 'off';
+      if (m === 'device') { try { off = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {} }
+      document.documentElement.classList.toggle('no-anim', off);
+    }
+
+    // ---- language ----
+    var T = {
+      'home':['முகப்பு','होम','ഹോം','ಮುಖಪುಟ','హోమ్','হোম','होम'],'reminders hub':['நினைவூட்டல் மையம்','रिमाइंडर हब','ഓർമ്മപ്പെടുത്തൽ ഹബ്','ಜ್ಞಾಪನೆ ಹಬ್','రిమైండర్ హబ్','রিমাইন্ডার হাব','रिमाइंडर हब'],'utilities':['பயன்பாடுகள்','उपयोगिताएँ','ഉപകരണങ്ങൾ','ಉಪಯುಕ್ತತೆಗಳು','యుటిలిటీలు','ইউটিলিটি','उपयुक्तता'],
+      'profile':['சுயவிவரம்','प्रोफ़ाइल','പ്രൊഫൈൽ','ಪ್ರೊಫೈಲ್','ప్రొఫైల్','প্রোফাইল','प्रोफाइल'],'settings':['அமைப்புகள்','सेटिंग्स','ക്രമീകരണങ്ങൾ','ಸೆಟ್ಟಿಂಗ್‌ಗಳು','సెట్టింగ్‌లు','সেটিংস','सेटिंग्ज'],'storage':['சேமிப்பகம்','स्टोरेज','സ്റ്റോറേജ്','ಸಂಗ್ರಹಣೆ','నిల్వ','স্টোরেজ','स्टोरेज'],
+      'more apps':['மேலும் செயலிகள்','और ऐप्स','കൂടുതൽ ആപ്പുകൾ','ಇನ್ನಷ್ಟು ಆ್ಯಪ್‌ಗಳು','మరిన్ని యాప్‌లు','আরও অ্যাপ','आणखी अॅप्स'],'update blog':['புதுப்பிப்பு வலைப்பதிவு','अपडेट ब्लॉग','അപ്‌ഡേറ്റ് ബ്ലോഗ്','ಅಪ್‌ಡೇಟ್ ಬ್ಲಾಗ್','అప్‌డేట్ బ్లాగ్','আপডেট ব্লগ','अपडेट ब्लॉग'],
+      'how to use':['பயன்படுத்தும் முறை','उपयोग कैसे करें','ഉപയോഗിക്കേണ്ട വിധം','ಬಳಸುವ ವಿಧಾನ','ఎలా ఉపయోగించాలి','কীভাবে ব্যবহার করবেন','कसे वापरावे'],'terms & conditions':['விதிமுறைகள் & நிபந்தனைகள்','नियम और शर्तें','നിബന്ധനകളും വ്യവസ്ഥകളും','ನಿಯಮಗಳು ಮತ್ತು ಷರತ್ತುಗಳು','నియమాలు & షరతులు','শর্তাবলী','अटी आणि शर्ती'],
+      'dark mode':['இருள் பயன்முறை','डार्क मोड','ഡാർക്ക് മോഡ്','ಡಾರ್ಕ್ ಮೋಡ್','డార్క్ మోడ్','ডার্ক মোড','डार्क मोड'],'notifications':['அறிவிப்புகள்','सूचनाएँ','അറിയിപ്പുകൾ','ಅಧಿಸೂಚನೆಗಳು','నోటిఫికేషన్లు','বিজ্ঞপ্তি','सूचना'],
+      'save last changes':['கடைசி மாற்றங்களைச் சேமி','अंतिम बदलाव सहेजें','അവസാന മാറ്റങ്ങൾ സേവ് ചെയ്യുക','ಕೊನೆಯ ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸಿ','చివరి మార్పులను సేవ్ చేయి','শেষ পরিবর্তন সংরক্ষণ','शेवटचे बदल जतन करा'],'default page':['இயல்புநிலை பக்கம்','डिफ़ॉल्ट पेज','ഡിഫോൾട്ട് പേജ്','ಡೀಫಾಲ್ಟ್ ಪುಟ','డిఫాల్ట్ పేజీ','ডিফল্ট পেজ','डिफॉल्ट पेज'],
+      'view mode':['காட்சி முறை','व्यू मोड','കാഴ്ച രീതി','ವೀಕ್ಷಣೆ ಮೋಡ್','వ్యూ మోడ్','ভিউ মোড','व्ह्यू मोड'],'compact':['சுருக்கமான','कॉम्पैक्ट'],'half screen':['அரைத் திரை','आधी स्क्रीन'],
+      'reminders':['நினைவூட்டல்கள்','रिमाइंडर','ഓർമ്മപ്പെടുത്തലുകൾ','ಜ್ಞಾಪನೆಗಳು','రిమైండర్లు','রিমাইন্ডার','रिमाइंडर'],'notes':['குறிப்புகள்','नोट्स','കുറിപ്പുകൾ','ಟಿಪ್ಪಣಿಗಳು','గమనికలు','নোট','नोट्स'],'budget overview':['பட்ஜெட் மேலோட்டம்','बजट अवलोकन','ബജറ്റ് അവലോകനം','ಬಜೆಟ್ ಅವಲೋಕನ','బడ్జెట్ అవలోకనం','বাজেট ওভারভিউ','बजेट आढावा'],
+      'check list':['சரிபார்ப்புப் பட்டியல்','चेकलिस्ट','ചെക്ക്‌ലിസ്റ്റ്','ಚೆಕ್‌ಲಿಸ್ಟ್','చెక్‌లిస్ట్','চেকলিস্ট','चेकलिस्ट'],'priority queue':['முன்னுரிமை வரிசை','प्राथमिकता सूची','മുൻഗണനാ ക്യൂ','ಆದ್ಯತೆಯ ಸರತಿ','ప్రాధాన్యత క్యూ','অগ্রাধিকার তালিকা','प्राधान्य यादी'],
+      'progress tracker':['முன்னேற்றக் கண்காணிப்பு','प्रगति ट्रैकर','പുരോഗതി ട്രാക്കർ','ಪ್ರಗತಿ ಟ್ರ್ಯಾಕರ್','పురోగతి ట్రాకర్','অগ্রগতি ট্র্যাকার','प्रगती ट्रॅकर'],'reminders overview':['நினைவூட்டல் மேலோட்டம்','रिमाइंडर अवलोकन','ഓർമ്മപ്പെടുത്തൽ അവലോകനം','ಜ್ಞಾಪನೆ ಅವಲೋಕನ','రిమైండర్ అవలోకనం','রিমাইন্ডার ওভারভিউ','रिमाइंडर आढावा'],
+      'title':['தலைப்பு','शीर्षक','തലക്കെട്ട്','ಶೀರ್ಷಿಕೆ','శీర్షిక','শিরোনাম','शीर्षक'],'active':['செயலில்','सक्रिय','സജീവം','ಸಕ್ರಿಯ','క్రియాశీలం','সক্রিয়','सक्रिय'],'inactive':['செயலற்றவை','निष्क्रिय','നിഷ്‌ക്രിയം','ನಿಷ್ಕ್ರಿಯ','క్రియారహితం','নিষ্ক্রিয়','निष्क्रिय'],
+      'checklists':['சரிபார்ப்புப் பட்டியல்கள்','चेकलिस्ट'],'priorities':['முன்னுரிமைகள்','प्राथमिकताएँ'],
+      'language':['மொழி','भाषा','ഭാഷ','ಭಾಷೆ','భాష','ভাষা','भाषा'],'animations':['அனிமேஷன்கள்','एनिमेशन','ആനിമേഷനുകൾ','ಅನಿಮೇಷನ್‌ಗಳು','యానిమేషన్లు','অ্যানিমেশন','अॅनिमेशन'],'device default':['சாதன இயல்புநிலை','डिवाइस डिफ़ॉल्ट','ഉപകരണ ഡിഫോൾട്ട്','ಸಾಧನ ಡೀಫಾಲ್ಟ್','పరికర డిఫాల్ట్','ডিভাইস ডিফল্ট','डिव्हाइस डिफॉल्ट'],
+      'animations on':['அனிமேஷன் இயக்கு','एनिमेशन चालू','ആനിമേഷൻ ഓൺ','ಅನಿಮೇಷನ್ ಆನ್','యానిమేషన్ ఆన్','অ্যানিমেশন চালু','अॅनिमेशन चालू'],'animations off':['அனிமேஷன் நிறுத்து','एनिमेशन बंद','ആനിമേഷൻ ഓഫ്','ಅನಿಮೇಷನ್ ಆಫ್','యానిమేషన్ ఆఫ్','অ্যানিমেশন বন্ধ','अॅनिमेशन बंद'],
+      'provide feedback':['கருத்தை வழங்கவும்','फ़ीडबैक दें','ഫീഡ്ബാക്ക് നൽകുക','ಪ್ರತಿಕ್ರಿಯೆ ನೀಡಿ','అభిప్రాయం తెలపండి','মতামত দিন','अभिप्राय द्या'],'send feedback':['கருத்தை அனுப்பு','फ़ीडबैक भेजें','ഫീഡ്ബാക്ക് അയയ്ക്കുക','ಪ್ರತಿಕ್ರಿಯೆ ಕಳುಹಿಸಿ','అభిప్రాయం పంపండి','মতামত পাঠান','अभिप्राय पाठवा'],
+      'edit name':['பெயரை மாற்று','नाम बदलें'],'upload photo':['புகைப்படம் பதிவேற்று','फ़ोटो अपलोड करें'],
+      'weight profile':['எடை சுயவிவரம்','वज़न प्रोफ़ाइल'],'trash bin':['குப்பைத் தொட்டி','ट्रैश बिन','ട്രാഷ് ബിൻ','ಟ್ರ್ಯಾಶ್ ಬಿನ್','ట్రాష్ బిన్','ট্র্যাশ বিন','ट्रॅश बिन'],
+      'export':['ஏற்றுமதி','एक्सपोर्ट','എക്സ്പോർട്ട്','ಎಕ್ಸ್‌ಪೋರ್ಟ್','ఎగుమతి','এক্সপোর্ট','एक्स्पोर्ट'],'import':['இறக்குமதி','इम्पोर्ट','ഇമ്പോർട്ട്','ಇಂಪೋರ್ಟ್','దిగుమతి','ইমপোর্ট','इम्पोर्ट']
+    };
+    var SKIP = 'script,style,textarea,input,iframe,.item-left,table,#homeNotesContainer,#homeRemindersContainer,#homeCheckContainer,#homeProgressContainer,#homeBudgetsContainer';
+    var LANGS = ['ta','hi','ml','kn','te','bn','mr'];
+    var applying = false, timer = null, obs = null;
+    function curLang() {
+      var v = lsGet('nrLang') || 'device';
+      if (v === 'device') {
+        var n = ((navigator.languages && navigator.languages[0]) || navigator.language || 'en').toLowerCase();
+        var f = LANGS.filter(function (c) { return n.indexOf(c) === 0; }); v = f.length ? f[0] : 'en';
+      }
+      return v;
+    }
+    function proc(n, idx) {
+      var cur = n.nodeValue;
+      var orig = (n.__t !== undefined && cur === n.__t) ? n.__o : cur;
+      var m = orig.match(/^([^A-Za-z]*)([\s\S]*?)([^A-Za-z]*)$/);
+      var next = orig;
+      if (m && idx >= 0) {
+        var e = T[m[2].toLowerCase().replace(/\s+/g, ' ').trim()];
+        if (e && e[idx]) next = m[1] + e[idx] + m[3];
+      }
+      if (next !== cur) { n.nodeValue = next; n.__o = orig; n.__t = next; }
+      else if (n.__t !== undefined && cur === n.__t) { n.__o = orig; }
+    }
+    function apply() {
+      var lang = curLang(), idx = LANGS.indexOf(lang);
+      document.documentElement.lang = lang;
+      applying = true;
+      if (obs) obs.disconnect();
+      try {
+        var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null), node;
+        while ((node = w.nextNode())) {
+          var par = node.parentElement;
+          if (!par || !node.nodeValue.trim() || par.closest(SKIP)) continue;
+          proc(node, idx);
+        }
+      } catch (e) {}
+      if (idx >= 0 && obs) obs.observe(document.body, { childList: true, subtree: true, characterData: true });
+      applying = false;
+    }
+    function schedule() { if (applying) return; clearTimeout(timer); timer = setTimeout(apply, 150); }
+
+    function init() {
+      obs = new MutationObserver(schedule);
+      var ls = document.getElementById('languageSelect'), as = document.getElementById('animSelect');
+      if (ls) { ls.value = lsGet('nrLang') || 'device'; ls.addEventListener('change', function () { lsSet('nrLang', ls.value); apply(); }); }
+      if (as) { as.value = lsGet('nrAnim') || 'device'; as.addEventListener('change', function () { lsSet('nrAnim', as.value); animApply(); }); }
+      animApply(); apply();
+
+      var fb = document.getElementById('feedbackBtn'), panel = document.getElementById('feedbackPanel'),
+          txt = document.getElementById('feedbackText'), send = document.getElementById('feedbackSend');
+      if (fb && panel) fb.addEventListener('click', function () {
+        var open = panel.hidden; panel.hidden = !open; fb.setAttribute('aria-expanded', String(open));
+        if (open && txt) txt.focus();
+      });
+      if (send) send.addEventListener('click', function () {
+        var msg = (txt && txt.value || '').trim();
+        if (!msg) { if (txt) txt.focus(); return; }
+        var body = msg + '\n\n---\nApp: Nothing Reminder v' + APP_VERSION;
+        window.location.href = 'mailto:' + FEEDBACK_TO + '?subject=' + encodeURIComponent('Nothing Reminder feedback') + '&body=' + encodeURIComponent(body);
+      });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+  })();
   </script>
 
 </body>

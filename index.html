@@ -1746,6 +1746,22 @@
     #fbModal .fb-actions button.fb-send { background: var(--accent); color: #fff; border-color: transparent; font-weight: 600; }
     #fbStatus { font-size: 12px; color: var(--sh-mute); margin: 8px 2px 0; min-height: 0; }
     #fbStatus:empty { display: none; }
+
+    /* ---------- Fix: inputs/textareas must never overflow their card (all pages) ---------- */
+    .form, .form label, .pt-form, .pt-form label, .add-area, .add-area .form { min-width: 0; max-width: 100%; }
+    .form label, .pt-form label { min-width: 0; }
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+    select, textarea {
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+    .form input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="number"]),
+    .form select, .form textarea,
+    .pt-form input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="number"]),
+    .pt-form select, .pt-form textarea { width: 100%; }
+    textarea { resize: vertical; }
+    input[type="file"] { width: 100%; max-width: 100%; }
   </style>
 </head>
 

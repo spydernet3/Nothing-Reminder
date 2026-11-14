@@ -1296,7 +1296,7 @@
     }
     .set-default-wrap { margin-top: 8px; }
     .set-default-wrap .set-lbl { margin: 14px 2px 6px; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--sh-mute); font-weight: 600; }
-    #defaultPageSelect, #languageSelect, #animSelect {
+    #defaultPageSelect {
       width: 100%; padding: 11px 12px; border-radius: 11px; border: 1px solid var(--sh-line);
       background: var(--sh-card); color: var(--sh-text); font: inherit; font-size: 14px;
     }
@@ -1599,9 +1599,9 @@
 
     /* ---------- desktop only (wide screens, 900px+): centred + wider layout. Phones are untouched ---------- */
     @media (min-width: 900px) {
-      /* page content: centred column, ~60% wider than before (520px -> 832px) */
-      .page > * { max-width: 832px; margin-left: auto; margin-right: auto; }
-      .add-area { max-width: 832px; }
+      /* page content: one centred column (~1100px) on every page, with equal space left and right */
+      .page > * { max-width: 1100px; margin-left: auto; margin-right: auto; }
+      .add-area { max-width: 1100px; }
       .add-area .form { max-width: none; }
       .add-btn { padding: 16px 16px; font-size: 16px; border-radius: 12px; }
       .form { border-radius: 14px; }
@@ -1618,7 +1618,7 @@
       .nav-tab:focus-visible { border-radius: 22px; }
 
       /* popup menu: wide half-screen panel, view-mode option removed */
-      #sheet { max-width: 1000px; border-radius: 26px 26px 0 0; }
+      #sheet { max-width: 1100px; border-radius: 26px 26px 0 0; }
       #sheetHead { padding: 4px 20px 10px 22px; }
       #sheetHead h3 { font-size: 20px; }
       #sheetHead button { width: 38px; height: 38px; }
@@ -1682,104 +1682,53 @@
     .cal-neg { color: #2e9d4f; }
     select.cal-in[size] { height: auto; }
 
+    /* ---------- Animation setting (Settings > Animations): auto = follow device, on, off ---------- */
+    html[data-anim="off"] *, html[data-anim="off"] *::before, html[data-anim="off"] *::after,
+    html[data-anim="off"] { animation-duration: 0s !important; animation-delay: 0s !important; transition-duration: 0s !important; transition-delay: 0s !important; scroll-behavior: auto !important; }
     @media (prefers-reduced-motion: reduce) {
-      #sheet, #sheetBackdrop, .nav-tab .ni, .sw, .sw::after { transition: none !important; }
+      html:not([data-anim="on"]) *, html:not([data-anim="on"]) *::before, html:not([data-anim="on"]) *::after,
+      html:not([data-anim="on"]) { animation-duration: 0s !important; animation-delay: 0s !important; transition-duration: 0s !important; transition-delay: 0s !important; scroll-behavior: auto !important; }
     }
 
-    /* ===== Home list icons (replace bullets) ===== */
-    #home .form > li { list-style: none; position: relative; padding-left: 24px; }
-    #home .form > li::before { content: none; position: absolute; left: 0; top: 0.05em; font-size: 14px; line-height: 1.5; }
-    #home #homeRemindersContainer > li::before { content: "\23F0"; }
-    #home #homeNotesContainer > li::before { content: "\1F4CC"; }
-    #home #homeBudgetsContainer > li::before { content: "\1FA99"; }
-    #home #homeCheckContainer > li::before { content: "\2611\FE0F"; }
-    #home #homeProgressContainer > li::before { content: "\1F680"; }
-    #home .form > li.pq-day-home { padding-left: 0; }
-    /* ===== Animation setting ===== */
-    html.no-anim *, html.no-anim *::before, html.no-anim *::after {
-      animation: none !important; transition: none !important; scroll-behavior: auto !important;
+    /* ---------- Home screen: small icons instead of bullets ---------- */
+    #homeRemindersContainer > li, #homeNotesContainer > li, #homeBudgetsContainer > li,
+    #homeCheckContainer > li, #homePriorityContainer > li, #homeProgressContainer > li {
+      list-style: none; position: relative; padding-left: 26px;
     }
-    /* Feedback: button matches the other settings controls */
-    #feedbackBtn {
-      width: 100%; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between;
-      padding: 11px 12px; border-radius: 11px; border: 1px solid var(--sh-line);
-      background: var(--sh-card); color: var(--sh-text); font: inherit; font-size: 14px;
-      text-align: left; cursor: pointer;
+    #homeRemindersContainer > li::before, #homeNotesContainer > li::before, #homeBudgetsContainer > li::before,
+    #homeCheckContainer > li::before, #homePriorityContainer > li::before, #homeProgressContainer > li::before {
+      position: absolute; left: 2px; top: 0; font-size: 14px; line-height: 1.5; font-style: normal;
     }
-    #feedbackBtn .sh-chev { color: var(--sh-mute); font-size: 18px; line-height: 1; }
-    /* Feedback mini window */
-    #fbModal[hidden] { display: none; }
-    #fbModal {
-      position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center;
-      padding: 16px; background: rgba(0,0,0,.55); box-sizing: border-box;
-    }
-    #fbModal .fb-card {
-      width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto; box-sizing: border-box;
-      background: var(--sh-bg); color: var(--sh-text); border: 1px solid var(--sh-line);
-      border-radius: 18px; padding: 16px; box-shadow: 0 12px 40px rgba(0,0,0,.45);
-    }
-    #fbModal .fb-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-    #fbModal .fb-head h3 { margin: 0; font-size: 17px; letter-spacing: .06em; text-transform: uppercase; }
-    #fbModal .fb-x {
-      width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--sh-card);
-      color: var(--sh-text); font-size: 20px; line-height: 1; cursor: pointer;
-    }
-    #fbText {
-      display: block; width: 100%; box-sizing: border-box; min-height: 120px; max-height: 40vh; resize: vertical;
-      padding: 11px 12px; border-radius: 11px; border: 1px solid var(--sh-line);
-      background: var(--sh-card); color: var(--sh-text); font: inherit; font-size: 14px;
-    }
-    #fbText:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: transparent; }
-    #fbThumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-    #fbThumbs:empty { display: none; }
-    #fbThumbs .fb-th { position: relative; width: 64px; height: 64px; }
-    #fbThumbs img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; border: 1px solid var(--sh-line); display: block; }
-    #fbThumbs button {
-      position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; border-radius: 50%; border: 0;
-      background: #e53935; color: #fff; font-size: 14px; line-height: 1; cursor: pointer; padding: 0;
-    }
-    #fbModal .fb-actions { display: flex; gap: 8px; margin-top: 12px; }
-    #fbModal .fb-actions button {
-      flex: 1; padding: 11px 12px; border-radius: 11px; border: 1px solid var(--sh-line);
-      font: inherit; font-size: 14px; cursor: pointer; background: var(--sh-card); color: var(--sh-text);
-    }
-    #fbModal .fb-actions button.fb-send { background: var(--accent); color: #fff; border-color: transparent; font-weight: 600; }
-    #fbStatus { font-size: 12px; color: var(--sh-mute); margin: 8px 2px 0; min-height: 0; }
-    #fbStatus:empty { display: none; }
+    #homeRemindersContainer > li::before { content: "\1F514"; }   /* bell */
+    #homeNotesContainer > li::before     { content: "\1F4CC"; }   /* pin */
+    #homeBudgetsContainer > li::before   { content: "\1F4B5"; }   /* banknote */
+    #homeCheckContainer > li::before     { content: "\2611\FE0F"; }   /* tick box */
+    #homePriorityContainer > li::before  { content: "\2B50"; }    /* star */
+    #homeProgressContainer > li::before  { content: "\1F680"; }   /* rocket */
+    /* "nothing here yet" lines get no icon */
+    .form > li[style*="opacity"] { padding-left: 0 !important; }
+    .form > li[style*="opacity"]::before { content: none !important; }
 
-    /* ---------- Fix: inputs/textareas must never overflow their card (all pages) ---------- */
-    .form, .form label, .pt-form, .pt-form label, .add-area, .add-area .form { min-width: 0; max-width: 100%; }
-    .form label, .pt-form label { min-width: 0; }
-    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
-    select, textarea {
-      max-width: 100%;
-      min-width: 0;
-      box-sizing: border-box;
+    /* ---------- Settings: language / animations / feedback ---------- */
+    #langSelect, #animSelect, #fbType, #fbMsg {
+      width: 100%; padding: 11px 12px; border-radius: 11px; border: 1px solid var(--sh-line);
+      background: var(--sh-card); color: var(--sh-text); font: inherit; font-size: 14px; box-sizing: border-box;
     }
-    .form input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="number"]),
-    .form select, .form textarea,
-    .pt-form input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="number"]),
-    .pt-form select, .pt-form textarea { width: 100%; }
-    textarea { resize: vertical; }
-    input[type="file"] { width: 100%; max-width: 100%; }
+    #fbMsg { resize: vertical; min-height: 120px; font-style: normal; }
+    .fb-check { display: flex; align-items: center; gap: 8px; margin: 12px 2px 0; font-size: 13.5px; color: var(--sh-text); cursor: pointer; }
+    .fb-check input { width: 18px; height: 18px; accent-color: var(--accent); }
+    .fb-actions { display: flex; gap: 8px; margin-top: 14px; }
+    .fb-actions button {
+      flex: 1; border: 0; border-radius: 11px; padding: 12px 10px; font: inherit; font-size: 14px; font-weight: 600; font-style: normal;
+      cursor: pointer; background: var(--accent); color: #fff;
+    }
+    .fb-actions button.alt { background: var(--sh-card); color: var(--sh-text); }
+    #fbStatus.err { color: #e53935; }
   </style>
 </head>
 
 <body>
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h5v-6h4v6h5V10"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4.5l3 1.8"/><path d="M4.5 4.2 2.5 6.2M19.5 4.2l2 2"/></symbol><symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></symbol><symbol id="i-notes" viewBox="0 0 24 24"><path d="M7 3h7.5L19 7.5V21H7z"/><path d="M14.5 3v5H19"/><path d="M10 13h6M10 17h6"/></symbol><symbol id="i-wallet" viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 1 2-2h13v3"/><path d="M3 8v10a2 2 0 0 0 2 2h14a1.5 1.5 0 0 0 1.5-1.5v-8A1.5 1.5 0 0 0 19 9H5a2 2 0 0 1-2-1"/><circle cx="16.5" cy="14.5" r="1" fill="#fff"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="M9.5 6.5H20M9.5 12H20M9.5 17.5H20"/><path d="m3.5 6.5 1.4 1.4 2.4-2.8M3.5 12l1.4 1.4 2.4-2.8M3.5 17.5l1.4 1.4 2.4-2.8"/></symbol><symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="#fff"/></symbol><symbol id="i-trend" viewBox="0 0 24 24"><path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/></symbol><symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol><symbol id="i-calendar2" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 17.2h.01M12 17.2h.01" stroke-width="2.6"/></symbol><symbol id="i-calc" viewBox="0 0 24 24"><rect x="5" y="2.5" width="14" height="19" rx="3"/><rect x="8" y="5.5" width="8" height="3.5" rx="1"/><path d="M8.5 13h.01M12 13h.01M15.5 13h.01M8.5 17h.01M12 17h.01M15.5 17h.01" stroke-width="2.6"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.5 13.2A8.5 8.5 0 1 1 10.8 3.5a6.8 6.8 0 0 0 9.7 9.7z"/></symbol><symbol id="i-sunrise" viewBox="0 0 24 24"><path d="M12 3v3.5M4.9 8.4l2.4 2.4M19.1 8.4l-2.4 2.4M2.5 17.5h3M18.5 17.5h3"/><path d="M7 17.5a5 5 0 0 1 10 0"/><path d="M3.5 21h17"/></symbol><symbol id="i-gold" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 7.5h7M8.5 11h7M8.5 7.5h1.6c3.2 0 3.7 3.5 0 3.5H8.5l5.5 5.5"/></symbol><symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7.5 18.5a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18.4 10.8 3.9 3.9 0 0 1 17.5 18.5z"/></symbol><symbol id="i-qr" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><path d="M14 14h3v3h-3zM20.5 14v.01M14 20.5h3M20.5 17.5v3"/></symbol><symbol id="i-cart" viewBox="0 0 24 24"><path d="M3 3.5h2.2l2.3 11.6a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L20.5 8H6"/><circle cx="10" cy="20.5" r="1.1" fill="#fff"/><circle cx="17" cy="20.5" r="1.1" fill="#fff"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M3.5 3.5v17h17"/><path d="m7.5 15 3.8-4 3 3 5-6"/></symbol><symbol id="i-history" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3.5 8.5"/><path d="M3.5 3.5v5h5"/><path d="M12 7.5V12l3 2"/></symbol><symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 6.5h9M19 6.5h1M4 12h3M13 12h7M4 17.5h11M19 17.5h1"/><circle cx="16" cy="6.5" r="2.4"/><circle cx="10" cy="12" r="2.4"/><circle cx="17" cy="17.5" r="2.4"/></symbol><symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 6.5 2.5 8 2.5 8h-17S6 15.5 6 9"/><path d="M10.2 20.5a2 2 0 0 0 3.6 0"/></symbol><symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></symbol><symbol id="i-game" viewBox="0 0 24 24"><path d="M6.5 11.5h4M8.5 9.5v4"/><path d="M15 12.5h.01M18 10.5h.01"/><path d="M17.3 5.5H6.7a4 4 0 0 0-3.9 3.2l-1.3 6.3a2.6 2.6 0 0 0 4.6 1.9l1.6-2.4h8.6l1.6 2.4a2.6 2.6 0 0 0 4.6-1.9l-1.3-6.3a4 4 0 0 0-3.9-3.2z"/></symbol><symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20.5 12A8.5 8.5 0 0 1 6 18"/><path d="M3.5 12A8.5 8.5 0 0 1 18 6"/><path d="M20.5 3.5v4.5H16M3.5 20.5V16H8"/></symbol><symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M9.3 9.2a2.8 2.8 0 1 1 3.9 2.6c-.8.4-1.2 1-1.2 1.8"/><path d="M12 17h.01" stroke-width="2.6"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2.5 19.5 5.5v6c0 4.8-3.2 8.4-7.5 10-4.3-1.6-7.5-5.2-7.5-10v-6z"/><path d="m8.8 12 2.2 2.2 4.2-4.4"/></symbol><symbol id="i-trash" viewBox="0 0 24 24"><path d="M3.5 6.5h17M9 6.5V4h6v2.5"/><path d="m5.5 6.5 1 14h11l1-14"/><path d="M10 11v5.5M14 11v5.5"/></symbol><symbol id="i-bank" viewBox="0 0 24 24"><path d="M4.5 13c0-3.3 3-5.8 7-5.8 1.4 0 2.7.3 3.8.9L18.5 6.5v3.4c.9.8 1.5 1.8 1.5 3.1 0 1.5-.8 2.8-2 3.6V19h-2.8v-1.3H9.8V19H7v-2.6c-1.5-.8-2.5-2-2.5-3.4z"/><path d="M9.5 10h3"/><path d="M15.6 12.4h.01" stroke-width="2.6"/><path d="M4.5 12.3H3"/></symbol><symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4.2 4-6.5 8-6.5s7.2 2.3 8 6.5"/></symbol><symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 2.5c.8 3.6 5.5 5.6 5.5 10.6a5.5 5.5 0 0 1-11 0c0-2.2 1-3.6 2.2-4.8.3 1.5 1 2.3 1.9 2.6C10.2 8.2 10.6 5 12 2.5z"/><path d="M12 21a2.6 2.6 0 0 1-2.6-2.6c0-1.4 1.2-2.3 2.6-3.6 1.4 1.3 2.6 2.2 2.6 3.6A2.6 2.6 0 0 1 12 21z"/></symbol></defs></svg>
-  <div id="fbModal" role="dialog" aria-modal="true" aria-labelledby="fbTitle" hidden>
-    <div class="fb-card">
-      <div class="fb-head"><h3 id="fbTitle">Feedback</h3><button type="button" class="fb-x" id="fbClose" aria-label="Close">×</button></div>
-      <textarea id="fbText" rows="5" placeholder="Write your feedback here"></textarea>
-      <div id="fbThumbs"></div>
-      <div id="fbStatus" role="status"></div>
-      <div class="fb-actions">
-        <button type="button" id="fbAttach">📎 Screenshot</button>
-        <button type="button" id="feedbackSend" class="fb-send">Send Feedback</button>
-      </div>
-      <input type="file" id="fbFile" accept="image/*" multiple hidden />
-    </div>
-  </div>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h5v-6h4v6h5V10"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4.5l3 1.8"/><path d="M4.5 4.2 2.5 6.2M19.5 4.2l2 2"/></symbol><symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></symbol><symbol id="i-notes" viewBox="0 0 24 24"><path d="M7 3h7.5L19 7.5V21H7z"/><path d="M14.5 3v5H19"/><path d="M10 13h6M10 17h6"/></symbol><symbol id="i-wallet" viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 1 2-2h13v3"/><path d="M3 8v10a2 2 0 0 0 2 2h14a1.5 1.5 0 0 0 1.5-1.5v-8A1.5 1.5 0 0 0 19 9H5a2 2 0 0 1-2-1"/><circle cx="16.5" cy="14.5" r="1" fill="#fff"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="M9.5 6.5H20M9.5 12H20M9.5 17.5H20"/><path d="m3.5 6.5 1.4 1.4 2.4-2.8M3.5 12l1.4 1.4 2.4-2.8M3.5 17.5l1.4 1.4 2.4-2.8"/></symbol><symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="#fff"/></symbol><symbol id="i-trend" viewBox="0 0 24 24"><path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/></symbol><symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol><symbol id="i-calendar2" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 17.2h.01M12 17.2h.01" stroke-width="2.6"/></symbol><symbol id="i-calc" viewBox="0 0 24 24"><rect x="5" y="2.5" width="14" height="19" rx="3"/><rect x="8" y="5.5" width="8" height="3.5" rx="1"/><path d="M8.5 13h.01M12 13h.01M15.5 13h.01M8.5 17h.01M12 17h.01M15.5 17h.01" stroke-width="2.6"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.5 13.2A8.5 8.5 0 1 1 10.8 3.5a6.8 6.8 0 0 0 9.7 9.7z"/></symbol><symbol id="i-sunrise" viewBox="0 0 24 24"><path d="M12 3v3.5M4.9 8.4l2.4 2.4M19.1 8.4l-2.4 2.4M2.5 17.5h3M18.5 17.5h3"/><path d="M7 17.5a5 5 0 0 1 10 0"/><path d="M3.5 21h17"/></symbol><symbol id="i-gold" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 7.5h7M8.5 11h7M8.5 7.5h1.6c3.2 0 3.7 3.5 0 3.5H8.5l5.5 5.5"/></symbol><symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7.5 18.5a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18.4 10.8 3.9 3.9 0 0 1 17.5 18.5z"/></symbol><symbol id="i-qr" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><path d="M14 14h3v3h-3zM20.5 14v.01M14 20.5h3M20.5 17.5v3"/></symbol><symbol id="i-cart" viewBox="0 0 24 24"><path d="M3 3.5h2.2l2.3 11.6a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L20.5 8H6"/><circle cx="10" cy="20.5" r="1.1" fill="#fff"/><circle cx="17" cy="20.5" r="1.1" fill="#fff"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M3.5 3.5v17h17"/><path d="m7.5 15 3.8-4 3 3 5-6"/></symbol><symbol id="i-history" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3.5 8.5"/><path d="M3.5 3.5v5h5"/><path d="M12 7.5V12l3 2"/></symbol><symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 6.5h9M19 6.5h1M4 12h3M13 12h7M4 17.5h11M19 17.5h1"/><circle cx="16" cy="6.5" r="2.4"/><circle cx="10" cy="12" r="2.4"/><circle cx="17" cy="17.5" r="2.4"/></symbol><symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 6.5 2.5 8 2.5 8h-17S6 15.5 6 9"/><path d="M10.2 20.5a2 2 0 0 0 3.6 0"/></symbol><symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></symbol><symbol id="i-game" viewBox="0 0 24 24"><path d="M6.5 11.5h4M8.5 9.5v4"/><path d="M15 12.5h.01M18 10.5h.01"/><path d="M17.3 5.5H6.7a4 4 0 0 0-3.9 3.2l-1.3 6.3a2.6 2.6 0 0 0 4.6 1.9l1.6-2.4h8.6l1.6 2.4a2.6 2.6 0 0 0 4.6-1.9l-1.3-6.3a4 4 0 0 0-3.9-3.2z"/></symbol><symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20.5 12A8.5 8.5 0 0 1 6 18"/><path d="M3.5 12A8.5 8.5 0 0 1 18 6"/><path d="M20.5 3.5v4.5H16M3.5 20.5V16H8"/></symbol><symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M9.3 9.2a2.8 2.8 0 1 1 3.9 2.6c-.8.4-1.2 1-1.2 1.8"/><path d="M12 17h.01" stroke-width="2.6"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2.5 19.5 5.5v6c0 4.8-3.2 8.4-7.5 10-4.3-1.6-7.5-5.2-7.5-10v-6z"/><path d="m8.8 12 2.2 2.2 4.2-4.4"/></symbol><symbol id="i-trash" viewBox="0 0 24 24"><path d="M3.5 6.5h17M9 6.5V4h6v2.5"/><path d="m5.5 6.5 1 14h11l1-14"/><path d="M10 11v5.5M14 11v5.5"/></symbol><symbol id="i-bank" viewBox="0 0 24 24"><path d="M4.5 13c0-3.3 3-5.8 7-5.8 1.4 0 2.7.3 3.8.9L18.5 6.5v3.4c.9.8 1.5 1.8 1.5 3.1 0 1.5-.8 2.8-2 3.6V19h-2.8v-1.3H9.8V19H7v-2.6c-1.5-.8-2.5-2-2.5-3.4z"/><path d="M9.5 10h3"/><path d="M15.6 12.4h.01" stroke-width="2.6"/><path d="M4.5 12.3H3"/></symbol><symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4.2 4-6.5 8-6.5s7.2 2.3 8 6.5"/></symbol><symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 2.5c.8 3.6 5.5 5.6 5.5 10.6a5.5 5.5 0 0 1-11 0c0-2.2 1-3.6 2.2-4.8.3 1.5 1 2.3 1.9 2.6C10.2 8.2 10.6 5 12 2.5z"/><path d="M12 21a2.6 2.6 0 0 1-2.6-2.6c0-1.4 1.2-2.3 2.6-3.6 1.4 1.3 2.6 2.2 2.6 3.6A2.6 2.6 0 0 1 12 21z"/></symbol><symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.5 7.5 8.5 6 8.5-6"/></symbol></defs></svg>
   <button id="installBtn" onclick="installApp()" style="display:none!important">
     INSTALL APP 🐒
     </button>
@@ -1871,7 +1820,7 @@
         <input id="photoUpload" type="file" accept="image/*" style="display:none;" />
 
         <div class="hub-grid">
-          <button type="button" class="hub-tile" data-view-go="settings"><span class="ri g-slate"><svg aria-hidden="true"><use href="#i-sliders"/></svg></span><b>Settings</b><small>Dark mode &amp; view mode</small></button>
+          <button type="button" class="hub-tile" data-view-go="settings"><span class="ri g-slate"><svg aria-hidden="true"><use href="#i-sliders"/></svg></span><b>Settings</b><small>Dark mode, language &amp; more</small></button>
           <button type="button" class="hub-tile" id="viewStorageBtn" data-view-go="storage"><span class="ri g-blue"><svg aria-hidden="true"><use href="#i-db"/></svg></span><b>Storage</b><small>Usage, trash &amp; backup</small></button>
           <button type="button" class="hub-tile" data-go="other"><span class="ri g-purple"><svg aria-hidden="true"><use href="#i-game"/></svg></span><b>More Apps</b><small>Try other apps</small></button>
           <button type="button" class="hub-tile" data-go="updateLog"><span class="ri g-teal"><svg aria-hidden="true"><use href="#i-refresh"/></svg></span><b>Update Blog</b><small>What's new</small></button>
@@ -1907,6 +1856,7 @@
           <button type="button" class="sh-row" id="darkModeBtn"><span class="ri g-night"><svg aria-hidden="true"><use href="#i-moon"/></svg></span><span class="sh-lbl">Dark Mode</span><span class="sw" id="darkSw"></span></button>
           <button type="button" class="sh-row" id="notificationBtn" data-go="notifications"><span class="ri g-red"><svg aria-hidden="true"><use href="#i-bell"/></svg></span><span class="sh-lbl">Notifications<small>Alerts &amp; permission</small></span><span class="sh-chev">›</span></button>
           <button type="button" class="sh-row" id="saveLastBtn" role="switch" aria-checked="false"><span class="ri g-blue"><svg aria-hidden="true"><use href="#i-history"/></svg></span><span class="sh-lbl">Save last changes<small>Remember hidden / expanded buttons</small></span><span class="sw" id="saveLastSw"></span></button>
+          <button type="button" class="sh-row" id="feedbackBtn" data-view-go="feedback"><span class="ri g-green"><svg aria-hidden="true"><use href="#i-mail"/></svg></span><span class="sh-lbl">Provide feedback<small>Send an idea or report a problem</small></span><span class="sh-chev">›</span></button>
         </div>
         <div class="set-default-wrap">
           <div class="set-lbl">Default page</div>
@@ -1915,32 +1865,15 @@
         </div>
         <div class="set-default-wrap">
           <div class="set-lbl">Language</div>
-          <select id="languageSelect" aria-label="Language">
-            <option value="device">Device default</option>
-            <option value="en">English</option>
-            <option value="ta">தமிழ்</option>
-            <option value="ml">മലയാളം</option>
-            <option value="kn">ಕನ್ನಡ</option>
-            <option value="hi">हिन्दी</option>
-            <option value="te">తెలుగు</option>
-            <option value="bn">বাংলা</option>
-            <option value="mr">मराठी</option>
-          </select>
-          <p class="set-hint">Default follows your device language. Menu and section labels change; your own notes stay as you wrote them.</p>
-        </div>
-        <div class="set-default-wrap">
+          <select id="langSelect" aria-label="Language"></select>
+          <p class="set-hint">Device default follows your phone / computer language. Menus, Home and Settings are translated; other text stays in English.</p>
           <div class="set-lbl">Animations</div>
           <select id="animSelect" aria-label="Animations">
-            <option value="device">Device default</option>
-            <option value="on">Animations on</option>
-            <option value="off">Animations off</option>
+            <option value="auto">Device default</option>
+            <option value="on">On</option>
+            <option value="off">Off</option>
           </select>
-          <p class="set-hint">Default follows your device's reduce-motion setting.</p>
-        </div>
-        <div class="set-default-wrap">
-          <div class="set-lbl">Feedback</div>
-          <button type="button" id="feedbackBtn" aria-haspopup="dialog">Provide Feedback<span class="sh-chev">›</span></button>
-          <p class="set-hint">Send a message with screenshots.</p>
+          <p class="set-hint">Off removes all motion and transitions. Device default follows your reduce-motion setting.</p>
         </div>
         <div class="sh-label">View mode</div>
         <div class="seg" role="group" aria-label="Popup view mode">
@@ -1974,6 +1907,26 @@
         <input type="file" id="importDataFile" accept=".json,application/json" style="display:none" />
         <div id="backupStatus"></div>
         <p class="sh-note">Export saves all your data and settings in one file. Import restores them from a backup file.</p>
+      </section>
+
+      <!-- Feedback -->
+      <section data-view="feedback" hidden>
+        <div class="set-default-wrap fb-wrap">
+          <div class="set-lbl">Type</div>
+          <select id="fbType" aria-label="Feedback type">
+            <option value="Suggestion">Suggestion</option>
+            <option value="Bug report">Bug report</option>
+            <option value="Other">Other</option>
+          </select>
+          <div class="set-lbl">Your message</div>
+          <textarea id="fbMsg" rows="6" maxlength="1500" aria-label="Your message"></textarea>
+          <label class="fb-check"><input type="checkbox" id="fbInfo" checked><span>Include app version &amp; device info</span></label>
+          <div class="fb-actions">
+            <button type="button" id="fbSend">Send email</button>
+            <button type="button" id="fbGmail" class="alt">Open in Gmail</button>
+          </div>
+          <p class="set-hint" id="fbStatus">Your message goes to mersalmgblog@gmail.com.</p>
+        </div>
       </section>
     </div>
   </div>
@@ -2327,7 +2280,7 @@
         <h3>Version Info!</h3>
         <ul>
           <p>Version 13.9.0</p>
-          <p>Last Updated: 12-Nov-2026</p>
+          <p>Last Updated: 14-Nov-2026</p>
           <p>Project Mode: Open source</p>
           <p>App Size : 7.0KB </p>
         </ul>
@@ -2410,7 +2363,7 @@
       <h3>Settings</h3>
       <hr />
       <ul>
-        <li>Edit Name, Dark Mode, Language, Animations, Notification Settings and Provide Feedback are inside ⚙️ Settings.</li>
+        <li>Edit Name, Dark Mode and Notification Settings are inside ⚙️ Settings.</li>
         <li>Click the profile picture to change it.</li>
         <li>Notifications can be turned on or off for each feature. Allow notifications for this site in your browser.</li>
       </ul>
@@ -9938,7 +9891,7 @@ render();
       const $ = id => document.getElementById(id);
       const HUB_PAGES = ['reminders', 'notes', 'budget', 'Check', 'priority', 'progress', 'piggyBank', 'calories'];
       const PROFILE_PAGES = ['trash', 'notifications', 'terms', 'how', 'other', 'updateLog'];
-      const TITLES = { hub: 'REMINDERS HUB', utilities: 'UTILITIES', profile: 'PROFILE', settings: 'Settings', storage: 'Storage', weightProfile: 'Weight & Profile' };
+      const TITLES = { hub: 'REMINDERS HUB', utilities: 'UTILITIES', profile: 'PROFILE', settings: 'Settings', storage: 'Storage', weightProfile: 'Weight & Profile', feedback: 'Feedback' };
       const MODE_KEY = 'nr_viewMode';
       const FALLBACK_AVATAR = 'data:image/svg+xml;utf8,' + encodeURIComponent(
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#9e9e9e"/>' +
@@ -10031,7 +9984,7 @@ render();
         if (ms) { applyMode(ms.dataset.modeSet, true); }
       });
       $('sheetClose').addEventListener('click', closeSheet);
-      $('sheetBack').addEventListener('click', () => setView('profile'));
+      $('sheetBack').addEventListener('click', () => setView(view === 'feedback' ? 'settings' : 'profile'));
       backdrop.addEventListener('click', closeSheet);
       document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
 
@@ -10421,142 +10374,241 @@ render();
     try {                                                   // permission granted later (button / prompt)
       navigator.permissions.query({ name: 'notifications' }).then(st => { st.onchange = initFCM; });
     } catch (e) {}
-  
-  // ================= Language, animation & feedback settings =================
-  (function () {
-    var APP_VERSION = '13.9.0', FEEDBACK_TO = 'mersalmgblog@gmail.com';
-    function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
-    function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  </script>
 
-    // ---- animations ----
-    function animApply() {
-      var m = lsGet('nrAnim') || 'device', off = m === 'off';
-      if (m === 'device') { try { off = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {} }
-      document.documentElement.classList.toggle('no-anim', off);
-    }
+  <script>
+    // ================= LANGUAGE + ANIMATIONS + FEEDBACK (Settings) =================
+    (function () {
+      const $ = id => document.getElementById(id);
+      const LANG_KEY = 'nr_lang', ANIM_KEY = 'nr_anim';
+      const APP_VERSION = '13.9.0';
+      const FEEDBACK_TO = 'mersalmgblog@gmail.com';
+      const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+      const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { } };
 
-    // ---- language ----
-    var T = {
-      'home':['முகப்பு','होम','ഹോം','ಮುಖಪುಟ','హోమ్','হোম','होम'],'reminders hub':['நினைவூட்டல் மையம்','रिमाइंडर हब','ഓർമ്മപ്പെടുത്തൽ ഹബ്','ಜ್ಞಾಪನೆ ಹಬ್','రిమైండర్ హబ్','রিমাইন্ডার হাব','रिमाइंडर हब'],'utilities':['பயன்பாடுகள்','उपयोगिताएँ','ഉപകരണങ്ങൾ','ಉಪಯುಕ್ತತೆಗಳು','యుటిలిటీలు','ইউটিলিটি','उपयुक्तता'],
-      'profile':['சுயவிவரம்','प्रोफ़ाइल','പ്രൊഫൈൽ','ಪ್ರೊಫೈಲ್','ప్రొఫైల్','প্রোফাইল','प्रोफाइल'],'settings':['அமைப்புகள்','सेटिंग्स','ക്രമീകരണങ്ങൾ','ಸೆಟ್ಟಿಂಗ್‌ಗಳು','సెట్టింగ్‌లు','সেটিংস','सेटिंग्ज'],'storage':['சேமிப்பகம்','स्टोरेज','സ്റ്റോറേജ്','ಸಂಗ್ರಹಣೆ','నిల్వ','স্টোরেজ','स्टोरेज'],
-      'more apps':['மேலும் செயலிகள்','और ऐप्स','കൂടുതൽ ആപ്പുകൾ','ಇನ್ನಷ್ಟು ಆ್ಯಪ್‌ಗಳು','మరిన్ని యాప్‌లు','আরও অ্যাপ','आणखी अॅप्स'],'update blog':['புதுப்பிப்பு வலைப்பதிவு','अपडेट ब्लॉग','അപ്‌ഡേറ്റ് ബ്ലോഗ്','ಅಪ್‌ಡೇಟ್ ಬ್ಲಾಗ್','అప్‌డేట్ బ్లాగ్','আপডেট ব্লগ','अपडेट ब्लॉग'],
-      'how to use':['பயன்படுத்தும் முறை','उपयोग कैसे करें','ഉപയോഗിക്കേണ്ട വിധം','ಬಳಸುವ ವಿಧಾನ','ఎలా ఉపయోగించాలి','কীভাবে ব্যবহার করবেন','कसे वापरावे'],'terms & conditions':['விதிமுறைகள் & நிபந்தனைகள்','नियम और शर्तें','നിബന്ധനകളും വ്യവസ്ഥകളും','ನಿಯಮಗಳು ಮತ್ತು ಷರತ್ತುಗಳು','నియమాలు & షరతులు','শর্তাবলী','अटी आणि शर्ती'],
-      'dark mode':['இருள் பயன்முறை','डार्क मोड','ഡാർക്ക് മോഡ്','ಡಾರ್ಕ್ ಮೋಡ್','డార్క్ మోడ్','ডার্ক মোড','डार्क मोड'],'notifications':['அறிவிப்புகள்','सूचनाएँ','അറിയിപ്പുകൾ','ಅಧಿಸೂಚನೆಗಳು','నోటిఫికేషన్లు','বিজ্ঞপ্তি','सूचना'],
-      'save last changes':['கடைசி மாற்றங்களைச் சேமி','अंतिम बदलाव सहेजें','അവസാന മാറ്റങ്ങൾ സേവ് ചെയ്യുക','ಕೊನೆಯ ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸಿ','చివరి మార్పులను సేవ్ చేయి','শেষ পরিবর্তন সংরক্ষণ','शेवटचे बदल जतन करा'],'default page':['இயல்புநிலை பக்கம்','डिफ़ॉल्ट पेज','ഡിഫോൾട്ട് പേജ്','ಡೀಫಾಲ್ಟ್ ಪುಟ','డిఫాల్ట్ పేజీ','ডিফল্ট পেজ','डिफॉल्ट पेज'],
-      'view mode':['காட்சி முறை','व्यू मोड','കാഴ്ച രീതി','ವೀಕ್ಷಣೆ ಮೋಡ್','వ్యూ మోడ్','ভিউ মোড','व्ह्यू मोड'],'compact':['சுருக்கமான','कॉम्पैक्ट'],'half screen':['அரைத் திரை','आधी स्क्रीन'],
-      'reminders':['நினைவூட்டல்கள்','रिमाइंडर','ഓർമ്മപ്പെടുത്തലുകൾ','ಜ್ಞಾಪನೆಗಳು','రిమైండర్లు','রিমাইন্ডার','रिमाइंडर'],'notes':['குறிப்புகள்','नोट्स','കുറിപ്പുകൾ','ಟಿಪ್ಪಣಿಗಳು','గమనికలు','নোট','नोट्स'],'budget overview':['பட்ஜெட் மேலோட்டம்','बजट अवलोकन','ബജറ്റ് അവലോകനം','ಬಜೆಟ್ ಅವಲೋಕನ','బడ్జెట్ అవలోకనం','বাজেট ওভারভিউ','बजेट आढावा'],
-      'check list':['சரிபார்ப்புப் பட்டியல்','चेकलिस्ट','ചെക്ക്‌ലിസ്റ്റ്','ಚೆಕ್‌ಲಿಸ್ಟ್','చెక్‌లిస్ట్','চেকলিস্ট','चेकलिस्ट'],'priority queue':['முன்னுரிமை வரிசை','प्राथमिकता सूची','മുൻഗണനാ ക്യൂ','ಆದ್ಯತೆಯ ಸರತಿ','ప్రాధాన్యత క్యూ','অগ্রাধিকার তালিকা','प्राधान्य यादी'],
-      'progress tracker':['முன்னேற்றக் கண்காணிப்பு','प्रगति ट्रैकर','പുരോഗതി ട്രാക്കർ','ಪ್ರಗತಿ ಟ್ರ್ಯಾಕರ್','పురోగతి ట్రాకర్','অগ্রগতি ট্র্যাকার','प्रगती ट्रॅकर'],'reminders overview':['நினைவூட்டல் மேலோட்டம்','रिमाइंडर अवलोकन','ഓർമ്മപ്പെടുത്തൽ അവലോകനം','ಜ್ಞಾಪನೆ ಅವಲೋಕನ','రిమైండర్ అవలోకనం','রিমাইন্ডার ওভারভিউ','रिमाइंडर आढावा'],
-      'title':['தலைப்பு','शीर्षक','തലക്കെട്ട്','ಶೀರ್ಷಿಕೆ','శీర్షిక','শিরোনাম','शीर्षक'],'active':['செயலில்','सक्रिय','സജീവം','ಸಕ್ರಿಯ','క్రియాశీలం','সক্রিয়','सक्रिय'],'inactive':['செயலற்றவை','निष्क्रिय','നിഷ്‌ക്രിയം','ನಿಷ್ಕ್ರಿಯ','క్రియారహితం','নিষ্ক্রিয়','निष्क्रिय'],
-      'checklists':['சரிபார்ப்புப் பட்டியல்கள்','चेकलिस्ट'],'priorities':['முன்னுரிமைகள்','प्राथमिकताएँ'],
-      'language':['மொழி','भाषा','ഭാഷ','ಭಾಷೆ','భాష','ভাষা','भाषा'],'animations':['அனிமேஷன்கள்','एनिमेशन','ആനിമേഷനുകൾ','ಅನಿಮೇಷನ್‌ಗಳು','యానిమేషన్లు','অ্যানিমেশন','अॅनिमेशन'],'device default':['சாதன இயல்புநிலை','डिवाइस डिफ़ॉल्ट','ഉപകരണ ഡിഫോൾട്ട്','ಸಾಧನ ಡೀಫಾಲ್ಟ್','పరికర డిఫాల్ట్','ডিভাইস ডিফল্ট','डिव्हाइस डिफॉल्ट'],
-      'animations on':['அனிமேஷன் இயக்கு','एनिमेशन चालू','ആനിമേഷൻ ഓൺ','ಅನಿಮೇಷನ್ ಆನ್','యానిమేషన్ ఆన్','অ্যানিমেশন চালু','अॅनिमेशन चालू'],'animations off':['அனிமேஷன் நிறுத்து','एनिमेशन बंद','ആനിമേഷൻ ഓഫ്','ಅನಿಮೇಷನ್ ಆಫ್','యానిమేషన్ ఆఫ్','অ্যানিমেশন বন্ধ','अॅनिमेशन बंद'],
-      'provide feedback':['கருத்தை வழங்கவும்','फ़ीडबैक दें','ഫീഡ്ബാക്ക് നൽകുക','ಪ್ರತಿಕ್ರಿಯೆ ನೀಡಿ','అభిప్రాయం తెలపండి','মতামত দিন','अभिप्राय द्या'],'send feedback':['கருத்தை அனுப்பு','फ़ीडबैक भेजें','ഫീഡ്ബാക്ക് അയയ്ക്കുക','ಪ್ರತಿಕ್ರಿಯೆ ಕಳುಹಿಸಿ','అభిప్రాయం పంపండి','মতামত পাঠান','अभिप्राय पाठवा'],
-      'edit name':['பெயரை மாற்று','नाम बदलें'],'upload photo':['புகைப்படம் பதிவேற்று','फ़ोटो अपलोड करें'],
-      'weight profile':['எடை சுயவிவரம்','वज़न प्रोफ़ाइल'],'trash bin':['குப்பைத் தொட்டி','ट्रैश बिन','ട്രാഷ് ബിൻ','ಟ್ರ್ಯಾಶ್ ಬಿನ್','ట్రాష్ బిన్','ট্র্যাশ বিন','ट्रॅश बिन'],
-      'export':['ஏற்றுமதி','एक्सपोर्ट','എക്സ്പോർട്ട്','ಎಕ್ಸ್‌ಪೋರ್ಟ್','ఎగుమతి','এক্সপোর্ট','एक्स्पोर्ट'],'import':['இறக்குமதி','इम्पोर्ट','ഇമ്പോർട്ട്','ಇಂಪೋರ್ಟ್','దిగుమతి','ইমপোর্ট','इम्पोर्ट']
-    };
-    var SKIP = 'script,style,textarea,input,iframe,.item-left,table,#homeNotesContainer,#homeRemindersContainer,#homeCheckContainer,#homeProgressContainer,#homeBudgetsContainer';
-    var LANGS = ['ta','hi','ml','kn','te','bn','mr'];
-    var applying = false, timer = null, obs = null;
-    function curLang() {
-      var v = lsGet('nrLang') || 'device';
-      if (v === 'device') {
-        var n = ((navigator.languages && navigator.languages[0]) || navigator.language || 'en').toLowerCase();
-        var f = LANGS.filter(function (c) { return n.indexOf(c) === 0; }); v = f.length ? f[0] : 'en';
+      // ---------- Animations ----------
+      const root = document.documentElement;
+      function applyAnim(v) {
+        if (v !== 'on' && v !== 'off') v = 'auto';
+        root.setAttribute('data-anim', v);
       }
-      return v;
-    }
-    function proc(n, idx) {
-      var cur = n.nodeValue;
-      var orig = (n.__t !== undefined && cur === n.__t) ? n.__o : cur;
-      var m = orig.match(/^([^A-Za-z]*)([\s\S]*?)([^A-Za-z]*)$/);
-      var next = orig;
-      if (m && idx >= 0) {
-        var e = T[m[2].toLowerCase().replace(/\s+/g, ' ').trim()];
-        if (e && e[idx]) next = m[1] + e[idx] + m[3];
+      applyAnim(lsGet(ANIM_KEY));
+      // smooth scrolling started from code also stops when animations are off
+      const _siv = Element.prototype.scrollIntoView;
+      Element.prototype.scrollIntoView = function (a) {
+        const off = root.getAttribute('data-anim') === 'off' ||
+          (root.getAttribute('data-anim') === 'auto' && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+        if (off && a && typeof a === 'object') a = Object.assign({}, a, { behavior: 'auto' });
+        return _siv.call(this, a);
+      };
+      const animSel = $('animSelect');
+      if (animSel) {
+        animSel.value = root.getAttribute('data-anim');
+        animSel.addEventListener('change', () => { lsSet(ANIM_KEY, animSel.value); applyAnim(animSel.value); });
       }
-      if (next !== cur) { n.nodeValue = next; n.__o = orig; n.__t = next; }
-      else if (n.__t !== undefined && cur === n.__t) { n.__o = orig; }
-    }
-    function apply() {
-      var lang = curLang(), idx = LANGS.indexOf(lang);
-      document.documentElement.lang = lang;
-      applying = true;
-      if (obs) obs.disconnect();
-      try {
-        var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null), node;
-        while ((node = w.nextNode())) {
-          var par = node.parentElement;
-          if (!par || !node.nodeValue.trim() || par.closest(SKIP)) continue;
-          proc(node, idx);
+
+      // ---------- Language ----------
+      // Rows: [English, Tamil, Hindi, Kannada, Telugu, Malayalam]. Matching ignores upper/lower case.
+      const LANGS = [['en', 'English'], ['ta', 'தமிழ்'], ['hi', 'हिन्दी'], ['kn', 'ಕನ್ನಡ'], ['te', 'తెలుగు'], ['ml', 'മലയാളം']];
+      const ROWS = [
+        ['Home', 'முகப்பு', 'होम', 'ಮುಖಪುಟ', 'హోమ్', 'ഹോം'],
+        ['Reminders Hub', 'நினைவூட்டல் மையம்', 'रिमाइंडर हब', 'ರಿಮೈಂಡರ್ ಹಬ್', 'రిమైండర్ హబ్', 'റിമൈൻഡർ ഹബ്'],
+        ['Utilities', 'கருவிகள்', 'उपयोगिताएँ', 'ಉಪಕರಣಗಳು', 'సాధనాలు', 'ഉപകരണങ്ങൾ'],
+        ['Profile', 'சுயவிவரம்', 'प्रोफ़ाइल', 'ಪ್ರೊಫೈಲ್', 'ప్రొఫైల్', 'പ്രൊഫൈൽ'],
+        ['Reminders', 'நினைவூட்டல்கள்', 'रिमाइंडर', 'ರಿಮೈಂಡರ್‌ಗಳು', 'రిమైండర్లు', 'റിമൈൻഡറുകൾ'],
+        ['Notes', 'குறிப்புகள்', 'नोट्स', 'ಟಿಪ್ಪಣಿಗಳು', 'నోట్స్', 'കുറിപ്പുകൾ'],
+        ['Budget Overview', 'பட்ஜெட் மேலோட்டம்', 'बजट अवलोकन', 'ಬಜೆಟ್ ಅವಲೋಕನ', 'బడ్జెట్ అవలోకనం', 'ബജറ്റ് അവലോകനം'],
+        ['Check List', 'சரிபார்ப்பு பட்டியல்', 'चेकलिस्ट', 'ಪರಿಶೀಲನಾ ಪಟ್ಟಿ', 'చెక్ లిస్ట్', 'ചെക്ക് ലിസ്റ്റ്'],
+        ['Priority Queue', 'முன்னுரிமை வரிசை', 'प्राथमिकता कतार', 'ಆದ್ಯತಾ ಸರತಿ', 'ప్రాధాన్యత క్యూ', 'മുൻഗണനാ ക്യൂ'],
+        ['Progress Tracker', 'முன்னேற்றக் கண்காணிப்பு', 'प्रगति ट्रैकर', 'ಪ್ರಗತಿ ಟ್ರ್ಯಾಕರ್', 'పురోగతి ట్రాకర్', 'പുരോഗതി ട്രാക്കർ'],
+        ['Reminders Overview', 'நினைவூட்டல் மேலோட்டம்', 'रिमाइंडर अवलोकन', 'ರಿಮೈಂಡರ್ ಅವಲೋಕನ', 'రిమైండర్ అవలోకనం', 'റിമൈൻഡർ അവലോകനം'],
+        ['Title', 'தலைப்பு', 'शीर्षक', 'ಶೀರ್ಷಿಕೆ', 'శీర్షిక', 'തലക്കെട്ട്'],
+        ['Active', 'செயலில்', 'सक्रिय', 'ಸಕ್ರಿಯ', 'క్రియాశీలం', 'സജീവം'],
+        ['Inactive', 'செயலற்றவை', 'निष्क्रिय', 'ನಿಷ್ಕ್ರಿಯ', 'నిష్క్రియం', 'നിഷ്ക്രിയം'],
+        ['Checklists', 'சரிபார்ப்பு பட்டியல்கள்', 'चेकलिस्ट', 'ಪರಿಶೀಲನಾ ಪಟ್ಟಿಗಳು', 'చెక్ లిస్టులు', 'ചെക്ക് ലിസ്റ്റുകൾ'],
+        ['Priorities', 'முன்னுரிமைகள்', 'प्राथमिकताएँ', 'ಆದ್ಯತೆಗಳು', 'ప్రాధాన్యతలు', 'മുൻഗണനകൾ'],
+        ['No reminders for today or tomorrow.', 'இன்று அல்லது நாளை நினைவூட்டல்கள் இல்லை.', 'आज या कल के लिए कोई रिमाइंडर नहीं।', 'ಇಂದು ಅಥವಾ ನಾಳೆಗೆ ರಿಮೈಂಡರ್‌ಗಳಿಲ್ಲ.', 'ఈరోజు లేదా రేపటికి రిమైండర్లు లేవు.', 'ഇന്നോ നാളെയോ റിമൈൻഡറുകളില്ല.'],
+        ['No notes available.', 'குறிப்புகள் இல்லை.', 'कोई नोट उपलब्ध नहीं।', 'ಟಿಪ್ಪಣಿಗಳಿಲ್ಲ.', 'నోట్స్ లేవు.', 'കുറിപ്പുകളില്ല.'],
+        ['No budgets yet.', 'இதுவரை பட்ஜெட் இல்லை.', 'अभी तक कोई बजट नहीं।', 'ಇನ್ನೂ ಬಜೆಟ್ ಇಲ್ಲ.', 'ఇంకా బడ్జెట్లు లేవు.', 'ബജറ്റുകളൊന്നുമില്ല.'],
+        ['No Checklists Yet.', 'இதுவரை சரிபார்ப்பு பட்டியல் இல்லை.', 'अभी तक कोई चेकलिस्ट नहीं।', 'ಇನ್ನೂ ಪರಿಶೀಲನಾ ಪಟ್ಟಿ ಇಲ್ಲ.', 'ఇంకా చెక్ లిస్టులు లేవు.', 'ചെക്ക് ലിസ്റ്റുകളൊന്നുമില്ല.'],
+        ['No open checklists.', 'திறந்த சரிபார்ப்பு பட்டியல் இல்லை.', 'कोई खुली चेकलिस्ट नहीं।', 'ತೆರೆದ ಪರಿಶೀಲನಾ ಪಟ್ಟಿ ಇಲ್ಲ.', 'ఓపెన్ చెక్ లిస్టులు లేవు.', 'തുറന്ന ചെക്ക് ലിസ്റ്റുകളില്ല.'],
+        ['No priority items.', 'முன்னுரிமை உருப்படிகள் இல்லை.', 'कोई प्राथमिकता आइटम नहीं।', 'ಆದ್ಯತಾ ಐಟಂಗಳಿಲ್ಲ.', 'ప్రాధాన్యత అంశాలు లేవు.', 'മുൻഗണനാ ഇനങ്ങളില്ല.'],
+        ['No progress yet.', 'இதுவரை முன்னேற்றம் இல்லை.', 'अभी तक कोई प्रगति नहीं।', 'ಇನ್ನೂ ಪ್ರಗತಿ ಇಲ್ಲ.', 'ఇంకా పురోగతి లేదు.', 'പുരോഗതിയൊന്നുമില്ല.'],
+        ['Settings', 'அமைப்புகள்', 'सेटिंग्स', 'ಸೆಟ್ಟಿಂಗ್‌ಗಳು', 'సెట్టింగ్‌లు', 'ക്രമീകരണങ്ങൾ'],
+        ['Storage', 'சேமிப்பு', 'स्टोरेज', 'ಸಂಗ್ರಹಣೆ', 'స్టోరేజ్', 'സ്റ്റോറേജ്'],
+        ['Budget Tracker', 'பட்ஜெட் கண்காணிப்பு', 'बजट ट्रैकर', 'ಬಜೆಟ್ ಟ್ರ್ಯಾಕರ್', 'బడ్జెట్ ట్రాకర్', 'ബജറ്റ് ട്രാക്കർ'],
+        ['Piggy Bank', 'உண்டியல்', 'गुल्लक', 'ಹುಂಡಿ', 'హుండీ', 'കുടുക്ക'],
+        ['Calories', 'கலோரிகள்', 'कैलोरी', 'ಕ್ಯಾಲೊರಿಗಳು', 'కేలరీలు', 'കലോറി'],
+        ['Calculator', 'கணிப்பான்', 'कैलकुलेटर', 'ಕ್ಯಾಲ್ಕುಲೇಟರ್', 'కాలిక్యులేటర్', 'കാൽക്കുലേറ്റർ'],
+        ['Monthly Calendar', 'மாதாந்திர நாட்காட்டி', 'मासिक कैलेंडर', 'ಮಾಸಿಕ ಕ್ಯಾಲೆಂಡರ್', 'నెలవారీ క్యాలెండర్', 'പ്രതിമാസ കലണ്ടർ'],
+        ['Weather', 'வானிலை', 'मौसम', 'ಹವಾಮಾನ', 'వాతావరణం', 'കാലാവസ്ഥ'],
+        ['Gold Rate', 'தங்க விலை', 'सोने का भाव', 'ಚಿನ್ನದ ದರ', 'బంగారం ధర', 'സ്വർണ്ണ വില'],
+        ['Moon Phase', 'நிலவின் கட்டங்கள்', 'चंद्र कला', 'ಚಂದ್ರನ ಹಂತಗಳು', 'చంద్ర కళలు', 'ചന്ദ്രക്കല'],
+        ['Sunrise & Sunset', 'சூரிய உதயம் & மறைவு', 'सूर्योदय और सूर्यास्त', 'ಸೂರ್ಯೋದಯ ಮತ್ತು ಸೂರ್ಯಾಸ್ತ', 'సూర్యోదయం & సూర్యాస్తమయం', 'സൂര്യോദയവും അസ്തമയവും'],
+        ['Edit Name', 'பெயரை திருத்து', 'नाम बदलें', 'ಹೆಸರು ಸಂಪಾದಿಸಿ', 'పేరు మార్చండి', 'പേര് എഡിറ്റ് ചെയ്യുക'],
+        ['Weight Profile', 'எடை விவரம்', 'वज़न प्रोफ़ाइल', 'ತೂಕದ ಪ್ರೊಫೈಲ್', 'బరువు ప్రొఫైల్', 'ഭാര പ്രൊഫൈൽ'],
+        ['Upload Photo', 'புகைப்படம் பதிவேற்று', 'फ़ोटो अपलोड करें', 'ಫೋಟೋ ಅಪ್‌ಲೋಡ್', 'ఫోటో అప్‌లోడ్', 'ഫോട്ടോ അപ്‌ലോഡ്'],
+        ['More Apps', 'மேலும் செயலிகள்', 'और ऐप्स', 'ಇನ್ನಷ್ಟು ಆಪ್‌ಗಳು', 'మరిన్ని యాప్‌లు', 'കൂടുതൽ ആപ്പുകൾ'],
+        ['Update Blog', 'புதுப்பிப்பு வலைப்பதிவு', 'अपडेट ब्लॉग', 'ಅಪ್‌ಡೇಟ್ ಬ್ಲಾಗ್', 'అప్‌డేట్ బ్లాగ్', 'അപ്‌ഡേറ്റ് ബ്ലോഗ്'],
+        ['How to Use', 'பயன்படுத்தும் முறை', 'उपयोग कैसे करें', 'ಬಳಸುವ ವಿಧಾನ', 'ఎలా ఉపయోగించాలి', 'ഉപയോഗിക്കേണ്ട വിധം'],
+        ['Terms & Conditions', 'விதிமுறைகள் & நிபந்தனைகள்', 'नियम और शर्तें', 'ನಿಯಮಗಳು ಮತ್ತು ಷರತ್ತುಗಳು', 'నిబంధనలు & షరతులు', 'നിബന്ധനകളും വ്യവസ്ഥകളും'],
+        ['Privacy policy', 'தனியுரிமைக் கொள்கை', 'गोपनीयता नीति', 'ಗೌಪ್ಯತಾ ನೀತಿ', 'గోప్యతా విధానం', 'സ്വകാര്യതാ നയം'],
+        ['Dark Mode', 'இருண்ட பயன்முறை', 'डार्क मोड', 'ಡಾರ್ಕ್ ಮೋಡ್', 'డార్క్ మోడ్', 'ഡാർക്ക് മോഡ്'],
+        ['Notifications', 'அறிவிப்புகள்', 'सूचनाएँ', 'ಅಧಿಸೂಚನೆಗಳು', 'నోటిఫికేషన్లు', 'അറിയിപ്പുകൾ'],
+        ['Alerts & permission', 'எச்சரிக்கைகள் & அனுமதி', 'अलर्ट और अनुमति', 'ಎಚ್ಚರಿಕೆಗಳು ಮತ್ತು ಅನುಮತಿ', 'హెచ్చరికలు & అనుమతి', 'അലേർട്ടുകളും അനുമതിയും'],
+        ['Save last changes', 'கடைசி மாற்றங்களை சேமி', 'अंतिम बदलाव सहेजें', 'ಕೊನೆಯ ಬದಲಾವಣೆ ಉಳಿಸಿ', 'చివరి మార్పులు సేవ్ చేయి', 'അവസാന മാറ്റങ്ങൾ സേവ് ചെയ്യുക'],
+        ['Default page', 'இயல்புநிலை பக்கம்', 'डिफ़ॉल्ट पेज', 'ಡೀಫಾಲ್ಟ್ ಪುಟ', 'డిఫాల్ట్ పేజీ', 'ഡിഫോൾട്ട് പേജ്'],
+        ['Language', 'மொழி', 'भाषा', 'ಭಾಷೆ', 'భాష', 'ഭാഷ'],
+        ['Animations', 'அனிமேஷன்கள்', 'एनिमेशन', 'ಅನಿಮೇಷನ್‌ಗಳು', 'యానిమేషన్లు', 'ആനിമേഷനുകൾ'],
+        ['Provide feedback', 'கருத்து தெரிவிக்கவும்', 'फ़ीडबैक दें', 'ಪ್ರತಿಕ್ರಿಯೆ ನೀಡಿ', 'ఫీడ్‌బ్యాక్ ఇవ్వండి', 'ഫീഡ്ബാക്ക് നൽകുക'],
+        ['Dark mode, language & more', 'இருண்ட பயன்முறை, மொழி மற்றும் பல', 'डार्क मोड, भाषा और अधिक', 'ಡಾರ್ಕ್ ಮೋಡ್, ಭಾಷೆ ಮತ್ತು ಇನ್ನಷ್ಟು', 'డార్క్ మోడ్, భాష & మరిన్ని', 'ഡാർക്ക് മോഡ്, ഭാഷ എന്നിവയും മറ്റും'],
+        ['Send an idea or report a problem', 'யோசனை அல்லது சிக்கலைத் தெரிவிக்கவும்', 'सुझाव या समस्या भेजें', 'ಸಲಹೆ ಅಥವಾ ಸಮಸ್ಯೆ ಕಳುಹಿಸಿ', 'ఆలోచన లేదా సమస్యను పంపండి', 'ആശയമോ പ്രശ്നമോ അയയ്ക്കുക'],
+        ['Feedback', 'கருத்து', 'फ़ीडबैक', 'ಪ್ರತಿಕ್ರಿಯೆ', 'ఫీడ్‌బ్యాక్', 'ഫീഡ്ബാക്ക്'],
+        ['Type', 'வகை', 'प्रकार', 'ಪ್ರಕಾರ', 'రకం', 'തരം'],
+        ['Suggestion', 'பரிந்துரை', 'सुझाव', 'ಸಲಹೆ', 'సూచన', 'നിർദ്ദേശം'],
+        ['Bug report', 'பிழை அறிக்கை', 'बग रिपोर्ट', 'ಬಗ್ ವರದಿ', 'బగ్ రిపోర్ట్', 'ബഗ് റിപ്പോർട്ട്'],
+        ['Other', 'மற்றவை', 'अन्य', 'ಇತರೆ', 'ఇతర', 'മറ്റുള്ളവ'],
+        ['Your message', 'உங்கள் செய்தி', 'आपका संदेश', 'ನಿಮ್ಮ ಸಂದೇಶ', 'మీ సందేశం', 'നിങ്ങളുടെ സന്ദേശം'],
+        ['Include app version & device info', 'ஆப் பதிப்பு & சாதன விவரங்களை சேர்', 'ऐप संस्करण और डिवाइस जानकारी जोड़ें', 'ಆಪ್ ಆವೃತ್ತಿ ಮತ್ತು ಸಾಧನ ಮಾಹಿತಿ ಸೇರಿಸಿ', 'యాప్ వెర్షన్ & పరికర వివరాలు జోడించండి', 'ആപ്പ് പതിപ്പും ഉപകരണ വിവരങ്ങളും ചേർക്കുക'],
+        ['Send email', 'மின்னஞ்சல் அனுப்பு', 'ईमेल भेजें', 'ಇಮೇಲ್ ಕಳುಹಿಸಿ', 'ఇమెయిల్ పంపండి', 'ഇമെയിൽ അയയ്ക്കുക'],
+        ['Open in Gmail', 'Gmail-ல் திற', 'Gmail में खोलें', 'Gmail ನಲ್ಲಿ ತೆರೆಯಿರಿ', 'Gmail లో తెరవండి', 'Gmail-ൽ തുറക്കുക'],
+        ['Device default', 'சாதன இயல்புநிலை', 'डिवाइस डिफ़ॉल्ट', 'ಸಾಧನ ಡೀಫಾಲ್ಟ್', 'పరికర డిఫాల్ట్', 'ഉപകരണ ഡിഫോൾട്ട്'],
+        ['On', 'இயக்கு', 'चालू', 'ಆನ್', 'ఆన్', 'ഓൺ'],
+        ['Off', 'அணை', 'बंद', 'ಆಫ್', 'ఆఫ్', 'ഓഫ്'],
+        ['Save', 'சேமி', 'सहेजें', 'ಉಳಿಸಿ', 'సేవ్', 'സേവ്'],
+        ['Cancel', 'ரத்துசெய்', 'रद्द करें', 'ರದ್ದುಮಾಡಿ', 'రద్దు', 'റദ്ദാക്കുക'],
+        ['Close', 'மூடு', 'बंद करें', 'ಮುಚ್ಚಿ', 'మూసివేయి', 'അടയ്ക്കുക'],
+        ['Date', 'தேதி', 'तारीख', 'ದಿನಾಂಕ', 'తేదీ', 'തീയതി'],
+        ['Trash', 'குப்பை', 'ट्रैश', 'ಕಸ', 'ట్రాష్', 'ട്രാഷ്'],
+        ['Trash Bin', 'குப்பைத் தொட்டி', 'ट्रैश बिन', 'ಕಸದ ಬುಟ್ಟಿ', 'ట్రాష్ బిన్', 'ട്രാഷ് ബിൻ'],
+        ['Data backup', 'தரவு காப்புப்பிரதி', 'डेटा बैकअप', 'ಡೇಟಾ ಬ್ಯಾಕಪ್', 'డేటా బ్యాకప్', 'ഡാറ്റ ബാക്കപ്പ്'],
+        ['Storage used', 'பயன்படுத்திய சேமிப்பு', 'उपयोग किया गया स्टोरेज', 'ಬಳಸಿದ ಸಂಗ್ರಹಣೆ', 'వాడిన స్టోరేజ్', 'ഉപയോഗിച്ച സ്റ്റോറേജ്']
+      ];
+      const SUPPORTED = LANGS.map(l => l[0]);
+      const MAPS = {};
+      SUPPORTED.forEach((code, i) => {
+        if (!i) return;
+        const m = new Map();
+        ROWS.forEach(r => m.set(r[0].toLowerCase(), r[i]));
+        MAPS[code] = m;
+      });
+
+      function deviceLang() {
+        const list = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || 'en'];
+        for (const l of list) {
+          const c = String(l).toLowerCase().split('-')[0];
+          if (SUPPORTED.includes(c)) return c;
         }
-      } catch (e) {}
-      if (idx >= 0 && obs) obs.observe(document.body, { childList: true, subtree: true, characterData: true });
-      applying = false;
-    }
-    function schedule() { if (applying) return; clearTimeout(timer); timer = setTimeout(apply, 150); }
+        return 'en';
+      }
+      function chosen() {
+        const v = lsGet(LANG_KEY);
+        return (v && SUPPORTED.includes(v)) ? v : 'auto';
+      }
+      function effective() { const c = chosen(); return c === 'auto' ? deviceLang() : c; }
 
-    function init() {
-      obs = new MutationObserver(schedule);
-      var ls = document.getElementById('languageSelect'), as = document.getElementById('animSelect');
-      if (ls) { ls.value = lsGet('nrLang') || 'device'; ls.addEventListener('change', function () { lsSet('nrLang', ls.value); apply(); }); }
-      if (as) { as.value = lsGet('nrAnim') || 'device'; as.addEventListener('change', function () { lsSet('nrAnim', as.value); animApply(); }); }
-      animApply(); apply();
+      // original English kept per text node so the language can be switched back
+      const orig = new WeakMap();
+      let map = null;
+      const SKIP = 'script,style,svg,textarea,input,.item-left,[data-no-translate]';
+      const LEAD = /^([^\p{L}\p{N}]*)([\s\S]*?)(\s*)$/u;
 
-      var fb = document.getElementById('feedbackBtn'), modal = document.getElementById('fbModal'),
-          txt = document.getElementById('fbText'), send = document.getElementById('feedbackSend'),
-          fileIn = document.getElementById('fbFile'), thumbs = document.getElementById('fbThumbs'),
-          status = document.getElementById('fbStatus'), files = [];
-      if (!fb || !modal) return;
-      function setStatus(t) { status.textContent = t || ''; }
-      function render() {
-        thumbs.innerHTML = '';
-        files.forEach(function (f, i) {
-          var w = document.createElement('div'); w.className = 'fb-th';
-          var im = document.createElement('img'); im.src = f.url; im.alt = 'Screenshot ' + (i + 1);
-          var x = document.createElement('button'); x.type = 'button'; x.textContent = '×'; x.setAttribute('aria-label', 'Remove screenshot');
-          x.addEventListener('click', function () { URL.revokeObjectURL(f.url); files.splice(i, 1); render(); });
-          w.appendChild(im); w.appendChild(x); thumbs.appendChild(w);
+      function translateNode(n) {
+        const v = n.nodeValue;
+        if (!v || !map) return;
+        const o = orig.get(n);
+        if (o && o.tr === v) return;                       // already translated by us
+        if (!/\S/.test(v)) return;
+        const par = n.parentElement;
+        if (!par || par.closest(SKIP)) return;
+        const m = v.match(LEAD);
+        if (!m) return;
+        const tr = map.get(m[2].toLowerCase());
+        if (!tr) return;
+        const out = m[1] + tr + m[3];
+        orig.set(n, { en: v, tr: out });
+        n.nodeValue = out;
+      }
+      function walk(rootNode, fn) {
+        if (rootNode.nodeType === 3) { fn(rootNode); return; }
+        if (rootNode.nodeType !== 1 && rootNode.nodeType !== 11) return;
+        const w = document.createTreeWalker(rootNode, NodeFilter.SHOW_TEXT);
+        let n; const list = [];
+        while ((n = w.nextNode())) list.push(n);
+        list.forEach(fn);
+      }
+      function revertAll() {
+        walk(document.body, n => {
+          const o = orig.get(n);
+          if (o && o.tr === n.nodeValue) { n.nodeValue = o.en; }
+          orig.delete(n);
         });
       }
-      function reset() {
-        files.forEach(function (f) { URL.revokeObjectURL(f.url); });
-        files = []; render(); txt.value = ''; setStatus('');
-      }
-      function openFb() { modal.hidden = false; fb.setAttribute('aria-expanded', 'true'); setTimeout(function () { txt.focus(); }, 50); }
-      function closeFb() { modal.hidden = true; fb.setAttribute('aria-expanded', 'false'); }
-      fb.addEventListener('click', openFb);
-      document.getElementById('fbClose').addEventListener('click', closeFb);
-      modal.addEventListener('click', function (e) { if (e.target === modal) closeFb(); });
-      document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !modal.hidden) closeFb(); });
-      document.getElementById('fbAttach').addEventListener('click', function () { fileIn.click(); });
-      fileIn.addEventListener('change', function () {
-        Array.prototype.forEach.call(fileIn.files || [], function (f) {
-          if (files.length < 5 && /^image\//.test(f.type)) files.push({ file: f, url: URL.createObjectURL(f) });
-        });
-        fileIn.value = ''; render(); setStatus('');
-      });
-      function viaMail(body) {
-        if (files.length) setStatus('This browser cannot attach screenshots automatically. Please attach them in your email app.');
-        window.location.href = 'mailto:' + FEEDBACK_TO + '?subject=' + encodeURIComponent('Nothing Reminder feedback') + '&body=' + encodeURIComponent(body);
-      }
-      send.addEventListener('click', function () {
-        var msg = (txt.value || '').trim();
-        if (!msg && !files.length) { txt.focus(); return; }
-        var body = (msg || '(screenshot only)') + '\n\n---\nApp: Nothing Reminder v' + APP_VERSION;
-        var fl = files.map(function (f) { return f.file; });
-        if (fl.length && navigator.share && navigator.canShare && navigator.canShare({ files: fl })) {
-          navigator.share({ files: fl, title: 'Nothing Reminder feedback', text: body + '\n\nSend to: ' + FEEDBACK_TO })
-            .then(function () { reset(); closeFb(); })
-            .catch(function (err) { if (!err || err.name !== 'AbortError') viaMail(body); });
-        } else {
-          viaMail(body);
+      let obs = null;
+      function applyLang() {
+        if (obs) obs.disconnect();
+        revertAll();
+        const code = effective();
+        root.setAttribute('lang', code);
+        map = code === 'en' ? null : MAPS[code];
+        if (map) {
+          walk(document.body, translateNode);
+          obs = new MutationObserver(muts => {
+            for (const mu of muts) {
+              if (mu.type === 'characterData') translateNode(mu.target);
+              else mu.addedNodes.forEach(nd => walk(nd, translateNode));
+            }
+          });
+          obs.observe(document.body, { childList: true, subtree: true, characterData: true });
         }
+      }
+
+      const langSel = $('langSelect');
+      if (langSel) {
+        const mk = (v, t) => { const o = document.createElement('option'); o.value = v; o.textContent = t; return o; };
+        langSel.appendChild(mk('auto', 'Device default'));
+        LANGS.forEach(l => langSel.appendChild(mk(l[0], l[1])));
+        langSel.value = chosen();
+        langSel.addEventListener('change', () => { lsSet(LANG_KEY, langSel.value); applyLang(); });
+      }
+      applyLang();
+      // the app builds some screens after load; run once more so nothing is missed
+      window.addEventListener('load', () => setTimeout(() => { if (map) walk(document.body, translateNode); }, 600));
+
+      // ---------- Feedback ----------
+      const fbMsg = $('fbMsg'), fbStatus = $('fbStatus');
+      function fbBuild() {
+        const type = ($('fbType') || {}).value || 'Feedback';
+        const msg = (fbMsg.value || '').trim();
+        if (!msg) {
+          fbStatus.textContent = 'Please write your message first.';
+          fbStatus.classList.add('err');
+          fbMsg.focus();
+          return null;
+        }
+        fbStatus.classList.remove('err');
+        let body = msg;
+        if ($('fbInfo') && $('fbInfo').checked) {
+          body += '\n\n---\nApp: Nothing Reminder ' + APP_VERSION +
+            '\nLanguage: ' + effective() + ' (' + (chosen() === 'auto' ? 'device default' : 'chosen') + ')' +
+            '\nScreen: ' + window.innerWidth + 'x' + window.innerHeight +
+            '\nDevice: ' + navigator.userAgent;
+        }
+        return { subject: '[Nothing Reminder] ' + type, body: body };
+      }
+      const fbSend = $('fbSend'), fbGmail = $('fbGmail');
+      if (fbSend) fbSend.addEventListener('click', () => {
+        const m = fbBuild(); if (!m) return;
+        fbStatus.textContent = 'Opening your email app… if nothing opens, tap Open in Gmail.';
+        window.location.href = 'mailto:' + FEEDBACK_TO + '?subject=' + encodeURIComponent(m.subject) + '&body=' + encodeURIComponent(m.body);
       });
-    }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
-  })();
+      if (fbGmail) fbGmail.addEventListener('click', () => {
+        const m = fbBuild(); if (!m) return;
+        fbStatus.textContent = 'Opening Gmail…';
+        window.open('https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(FEEDBACK_TO) +
+          '&su=' + encodeURIComponent(m.subject) + '&body=' + encodeURIComponent(m.body), '_blank', 'noopener');
+      });
+    })();
   </script>
 
 </body>

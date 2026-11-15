@@ -1682,6 +1682,16 @@
     .cal-neg { color: #2e9d4f; }
     select.cal-in[size] { height: auto; }
 
+    /* ---------- Notes: tables never push the page sideways (wide tables scroll inside their own box) ---------- */
+    .note-rich { min-width: 0; max-width: 100%; }
+    .tbl-scroll { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 4px 0; }
+    .tbl-scroll table { width: 100%; }
+    .note-para { white-space: pre-wrap; overflow-wrap: anywhere; margin: 4px 0; font-size: 14px; }
+    .list li > .item-left { min-width: 0; flex: 1 1 auto; max-width: 100%; }
+    .list li > div:not(.item-left) { flex: none; }
+    #noteList, #homeNotesContainer { overflow-x: hidden; }
+    #noteFileKeep { display: none; font-size: 12.5px; opacity: .8; margin: 2px 0 6px; }
+
     /* ---------- Animation setting (Settings > Animations): auto = follow device, on, off ---------- */
     html[data-anim="off"] *, html[data-anim="off"] *::before, html[data-anim="off"] *::after,
     html[data-anim="off"] { animation-duration: 0s !important; animation-delay: 0s !important; transition-duration: 0s !important; transition-delay: 0s !important; scroll-behavior: auto !important; }
@@ -2055,11 +2065,12 @@
                 accept="image/*,.pdf,.doc,.docx,.mp3,.mp4"
               />
             </label>
+          <small id="noteFileKeep"></small>
           <label>
               Note<textarea
                 id="noteText"
                 rows="4"
-                placeholder="Write your note here. Use ▦ Insert Table to add a table."
+                placeholder="Write your note here. You can also add a table (▦ Insert Table) and attach a file, all in one note."
               ></textarea>
             </label>
           <div style="margin:6px 0 10px;">
@@ -2070,7 +2081,7 @@
                 <span>Columns <input type="number" id="tblCols" min="1" max="10" value="3" style="width:70px;"></span>
               </div>
               <div id="tblGrid" style="margin-top:10px;overflow-x:auto;"></div>
-              <small id="tblHint" style="display:block;opacity:.7;margin-top:6px;">First row is the heading. Fill the cells, then add it to the note.</small>
+              <small id="tblHint" style="display:block;opacity:.7;margin-top:6px;">First row is the heading. Fill the cells, then press Add table (or just press Save). Text and a file can be saved with it in the same note.</small>
               <div class="form-actions" style="margin-top:8px;">
                 <button type="button" id="tblApply" class="primary">✔ Add table to note</button>
                 <button type="button" id="tblClose" class="secondary">Close</button>
@@ -2279,8 +2290,8 @@
         <hr />
         <h3>Version Info!</h3>
         <ul>
-          <p>Version 13.9.0</p>
-          <p>Last Updated: 14-Nov-2026</p>
+          <p>Version 13.9.1</p>
+          <p>Last Updated: 15-Nov-2026</p>
           <p>Project Mode: Open source</p>
           <p>App Size : 7.0KB </p>
         </ul>
@@ -3692,7 +3703,7 @@ render();
             }
             const backup = {
               app: BACKUP_APP,
-              version: '13.9.0',
+              version: '13.9.1',
               exportedAt: new Date().toISOString(),
               appData: structuredClone(appData),
               localStorage: ls
@@ -3897,6 +3908,40 @@ render();
           return m ? m[1] : '';
         }
 
+        // Note body = text and tables together, in the order they were written. Each table scrolls inside its own box.
+        function renderNoteRichText(rawText, maxText) {
+          const wrap = document.createElement('div');
+          wrap.className = 'note-rich';
+          const lines = String(rawText || '').replace(/^Created: [^\n]*\n*/, '').split('\n');
+          let buf = [], inTable = false;
+          const flush = () => {
+            if (!buf.length) return;
+            const chunk = buf.join('\n');
+            if (inTable) {
+              const sc = document.createElement('div');
+              sc.className = 'tbl-scroll';
+              sc.appendChild(renderSafeTableFromText(chunk));
+              wrap.appendChild(sc);
+            } else if (chunk.trim()) {
+              const p = document.createElement('div');
+              p.className = 'note-para';
+              let t = chunk.trim();
+              if (maxText && t.length > maxText) t = t.substring(0, maxText) + '...';
+              p.textContent = t;
+              wrap.appendChild(p);
+            }
+            buf = [];
+          };
+          lines.forEach(l => {
+            const isT = l.includes('|');
+            if (buf.length && isT !== inTable) flush();
+            inTable = isT;
+            buf.push(l);
+          });
+          flush();
+          return wrap;
+        }
+
         // 🔐 SAFE table renderer (XSS-proof). Empty cells in the middle are kept.
         function renderSafeTableFromText(tableText) {
           const table = document.createElement('table');
@@ -3963,7 +4008,7 @@ render();
             dateRow.textContent = noteWhen(n);
             text.appendChild(dateRow);
             if(n.isTable && n.text) {
-              text.appendChild(renderSafeTableFromText(n.text));
+              text.appendChild(renderNoteRichText(n.text, 200));
             } else {
               const full = n.text || (n.file && n.file.name ? '📎 ' + n.file.name : '');
               const para = document.createElement('p');
@@ -4016,7 +4061,7 @@ render();
               when.style.marginBottom = '6px';
               when.textContent = noteWhen(note);
               text.appendChild(when);
-              text.appendChild(renderSafeTableFromText(note.text));
+              text.appendChild(renderNoteRichText(note.text));
 
             } else {
               const strong = document.createElement('b');
@@ -4580,23 +4625,38 @@ render();
 
           const rawText = (note.text || '').replace(/^Created: [^\n]*\n\n/, '');
           if (typeof window.nrTblReset === 'function') window.nrTblReset();
-          if (note.isTable && typeof window.nrTblLoad === 'function') {
-            // table note: open the table editor with its rows and columns
-            const rows = [], other = [];
-            rawText.split('\n').forEach(line => {
-              if (!line.includes('|')) { other.push(line); return; }
-              if (line.includes('---')) return;
-              let t = line.trim();
-              if (t.startsWith('|')) t = t.slice(1);
-              if (t.endsWith('|')) t = t.slice(0, -1);
-              const cells = t.split('|').map(c => c.trim());
-              if (cells.some(c => c)) rows.push(cells);
-            });
-            byId('noteText').value = other.join('\n').trim();
-            if (rows.length) window.nrTblLoad(rows);
-          } else {
-            byId('noteText').value = rawText;
+          byId('noteFile').value = '';
+          const keepEl = byId('noteFileKeep');
+          if (keepEl) {
+            if (note.file) { keepEl.textContent = '📎 Current file: ' + (note.file.name || 'attached file') + ' (stays with the note; choose another file to replace it)'; keepEl.style.display = 'block'; }
+            else keepEl.style.display = 'none';
           }
+          let loadedGrid = false;
+          if (note.isTable && typeof window.nrTblLoad === 'function') {
+            // text before one table at the end of the note -> table editor; any other layout stays as plain text you can edit
+            const lines = rawText.split('\n');
+            const idx = [];
+            lines.forEach((l, i) => { if (l.includes('|')) idx.push(i); });
+            if (idx.length) {
+              const first = idx[0], last = idx[idx.length - 1];
+              const contiguous = (last - first + 1) === idx.length;
+              const tail = lines.slice(last + 1).join('').trim();
+              if (contiguous && !tail) {
+                const rows = [];
+                lines.slice(first, last + 1).forEach(line => {
+                  if (line.includes('---')) return;
+                  let t = line.trim();
+                  if (t.startsWith('|')) t = t.slice(1);
+                  if (t.endsWith('|')) t = t.slice(0, -1);
+                  const cells = t.split('|').map(c => c.trim());
+                  if (cells.some(c => c)) rows.push(cells);
+                });
+                byId('noteText').value = lines.slice(0, first).join('\n').trim();
+                if (rows.length) { window.nrTblLoad(rows); loadedGrid = true; }
+              }
+            }
+          }
+          if (!loadedGrid) byId('noteText').value = rawText;
 
           // Show the form
           showForm(byId('noteFormContainer'));
@@ -4620,7 +4680,9 @@ render();
           const wasTable = editingNoteIndex !== null && appData.notes[editingNoteIndex] && appData.notes[editingNoteIndex].isTable;
           const isTableFormat = text.includes('|') && (text.includes('---') || !!wasTable);
 
-          if(!text && !file){
+          const prevNote = (editingNoteIndex !== null) ? appData.notes[editingNoteIndex] : null;
+          const keepFile = (!file && prevNote && prevNote.file) ? prevNote.file : null;
+          if(!text && !file && !keepFile){
             alert('Note cannot be empty. Please add text or a file.');
             return;
           }
@@ -4634,7 +4696,7 @@ render();
           const noteObj = {
             text: noteText,
             createdAt: noteDate,
-            file: null,
+            file: keepFile,
             isTable: isTableFormat,
           };
 
@@ -4650,6 +4712,7 @@ render();
               byId('showAddNoteBtn').classList.remove('open');
               byId('noteText').value='';
               fileInput.value='';
+              { const kk = byId('noteFileKeep'); if (kk) kk.style.display = 'none'; }
               byId('saveNoteBtn').textContent = 'Save';
               // open the history so the saved note is visible straight away
               const nl = byId('noteList');
@@ -4913,7 +4976,7 @@ render();
                   const when = document.createElement('small');
                   when.style.cssText = 'opacity:.7;display:block;margin-bottom:6px;';
                   when.textContent = noteWhen(it);
-                  text.append(when, renderSafeTableFromText(it.text));
+                  text.append(when, renderNoteRichText(it.text));
                 } else {
                   const strong = document.createElement('b');
                   strong.textContent = it.text || '';
@@ -8304,6 +8367,7 @@ render();
                   hideForm(byId('noteFormContainer'));
                   byId('showAddNoteBtn').classList.remove('open');
                   editingNoteIndex = null;
+                  { const kk = byId('noteFileKeep'); if (kk) kk.style.display = 'none'; }
                   byId('saveNoteBtn').textContent = 'Save';
                 });
 
@@ -9694,7 +9758,7 @@ render();
                 box.hidden = true; grid.innerHTML = ''; rowsI.value = 3; colsI.value = 3;
                 editMode = false;
                 btn.style.display = ''; apply.style.display = ''; closeB.style.display = '';
-                if (hint) hint.textContent = 'First row is the heading. Fill the cells, then add it to the note.';
+                if (hint) hint.textContent = 'First row is the heading. Fill the cells, then press Add table (or just press Save). Text and a file can be saved with it in the same note.';
               }
               function serialize() {
                 const r = clamp(rowsI.value, 2, 30), c = clamp(colsI.value, 1, 10);
@@ -9731,9 +9795,12 @@ render();
               };
               // table text for Update (only while a table note is being edited)
               window.nrTblSerialize = function () {
-                if (!editMode || box.hidden) return '';
+                if (box.hidden) return '';
                 const t = serialize();
-                if (!t.any) { alert('Fill at least one cell in the table.'); return null; }
+                if (!t.any) {
+                  if (editMode) { alert('Fill at least one cell in the table.'); return null; }
+                  return '';          // new note: an open but empty table is simply ignored
+                }
                 return t.text;
               };
 
@@ -9764,21 +9831,11 @@ render();
                 const lines = [fmt(rows[0]), fmt(new Array(c).fill('---'))];
                 rows.slice(1).forEach(cells => lines.push(fmt(cells)));
                 const tableText = lines.join('\n');
-                const saveBtn = g('saveNoteBtn');
-                if (saveBtn && saveBtn.textContent.trim() === 'Save') {
-                  // new note: the table is saved straight into the notes history
-                  const typed = ta.value;
-                  ta.value = tableText;
-                  reset();
-                  saveBtn.click();
-                  ta.value = typed;      // keep anything already typed in the box
-                } else {
-                  // editing a note: add the table to that note's text
-                  const cur = ta.value.replace(/\s+$/, '');
-                  ta.value = (cur ? cur + '\n\n' : '') + tableText;
-                  reset();
-                  ta.focus();
-                }
+                // add the table to the note text; press Save when text / file are ready
+                const cur = ta.value.replace(/\s+$/, '');
+                ta.value = (cur ? cur + '\n\n' : '') + tableText;
+                reset();
+                ta.focus();
               });
 
               ['saveNoteBtn', 'cancelNoteBtn'].forEach(id => { const b = g(id); if (b) b.addEventListener('click', () => setTimeout(reset, 0)); });
@@ -10381,7 +10438,7 @@ render();
     (function () {
       const $ = id => document.getElementById(id);
       const LANG_KEY = 'nr_lang', ANIM_KEY = 'nr_anim';
-      const APP_VERSION = '13.9.0';
+      const APP_VERSION = '13.9.1';
       const FEEDBACK_TO = 'mersalmgblog@gmail.com';
       const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
       const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { } };

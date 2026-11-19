@@ -1,18 +1,26 @@
 
-const DB_NAME   = 'NothingReminderDB';
+const DB_NAME    = 'NothingReminderDB';
 const DB_VERSION = 1;
 const STORE_NAME = 'appData';
-const CACHE_NAME = 'app-cache-v2';
+const CACHE_NAME = 'app-cache-v3';
+
+// Everything needed to boot the app with no network. Cached one-by-one so a
+// single missing file cannot abort the install.
+const APP_SHELL = [
+  './',
+  './index.html',
+  './manifest.json',
+  './assets/icon-192.png',
+  './assets/icon-512.png',
+  './assets/default-avatar.jpg'
+];
 
 // ── Cache install ──────────────────────────────────────────────
-// Each file is cached on its own and failures are ignored: one missing file
-// used to make cache.addAll() reject, abort the install, and leave the OLD
-// worker (without the Priority Queue push code) running.
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     try {
       const cache = await caches.open(CACHE_NAME);
-      await Promise.all(['./manifest.json', './assets/icon.png'].map(u =>
+      await Promise.all(APP_SHELL.map(u =>
         cache.add(u).catch(err => console.warn('SW cache skip:', u, err))
       ));
     } catch (e) { console.warn('SW cache open failed:', e); }
@@ -25,57 +33,133 @@ self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     try {
       const keys = await caches.keys();
-      await Promise.all(keys.map(key =>
-        (key !== CACHE_NAME && key !== 'gold-state') ? caches.delete(key) : null
-      ));
+      // Only clean caches this app owns. Never delete another app's cache that
+      // happens to share the origin.
+      await Promise.all(keys.map(key => {
+        const ours = key === 'gold-state' || key.indexOf('app-cache-') === 0;
+        return (ours && key !== CACHE_NAME) ? caches.delete(key) : null;
+      }));
     } catch (e) {}
     await self.clients.claim();
   })());
 });
 
+// ── Offline support ────────────────────────────────────────────
+// App files: cache-first (instant offline load), refreshed in the background.
+// Third-party files (fonts / CDN scripts): network-first, cached as a fallback.
+// Non-GET requests (token save, form posts) are never intercepted.
+self.addEventListener('fetch', event => {
+  const req = event.request;
+  if (req.method !== 'GET') return;
+  let url;
+  try { url = new URL(req.url); } catch (e) { return; }
+
+  if (url.origin !== self.location.origin) {
+    event.respondWith(networkFirst(req));
+    return;
+  }
+  if (req.mode === 'navigate') {
+    event.respondWith(navigate(req));
+    return;
+  }
+  event.respondWith(cacheFirst(req));
+});
+
+async function cacheFirst(req) {
+  const cache = await caches.open(CACHE_NAME);
+  const cached = await cache.match(req);
+  const network = fetch(req).then(res => {
+    if (res && (res.ok || res.type === 'opaque')) {
+      try { cache.put(req, res.clone()); } catch (e) {}
+      return res;
+    }
+    return cached || res;
+  }).catch(() => cached);
+  return cached || network;
+}
+
+async function networkFirst(req) {
+  const cache = await caches.open(CACHE_NAME);
+  try {
+    const res = await fetch(req);
+    if (res && (res.ok || res.type === 'opaque')) {
+      try { cache.put(req, res.clone()); } catch (e) {}
+      return res;
+    }
+    return (await cache.match(req)) || res;
+  } catch (e) {
+    return (await cache.match(req)) || Response.error();
+  }
+}
+
+async function navigate(req) {
+  try {
+    const fresh = await fetch(req);
+    // A dead server can return a proxy 502 instead of throwing — treat it as offline.
+    if (fresh && fresh.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      // Keep the installed copy of the app shell up to date.
+      try { cache.put('./index.html', fresh.clone()); } catch (e) {}
+      return fresh;
+    }
+  } catch (e) {}
+  const cache = await caches.open(CACHE_NAME);
+  return (await cache.match('./index.html')) || (await cache.match('./')) || Response.error();
+}
+
 // ── Show a notification ONLY if the same one is not already on screen ──
 // (fixes the 7 AM / 2 PM / 8 PM duplicate: if you have not cleared it, we skip it)
 async function showOnce(title, options) {
+  const opts = Object.assign({}, options);
   try {
-    const active = await self.registration.getNotifications({ tag: options.tag });
-    if (active && active.length) {
-      // same content already visible -> do nothing; changed content -> update it
-      if (active.some(n => n.title === title && n.body === options.body)) return;
-      options = Object.assign({}, options, { renotify: true });
+    // Without a tag, getNotifications() returns EVERY notification. Only check
+    // for duplicates when the caller actually supplied a tag.
+    if (opts.tag) {
+      const active = await self.registration.getNotifications({ tag: opts.tag });
+      if (active && active.length) {
+        // same content already visible -> do nothing; changed content -> update it
+        if (active.some(n => n.title === title && n.body === opts.body)) return;
+        opts.renotify = true;
+      }
     }
   } catch (e) { /* if the check fails, fall through and show it */ }
-  return self.registration.showNotification(title, options);
+  return self.registration.showNotification(title, opts);
 }
 
 // ── Read IndexedDB from service worker ──────────────────────────
+// Every failure path resolves (never hangs) and always closes the connection.
 function readAppData() {
-  return new Promise((resolve) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onerror = e => {
-
-  console.error(
-    'IndexedDB Error:',
-    e
-  );
-
-  resolve(null);
-};
+  return new Promise(resolve => {
+    let db = null;
+    let settled = false;
+    const done = value => {
+      if (settled) return;
+      settled = true;
+      try { if (db) db.close(); } catch (e) {}
+      resolve(value);
+    };
+    let req;
+    try { req = indexedDB.open(DB_NAME, DB_VERSION); }
+    catch (e) { done(null); return; }
+    req.onblocked = () => done(null);
+    req.onerror   = () => done(null);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains(STORE_NAME)) d.createObjectStore(STORE_NAME);
+    };
     req.onsuccess = e => {
-      const db = e.target.result;
+      db = e.target.result;
       try {
         const tx    = db.transaction(STORE_NAME, 'readonly');
-        const store = tx.objectStore(STORE_NAME);
-        const get   = store.get('main');
-        get.onsuccess = () => { resolve(get.result || null); try { db.close(); } catch (e) {} };
-        get.onerror   = () => resolve(null);
-      } catch { resolve(null); }
-    };
-    req.onupgradeneeded = e => {
-      e.target.result.createObjectStore(STORE_NAME);
+        const get   = tx.objectStore(STORE_NAME).get('main');
+        get.onsuccess = () => done(get.result || null);
+        get.onerror   = () => done(null);
+        tx.onabort    = () => done(null);
+        tx.onerror    = () => done(null);
+      } catch (e) { done(null); }
     };
   });
 }
-
 
 // ── Small key/value store in Cache Storage (gold + EB state) ───
 async function stateGet(key) {
@@ -130,7 +214,6 @@ async function fetchGoldRates() {
   };
 }
 
-
 // ═════════════════════════════════════════════════════════════════
 //  ONE place builds and shows every notification. Two simple rules:
 //
@@ -142,8 +225,10 @@ async function fetchGoldRates() {
 //  NO DUPLICATES: if a notification with the same text is already on screen it is
 //  left alone. If its data changed, the same notification is updated in place.
 // ═════════════════════════════════════════════════════════════════
-const SW_VERSION = '2026-11-04-d';   // keep equal to EXPECTED_SW_VERSION in index.html and ?v= in firebase-messaging-sw.js
-const ICON = './assets/icon.png';
+// Informational only: reported to the page for diagnostics. The page no longer
+// hard-codes this value, and import URLs are kept fresh by updateViaCache:'none'.
+const SW_VERSION = '2026-11-19-a';
+const ICON = './assets/icon-192.png';
 
 // Android silently DROPS notifications that one app posts too quickly one after another
 // (only the first one or two get through). So every notification is posted with a gap,
@@ -159,7 +244,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 let runChain = Promise.resolve();
 let pageRunQueued = false;
 
-function runNotifications(mode) {
+function runNotifications(mode, filter) {
   // many quick "data saved" messages from the app -> one run is enough
   if (mode === 'page') {
     if (pageRunQueued) return runChain;
@@ -167,7 +252,7 @@ function runNotifications(mode) {
   }
   // serialise runs (push + page message at the same moment must not double-show)
   runChain = runChain
-    .then(() => { if (mode === 'page') pageRunQueued = false; return doRun(mode); })
+    .then(() => { if (mode === 'page') pageRunQueued = false; return doRun(mode, filter); })
     .catch(e => { pageRunQueued = false; console.error('Notification run failed:', e); });
   return runChain;
 }
@@ -183,7 +268,8 @@ function istToday() {
     const t = new Date(g('year'), g('month') - 1, g('day'));
     if (!isNaN(t.getTime())) return t;
   } catch (e) {}
-  const t = new Date(); t.setHours(0, 0, 0, 0); return t;   // fallback: device date
+  const t = new Date(); t.setHours(0, 0, 0, 0);   // fallback: device date
+  return t;
 }
 
 async function notify(ctx, tag, title, body, page, requireInteraction) {
@@ -266,16 +352,27 @@ async function section(name, fn) {
   try { await fn(); } catch (e) { console.error(name + ' notification failed:', e); }
 }
 
-async function doRun(mode) {
+// A push payload may optionally target categories:
+//   { "categories": ["reminders", "budget"] }   or   { "category": "notes" }
+// With no payload (or no category field) ALL categories are shown, as before.
+function wants(ctx, category) {
+  return !ctx.filter || ctx.filter.indexOf(category) !== -1;
+}
+
+async function doRun(mode, filter) {
   if (typeof Notification !== 'undefined' && Notification.permission && Notification.permission !== 'granted') return;
   const data = await readAppData();
   if (!data || typeof data !== 'object') return;
 
   const today = istToday();
-  const ctx = { mode, today, dayKey: pqKey(today), expected: new Map(), posted: (await stateGet('posted-at')) || {} };
+  const ctx = {
+    mode, today, dayKey: pqKey(today), filter: Array.isArray(filter) ? filter : null,
+    expected: new Map(), posted: (await stateGet('posted-at')) || {}
+  };
 
   // ── Priority Queue (first: it is the most important one) ────
   await section('Priority', async () => {
+    if (!wants(ctx, 'priority')) return;
     if (data.notifPriority === false || !Array.isArray(data.priorityQueue) || !data.priorityQueue.length) {
       return closeTag(ctx, 'priority-summary');
     }
@@ -296,6 +393,7 @@ async function doRun(mode) {
 
   // ── Reminders: expired / today / tomorrow ───────────────────
   await section('Reminders', async () => {
+    if (!wants(ctx, 'reminders')) return;
     if (data.notifReminders === false || !Array.isArray(data.reminders)) return closeTag(ctx, 'reminders-summary');
     const lines = [];
     data.reminders.forEach(r => {
@@ -311,6 +409,7 @@ async function doRun(mode) {
 
   // ── Notes: latest few ───────────────────────────────────────
   await section('Notes', async () => {
+    if (!wants(ctx, 'notes')) return;
     if (data.notifNotes === false || !Array.isArray(data.notes) || !data.notes.length) return closeTag(ctx, 'notes-summary');
     const MAX = 5;
     const recent = data.notes.slice().reverse();
@@ -328,6 +427,7 @@ async function doRun(mode) {
 
   // ── Open checklists ─────────────────────────────────────────
   await section('Checklist', async () => {
+    if (!wants(ctx, 'checklist')) return;
     const open = (data.notifChecklist !== false && Array.isArray(data.checklists)) ? data.checklists.filter(c => c && c.status === 'open') : [];
     if (!open.length) return closeTag(ctx, 'checklists-summary');
     const lines = open.map(c => c.title + ' — ' + (c.items ? c.items.length : 0) + ' items pending');
@@ -336,6 +436,7 @@ async function doRun(mode) {
 
   // ── Budget: one notification per budget, removed when the budget is deleted ──
   await section('Budget', async () => {
+    if (!wants(ctx, 'budget')) return;
     const keep = new Set();
     if (data.notifBudget !== false && Array.isArray(data.budget)) {
       for (const b of data.budget) {
@@ -364,6 +465,7 @@ async function doRun(mode) {
 
   // ── Moon phase ──────────────────────────────────────────────
   await section('Moon', async () => {
+    if (!wants(ctx, 'moon')) return;
     if (data.notifMoonPhase === false) return closeTag(ctx, 'moon-phase');
     const phase = getMoonPhase(today.getFullYear(), today.getMonth(), today.getDate());
     if (phase === 'Full Moon') await notify(ctx, 'moon-phase', '🌕 Pournami Today!', 'Full Moon (Pournami) is today.', '', true);
@@ -377,6 +479,7 @@ async function doRun(mode) {
 
   // ── Gold rate (network, so last) ────────────────────────────
   await section('Gold', async () => {
+    if (!wants(ctx, 'gold')) return;
     if (data.notifGold !== true) return;
     // the page may ask often; only hit the network every 30 min unless it is a scheduled push
     const lastRun = (await stateGet('gold-checked')) || 0;
@@ -386,7 +489,9 @@ async function doRun(mode) {
     const last = await stateGet('gold-last');
     await stateSet('gold-last', rates);
     if (!last) return;                       // first run = baseline only
-    const d22 = rates['22k'] - last['22k'];
+    const d22 = Number(rates['22k']) - Number(last['22k']);
+    // Ignore corrupt / old-schema saved state instead of showing "₹NaN".
+    if (!Number.isFinite(d22)) return;
     if (Math.abs(d22) < GOLD_NOTIFY_MIN_CHANGE) return;
     const arrow = d22 > 0 ? '▲ +' : '▼ -';
     const f = v => '₹' + Number(v).toLocaleString('en-IN');
@@ -395,91 +500,64 @@ async function doRun(mode) {
       '22K ' + f(rates['22k']) + '/g (' + arrow + '₹' + Math.abs(d22) + ')  |  24K ' + f(rates['24k']) + '/g  |  18K ' + f(rates['18k']) + '/g',
       'utilities', false);
   });
-
 }
 
 // ── Background push (FCM wakes the worker) ─────────────────────
 self.addEventListener('push', event => {
-  event.waitUntil(runNotifications('push'));
+  let filter = null;
+  try {
+    if (event.data) {
+      const payload = event.data.json();
+      // Optional targeting. No payload / no category field => show all (legacy).
+      if (Array.isArray(payload.categories)) filter = payload.categories.map(String);
+      else if (typeof payload.category === 'string') filter = [payload.category];
+    }
+  } catch (e) { /* non-JSON payload: keep legacy behaviour */ }
+  event.waitUntil(runNotifications('push', filter));
 });
 
 // ── Messages from the page ─────────────────────────────────────
 self.addEventListener('message', event => {
   const d = event.data || {};
   if (d.type === 'CHECK_NOTIFICATIONS') {
-    // tell the page immediately which version is running (an old cached worker never answers)
+    // tell the page immediately which version is running (diagnostics only)
     try { if (event.ports && event.ports[0]) event.ports[0].postMessage({ ok: true, version: SW_VERSION }); } catch (e) {}
     event.waitUntil(runNotifications('page'));
   } else if (d.type === 'SHOW_NOTIFICATION') {
+    if (!d.tag) return;                       // tag is required for safe dedup
     event.waitUntil(showOnce(d.title, {
       body: d.body, icon: ICON, badge: ICON, tag: d.tag, requireInteraction: true
     }));
   }
 });
 
-// ── Notification click — open the right page ───────────────────
-self.addEventListener(
-  'notificationclick',
-  event => {
+// ── Notification click — open the app tab (never an unrelated site) ──
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const page = (event.notification.data && event.notification.data.page) || '';
 
-    event.notification.close();
-
-    const page =
-      event.notification.data?.page || '';
-
-    event.waitUntil(
-
-      clients.matchAll({
-
-        type: 'window',
-
-        includeUncontrolled:
-        true
-
-      }).then(clientList => {
-
-        for (
-          const client
-          of clientList
-        ) {
-
-          if (
-            'focus' in client
-          ) {
-
-            client.focus();
-
-            client.postMessage({
-
-              type:
-              'NAVIGATE',
-
-              page
-            });
-
-            return;
-          }
+  event.waitUntil(clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
+    for (const client of clientList) {
+      try {
+        const u = new URL(client.url);
+        if (u.origin !== self.location.origin) continue;   // skip other sites
+        if ('focus' in client) {
+          client.focus();
+          client.postMessage({ type: 'NAVIGATE', page });
+          return;
         }
-
-        if (
-          clients.openWindow
-        ) {
-
-          return clients.openWindow(
-            './index.html#' +
-            page
-          );
-        }
-      })
-    );
-  }
-);
+      } catch (e) {}
+    }
+    return clients.openWindow('./index.html#' + page);
+  }));
+});
 
 // ── Moon phase algorithm (copied into SW — no import needed) ───
 function getMoonPhase(y, m, d) {
   const lp = 2551443;
   const new_moon = new Date(1970, 0, 7, 20, 35, 0);
-  const phase = ((new Date(y, m, d).getTime() - new_moon.getTime()) / 1000) % lp;
+  const raw = (new Date(y, m, d).getTime() - new_moon.getTime()) / 1000;
+  const phase = ((raw % lp) + lp) % lp;   // normalise negative dates
   const index = Math.floor((phase / lp) * 8 + 0.5) % 8;
   return ['New Moon','Waxing Crescent','First Quarter','Waxing Gibbous',
           'Full Moon','Waning Gibbous','Last Quarter','Waning Crescent'][index];

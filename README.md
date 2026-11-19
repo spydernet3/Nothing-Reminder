@@ -6,17 +6,19 @@
 
 A lightweight, web-based Reminder and Notes application with dark mode support, Designed for **fast note-taking, reminders, and more**.
 
-!> Users Data's are stored only local storage avoid data losses before format or erase all ...
+!> User data is stored locally in this browser (IndexedDB, with a localStorage fallback). Export a backup before clearing browser data or formatting the device.
 ---
 REMINDER APP [ https://nothing-reminder.localplayer.dev ]
+
+> Hosting uses the custom domain declared in `CNAME`; availability depends on that domain's DNS and hosting provider. The Firebase config in the client is public by design — enable Firebase App Check and restrict the push endpoint if you deploy your own copy.
 ---
 | Category                  | Rating | Remarks                                       |
 | ------------------------- | ------ | --------------------------------------------- |
 | 🧠 **Performance**        | 9.5    | Fast operations; optimized loops              |
-| 🔒 **Security**           | 9      | No external data flow                         |
+| 🔒 **Security**           | 9      | Local-first; only push token + optional feature APIs cross the network |
 | 🧰 **Usability**          | 9.0    | Minimalist UI, simple flow                    |
-| ⚙️ **Compatibility**      | 8.5    | Limited by Safari & Firefox localStorage size |
-| ☁️ **Offline Capability** | 10.0   | Full offline PWA mode                         |
+| ⚙️ **Compatibility**      | 8.5    | Limited by each browser's IndexedDB quota     |
+| ☁️ **Offline Capability** | 10.0   | Full offline PWA mode after the first load    |
 | 📦 **Storage Efficiency** | 9.0    | JSON compression-friendly                     |
 | 🧩 **Maintainability**    | 9.2    | Clean modular script                          |
 | 💡 **Innovation**         | 8.9    | Lightweight offline reminder with PWA traits  |
@@ -26,13 +28,15 @@ REMINDER APP [ https://nothing-reminder.localplayer.dev ]
 ## Features
 
 - **Install App**
-  - By pressing the Add to Home Screen Button, there you can see the Install App to Install page as PWA [Faster and Native icon compared to webpage]
+  - Tap **Install** in the app or in the browser menu (Android Chrome: Install app / Add to Home screen; iPhone: Share → Add to Home Screen). On supported Android devices the Play Store opens after you tap Install — approve it there to finish.
   - Due to compatibility concerns of all platforms (Android, iOS, Windows.Chrome OS, Linux) PWA as a better companion for all.
 
 - **Privacy Focused**
   - Apart from Notification permission no other direct or indirect permission are asked to users
   - No Ads and trackers are implemented to affect users privacy
-  - Users data's are stored user local storage only no external servers are used to store everything 
+  - Reminders, notes, budgets and settings stay in your browser's local IndexedDB (localStorage fallback). Nothing is stored on an app server.
+  - Push delivery uses Firebase Cloud Messaging: a device token is sent to the app's push service; note/reminder content is never uploaded.
+  - Optional features fetch public data (fonts, QR library, weather, gold rates, exchange rates) from their providers.
  
 - **App Lock**
   - By installing page as PWA you can use By Defauly App lock that contains your device
@@ -87,12 +91,12 @@ REMINDER APP [ https://nothing-reminder.localplayer.dev ]
 ### PWAs
 | Feature               | Description                                     | Limitation                          | Description                                               |
 | --------------------- | ----------------------------------------------- | ----------------------------------- | --------------------------------------------------------- |
-| 🎨 **Custom Theme**   | Uses CSS variable `--bg` for easy theme control | ❌ **No Backend**                   | Static hosting, no real-time database or APIs             |
-| 🚀 **Offline Access** | Caches pages for offline browsing               | ⚡ **Offline Cache Limits**         | Browsers restrict cache size                              |
-| 📲 **Installable**    | Add to home screen / desktop                    | 📱 **iOS Limitations**              | No push notifications / background sync                   |
-| ⚡ **Fast Load**      | Cache-first strategy                            | 🕒 **First Load Requires Internet** | Offline only after first successful load                  |
+| 🎨 **Custom Theme**   | Uses CSS variables for easy theme control       | ❌ **No Backend**                   | Static hosting, no real-time database or APIs             |
+| 🚀 **Offline Access** | App shell + assets cached by the service worker | ⚡ **Offline Cache Limits**         | Browsers restrict cache size                              |
+| 📲 **Installable**    | Add to home screen / desktop                    | 📱 **iOS Limitations**              | Background push is not available on iOS                   |
+| ⚡ **Fast Load**      | Cache-first for app files, network-first for 3rd-party | 🕒 **First Load Requires Internet** | Offline works after the first successful load             |
 | 🧩 **Cross-Platform** | Works on Android, iOS & Desktop                 | 🧩 **Storage Quota**                | Browser limits offline storage                            |
-| 🔐 **Secure (HTTPS)** | GitHub Pages provides free SSL                  | 🌗 **Dynamic Theme Requires JS**    | `--bg` value must be updated manually for dark/light mode |
+| 🔐 **Secure (HTTPS)** | Hosted over HTTPS (see `CNAME`)                 | 🌗 **Dynamic Theme Requires JS**    | Dark/light mode is applied from saved settings on load    |
 
 
 

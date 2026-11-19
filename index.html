@@ -92,8 +92,16 @@
       padding: 8px;
       border-radius: 6px;
       margin-bottom: 8px;
-      background: rgba(0, 0, 0, 0.03);
+      background: transparent;
       transition: left 0s;
+    }
+
+    /* Empty states ("No reminders yet.", etc.) get breathing room on the left
+       and stay flat — no fill, no inset line, on every page and in dark mode. */
+    .empty-state {
+      margin-left: 12px;
+      background: transparent !important;
+      box-shadow: none !important;
     }
 
     /* Privacy / security / contact sections: readable bullet lists */
@@ -262,7 +270,7 @@
 
     /* Fix List Items (Reminders, Notes, Checklist) */
     .dark .list li {
-      background: rgba(255, 255, 255, 0.05) !important;
+      background: transparent !important;
       color: var(--text) !important;
     }
 
@@ -278,7 +286,7 @@
     /* Fix specific badges (Days Count) */
     .dark .badge {
       background: #444 !important;
-      color: #4CAF50 !important;
+      color: #A5D6A7 !important;
     }
 
     /* Settings panel styles */
@@ -1340,7 +1348,8 @@
     #navBar { box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06); }
     .dark #navBar { box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.4); }
     .menu-btn, .icon-btn, .add-btn, .primary, .secondary { transition: background 0.15s; }
-    .list li { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04); }
+    /* List rows stay flat: no tinted fill and no inset outline. */
+    .list li { box-shadow: none; }
     .form input:focus, .form textarea:focus, .form select:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: transparent; }
     html { scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
 
@@ -1793,6 +1802,20 @@
     }
     .fb-actions button.alt { background: var(--sh-card); color: var(--sh-text); }
     #fbStatus.err { color: #e53935; }
+
+    /* Empty states must stay flat even under the dark .list li fill rule. */
+    :root .empty-state, :root.dark .empty-state {
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
+    /* List areas sit directly on the page: white in light mode, black in dark.
+       No grey card fill behind reminders, notes, checklists or Home lists. */
+    :root .list, :root ul.form, :root #homeOverviewContainer,
+    :root.dark .list, :root.dark ul.form, :root.dark #homeOverviewContainer {
+      background: transparent !important;
+      box-shadow: none !important;
+    }
   </style>
 </head>
 
@@ -3498,6 +3521,7 @@ render();
           case 'calBurn':
             renderCalories(); break;
           case 'calculationHistoryList':
+          if (typeof renderCalculationHistory === 'function') renderCalculationHistory();
           targetPageId = 'utilities';
           break;
           case 'priceTracker':
@@ -3693,6 +3717,7 @@ render();
          rerenderFor('progress');
          rerenderFor('piggyBank');
          rerenderFor('calories');
+         rerenderFor('calculationHistoryList');
          if (typeof pqInit === 'function') pqInit();
          if (typeof window.renderPriceTrackerList === "function") window.renderPriceTrackerList();
        }
@@ -3980,7 +4005,7 @@ render();
         function renderReminders(){
           const list = byId('reminderList'); list.innerHTML = '';
             if(appData.reminders.length === 0){
-            const li = document.createElement('li'); li.textContent='No reminders yet.'; li.style.opacity='0.7'; list.appendChild(li);
+            const li = document.createElement('li'); li.textContent='No reminders yet.'; li.style.opacity='0.7'; li.className='empty-state'; list.appendChild(li);
             renderHomeReminders(); renderHomeNotes(); renderHomeCheck();renderHomeOverview(); return;
           }
           const frag = document.createDocumentFragment();
@@ -4035,6 +4060,7 @@ render();
             const li=document.createElement('li');
             li.textContent='No reminders for today or tomorrow.';
             li.style.opacity='0.7';
+            li.className='empty-state';
             container.appendChild(li);
             return;
           }
@@ -4139,6 +4165,7 @@ render();
             const li = document.createElement('li');
             li.textContent = 'No notes available.';
             li.style.opacity = '0.7';
+            li.className = 'empty-state';
             container.appendChild(li);
             return;
           }
@@ -4197,7 +4224,7 @@ render();
           const list = byId('noteList'); list.innerHTML='';
           if(appData.notes.length===0){
             const li=document.createElement('li');
-            li.textContent='No notes yet.'; li.style.opacity='0.7';
+            li.textContent='No notes yet.'; li.style.opacity='0.7'; li.className='empty-state';
             list.appendChild(li);
             return;
           }
@@ -4298,6 +4325,7 @@ render();
             const li = document.createElement('li');
             li.textContent = 'No budgets yet.';
             li.style.opacity = '0.7';
+            li.className = 'empty-state';
             list.appendChild(li);
             renderHomeBudgets();
             return;
@@ -4374,6 +4402,7 @@ render();
               const p = document.createElement('p');
               p.style.opacity = '0.6';
               p.textContent = 'No expenses yet';
+              p.className = 'empty-state';
               expList.appendChild(p);
             }
             // --- EXPANDABLE FORM for adding expenses ---
@@ -4639,6 +4668,7 @@ render();
             const li = document.createElement('li');
             li.textContent = 'No budgets yet.';
             li.style.opacity = '0.7';
+            li.className = 'empty-state';
             container.appendChild(li);
             return;
           }
@@ -4954,6 +4984,7 @@ render();
             const li = document.createElement('li');
             li.textContent = 'No Checklists Yet.';
             li.style.opacity = '0.7';
+            li.className = 'empty-state';
             container.appendChild(li);
             return;
           }
@@ -4972,6 +5003,7 @@ render();
               const li = document.createElement('li');
               li.textContent = 'No open checklists.';
               li.style.opacity = '0.7';
+              li.className = 'empty-state';
               container.appendChild(li);
           } else {
               container.appendChild(frag);
@@ -4985,7 +5017,7 @@ render();
             appData.checklists = [];
           }
           if(appData.checklists.length === 0){
-            const li = document.createElement('li'); li.textContent='No checklists yet.'; li.style.opacity='0.7'; list.appendChild(li);
+            const li = document.createElement('li'); li.textContent='No checklists yet.'; li.style.opacity='0.7'; li.className='empty-state'; list.appendChild(li);
             renderHomeCheck();return;
           }
           const frag = document.createDocumentFragment();
@@ -5014,6 +5046,7 @@ render();
               itemLi.textContent='No items in list.';
               itemLi.style.listStyle='none';
               itemLi.style.opacity='0.7';
+              itemLi.className='empty-state';
               itemsPreview.appendChild(itemLi);
             }
 
@@ -5428,7 +5461,7 @@ render();
             box.innerHTML = '';
             const q = pqEnsure().filter(d => d.items.length).slice().sort((a, b) => a.date < b.date ? 1 : -1);
             if (!q.length) {
-              const li = document.createElement('li'); li.className = 'pq-empty';
+              const li = document.createElement('li'); li.className = 'pq-empty empty-state';
               li.textContent = 'No priority items yet.';
               box.appendChild(li);
               return;
@@ -5464,7 +5497,7 @@ render();
             box.innerHTML = '';
             const q = pqEnsure().filter(d => d.items.length).slice().sort((a, b) => a.date < b.date ? 1 : -1);
             if (!q.length) {
-              const p = document.createElement('li'); p.className = 'pq-empty';
+              const p = document.createElement('li'); p.className = 'pq-empty empty-state';
               p.textContent = 'No priority items.';
               box.appendChild(p);
               return;
@@ -6441,7 +6474,7 @@ render();
                   const items = pgEnsure();
                   if (items.length === 0) {
                     const li = document.createElement('li');
-                    li.textContent = 'No progress yet.'; li.style.opacity = '0.7';
+                    li.textContent = 'No progress yet.'; li.style.opacity = '0.7'; li.className = 'empty-state';
                     list.appendChild(li);
                     renderHomeProgress();
                     return;
@@ -6529,7 +6562,7 @@ render();
                   const items = pgEnsure();
                   if (items.length === 0) {
                     const li = document.createElement('li');
-                    li.textContent = 'No progress yet.'; li.style.opacity = '0.7';
+                    li.textContent = 'No progress yet.'; li.style.opacity = '0.7'; li.className = 'empty-state';
                     c.appendChild(li);
                     return;
                   }
@@ -6736,7 +6769,7 @@ render();
                   const items = bbEnsure();
                   if (items.length === 0) {
                     const li = document.createElement('li');
-                    li.textContent = 'No savings yet.'; li.style.opacity = '0.7';
+                    li.textContent = 'No savings yet.'; li.style.opacity = '0.7'; li.className = 'empty-state';
                     list.appendChild(li);
                     return;
                   }
@@ -8293,7 +8326,7 @@ render();
                   const today = calKey(new Date());
                   const all = calEnsure();
                   const burnAll = calBurnEnsure();
-                  if (!all.length && !burnAll.length) { box.appendChild(calMk('div', 'pq-empty', 'No food or exercise tracked yet.')); return; }
+                  if (!all.length && !burnAll.length) { box.appendChild(calMk('div', 'pq-empty empty-state', 'No food or exercise tracked yet.')); return; }
 
                   // last 7 days chart
                   const days = [];
@@ -9343,7 +9376,7 @@ render();
               list.innerHTML = "";
             
               if (!appData.calculationHistory || appData.calculationHistory.length === 0) {
-                list.innerHTML = `<li>No History yet.</li>`;
+                list.innerHTML = `<li class="empty-state">No History yet.</li>`;
                 return;
               }
             
@@ -9835,7 +9868,7 @@ render();
                 list.innerHTML = "";
 
                 if (!appData.priceTracker.length) {
-                  list.innerHTML = `<li style="opacity:.7">No saved products</li>`;
+                  list.innerHTML = `<li class="empty-state" style="opacity:.7">No saved products</li>`;
                   return;
                 }
 

@@ -2,7 +2,7 @@
 const DB_NAME    = 'NothingReminderDB';
 const DB_VERSION = 1;
 const STORE_NAME = 'appData';
-const CACHE_NAME = 'app-cache-v3';
+const CACHE_NAME = 'app-cache-v4';
 
 // Everything needed to boot the app with no network. Cached one-by-one so a
 // single missing file cannot abort the install.
@@ -227,7 +227,7 @@ async function fetchGoldRates() {
 // ═════════════════════════════════════════════════════════════════
 // Informational only: reported to the page for diagnostics. The page no longer
 // hard-codes this value, and import URLs are kept fresh by updateViaCache:'none'.
-const SW_VERSION = '2026-11-19-a';
+const SW_VERSION = '2026-11-19-b';
 const ICON = './assets/icon-192.png';
 
 // Android silently DROPS notifications that one app posts too quickly one after another
